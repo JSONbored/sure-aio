@@ -87,10 +87,19 @@ This template uses a custom AIO image that effortlessly consolidates the Rails W
   <Config Name="Assume SSL" Target="RAILS_ASSUME_SSL" Default="true" Mode="" Description="Set to 'true' if you are putting this behind a reverse proxy like Nginx Proxy Manager or Cloudflare Tunnels." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
 
   <!-- Advanced: AI & Intelligence -->
-  <Config Name="[AI] OpenAI / Ollama Token" Target="OPENAI_ACCESS_TOKEN" Default="" Mode="" Description="API Key for OpenAI. If using a local Ollama container, enter 'ollama-local' here." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[AI] OpenAI / Ollama Token" Target="OPENAI_ACCESS_TOKEN" Default="" Mode="" Description="API Key for OpenAI. If using a local Ollama container, enter 'ollama-local'." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[AI] OpenAI URI Base" Target="OPENAI_URI_BASE" Default="" Mode="" Description="Leave blank for official OpenAI. For local LLMs, enter your endpoint (e.g., 'http://ollama:11434/v1')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[AI] Model Name" Target="OPENAI_MODEL" Default="" Mode="" Description="If using Ollama, you MUST define the model here (e.g., 'llama3.1:13b' or 'gemma2:7b')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[AI] Vector Store Provider" Target="VECTOR_STORE_PROVIDER" Default="pgvector" Mode="" Description="Backend for document search. Options: 'openai', 'pgvector', 'qdrant'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: External AI Assistant (OpenClaw / MCP) -->
+  <Config Name="[Ext. AI] Assistant Type" Target="ASSISTANT_TYPE" Default="" Mode="" Description="Set to 'external' to route all chat to an external agent via MCP." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] Assistant URL" Target="EXTERNAL_ASSISTANT_URL" Default="" Mode="" Description="URL for the external agent (e.g. https://your-openclaw/v1/chat/completions)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] Assistant Token" Target="EXTERNAL_ASSISTANT_TOKEN" Default="" Mode="" Description="Auth token for the external agent." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <!-- Advanced: External Providers -->
+  <Config Name="[API] Brandfetch Client ID" Target="BRAND_FETCH_CLIENT_ID" Default="" Mode="" Description="Brandfetch OAuth key to auto-grab logos for banks and merchants." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[API] Twelve Data Key" Target="TWELVE_DATA_API_KEY" Default="" Mode="" Description="Optional API Key for Twelve Data (exchange rates/stocks) if you don't want to use the default free Yahoo Finance option." Type="Variable" Display="advanced" Required="false" Mask="true"/>
 
   <!-- Advanced: SMTP -->
   <Config Name="[Email] SMTP Address" Target="SMTP_ADDRESS" Default="" Mode="" Description="Hostname for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
@@ -98,5 +107,18 @@ This template uses a custom AIO image that effortlessly consolidates the Rails W
   <Config Name="[Email] SMTP Username" Target="SMTP_USERNAME" Default="" Mode="" Description="Username for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Email] SMTP Password" Target="SMTP_PASSWORD" Default="" Mode="" Description="Password for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[Email] Sender Address" Target="EMAIL_SENDER" Default="" Mode="" Description="The email address your app will send mail from (e.g., finance@mydomain.com)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  
+
+  <!-- Advanced: Enterprise Auth -->
+  <Config Name="[Auth] OIDC Client ID" Target="OIDC_CLIENT_ID" Default="" Mode="" Description="OpenID Connect Client ID (Authentik/Authelia)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Client Secret" Target="OIDC_CLIENT_SECRET" Default="" Mode="" Description="OpenID Connect Client Secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Auth] OIDC Issuer" Target="OIDC_ISSUER" Default="" Mode="" Description="OpenID Connect Issuer URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: Observability -->
+  <Config Name="[Telemetry] Langfuse Host" Target="LANGFUSE_HOST" Default="" Mode="" Description="Langfuse instance URL for LLM observability." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Langfuse Public Key" Target="LANGFUSE_PUBLIC_KEY" Default="" Mode="" Description="Langfuse Public Key." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Langfuse Secret Key" Target="LANGFUSE_SECRET_KEY" Default="" Mode="" Description="Langfuse Secret Key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <!-- Advanced: Encryption -->
+  <Config Name="[DB] Active Record Primary Key" Target="ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY" Default="" Mode="" Description="(Optional) Explicit DB encryption key. If blank, derives from SECRET_KEY_BASE." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
 </Container>
