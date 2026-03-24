@@ -12,17 +12,12 @@
   <Overview>Sure (formerly Maybe Finance) is a self-hosted personal finance app.&#xD;
 &#xD;
 [b]All-In-One (AIO) Edition[/b]&#xD;
-This template uses a custom AIO image that effortlessly consolidates the Rails Web Server and the Sidekiq Worker into a single container using s6-overlay.&#xD;
-&#xD;
-[b]Required Dependencies:[/b]&#xD;
-1. Postgres 16+ (or pgvector image if using local AI document search)&#xD;
-2. Redis 5.4+&#xD;
+The absolute easiest way to deploy Sure on Unraid. This is a "mega-container" that internally manages the Rails Server, Sidekiq Worker, PostgreSQL 15, and Redis. It requires NO external database setups and NO custom networks. Just click install.&#xD;
 &#xD;
 [b]Initial Setup:[/b]&#xD;
-1. Create a database named `sure` in your Postgres container.&#xD;
-2. Run `openssl rand -hex 64` in your Unraid terminal to generate your `SECRET_KEY_BASE`.&#xD;
-3. Click "Apply". On first boot, the app will setup the database schemas.&#xD;
-4. Visit the WebUI and click "Create Account".</Overview>
+1. Generate a SECRET_KEY_BASE (Run `openssl rand -hex 64` in your Unraid terminal) and paste it below.&#xD;
+2. Click "Apply".&#xD;
+3. Wait for the WebUI. Databases are auto-provisioned securely inside the container.</Overview>
   <Category>Tools: Finance: Productivity:</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://github.com/JSONbored/awesome-unraid/raw/master/sure-aio.xml</TemplateURL>
@@ -46,8 +41,18 @@ This template uses a custom AIO image that effortlessly consolidates the Rails W
   </Networking>
   <Data>
     <Volume>
-      <HostDir>/mnt/user/appdata/sure/storage</HostDir>
+      <HostDir>/mnt/user/appdata/sure-aio/system</HostDir>
       <ContainerDir>/rails/storage</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/appdata/sure-aio/postgres</HostDir>
+      <ContainerDir>/var/lib/postgresql/data</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/appdata/sure-aio/redis</HostDir>
+      <ContainerDir>/var/lib/redis</ContainerDir>
       <Mode>rw</Mode>
     </Volume>
   </Data>
@@ -71,16 +76,12 @@ This template uses a custom AIO image that effortlessly consolidates the Rails W
 
   <!-- Core Required -->
   <Config Name="Web UI Port" Target="3000" Default="3000" Mode="tcp" Description="The main web interface port." Type="Port" Display="always" Required="true" Mask="false">3000</Config>
-  <Config Name="App Storage" Target="/rails/storage" Default="/mnt/user/appdata/sure/storage" Mode="rw" Description="Persistent storage for file uploads and assets." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/sure/storage</Config>
-  <Config Name="Secret Key Base" Target="SECRET_KEY_BASE" Default="" Mode="" Description="Critical: Run 'openssl rand -hex 64' in your terminal and paste the result here." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="Secret Key Base" Target="SECRET_KEY_BASE" Default="" Mode="" Description="Critical: Run 'openssl rand -hex 64' in your Unraid terminal and paste the randomized hash here." Type="Variable" Display="always" Required="true" Mask="true"/>
   
-  <!-- Database & Redis (Required) -->
-  <Config Name="Database Host" Target="DB_HOST" Default="192.168.1.100" Mode="" Description="Hostname or IP of your Postgres database." Type="Variable" Display="always" Required="true" Mask="false">192.168.1.100</Config>
-  <Config Name="Database Port" Target="DB_PORT" Default="5432" Mode="" Description="Port for your Postgres database." Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
-  <Config Name="Database Name" Target="POSTGRES_DB" Default="sure_production" Mode="" Description="Name of the database to use." Type="Variable" Display="always" Required="true" Mask="false">sure_production</Config>
-  <Config Name="Database User" Target="POSTGRES_USER" Default="sure_user" Mode="" Description="Database username." Type="Variable" Display="always" Required="true" Mask="false">sure_user</Config>
-  <Config Name="Database Password" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="Database password." Type="Variable" Display="always" Required="true" Mask="true"/>
-  <Config Name="Redis URL" Target="REDIS_URL" Default="redis://192.168.1.100:6379/1" Mode="" Description="Full connection string for Redis (e.g., redis://host:port/db)." Type="Variable" Display="always" Required="true" Mask="false">redis://192.168.1.100:6379/1</Config>
+  <!-- Internal Volumes -->
+  <Config Name="App Volumes - Rails Storage" Target="/rails/storage" Default="/mnt/user/appdata/sure-aio/system" Mode="rw" Description="Internal rails file storage." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/sure-aio/system</Config>
+  <Config Name="App Volumes - Postgres DB" Target="/var/lib/postgresql/data" Default="/mnt/user/appdata/sure-aio/postgres" Mode="rw" Description="Internal PostgreSQL database storage mapped externally so you don't lose data." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/sure-aio/postgres</Config>
+  <Config Name="App Volumes - Redis Cache" Target="/var/lib/redis" Default="/mnt/user/appdata/sure-aio/redis" Mode="rw" Description="Internal Redis memory cache." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/sure-aio/redis</Config>
 
   <!-- Advanced: Overrides & Proxy -->
   <Config Name="Onboarding State" Target="ONBOARDING_STATE" Default="open" Mode="" Description="Controls user registration. Use 'open', 'closed', or 'invite_only'." Type="Variable" Display="advanced" Required="false" Mask="false">open</Config>
@@ -90,35 +91,15 @@ This template uses a custom AIO image that effortlessly consolidates the Rails W
   <Config Name="[AI] OpenAI / Ollama Token" Target="OPENAI_ACCESS_TOKEN" Default="" Mode="" Description="API Key for OpenAI. If using a local Ollama container, enter 'ollama-local'." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[AI] OpenAI URI Base" Target="OPENAI_URI_BASE" Default="" Mode="" Description="Leave blank for official OpenAI. For local LLMs, enter your endpoint (e.g., 'http://ollama:11434/v1')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[AI] Model Name" Target="OPENAI_MODEL" Default="" Mode="" Description="If using Ollama, you MUST define the model here (e.g., 'llama3.1:13b' or 'gemma2:7b')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[AI] Vector Store Provider" Target="VECTOR_STORE_PROVIDER" Default="pgvector" Mode="" Description="Backend for document search. Options: 'openai', 'pgvector', 'qdrant'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-
-  <!-- Advanced: External AI Assistant (OpenClaw / MCP) -->
-  <Config Name="[Ext. AI] Assistant Type" Target="ASSISTANT_TYPE" Default="" Mode="" Description="Set to 'external' to route all chat to an external agent via MCP." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Ext. AI] Assistant URL" Target="EXTERNAL_ASSISTANT_URL" Default="" Mode="" Description="URL for the external agent (e.g. https://your-openclaw/v1/chat/completions)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Ext. AI] Assistant Token" Target="EXTERNAL_ASSISTANT_TOKEN" Default="" Mode="" Description="Auth token for the external agent." Type="Variable" Display="advanced" Required="false" Mask="true"/>
 
   <!-- Advanced: External Providers -->
   <Config Name="[API] Brandfetch Client ID" Target="BRAND_FETCH_CLIENT_ID" Default="" Mode="" Description="Brandfetch OAuth key to auto-grab logos for banks and merchants." Type="Variable" Display="advanced" Required="false" Mask="true"/>
-  <Config Name="[API] Twelve Data Key" Target="TWELVE_DATA_API_KEY" Default="" Mode="" Description="Optional API Key for Twelve Data (exchange rates/stocks) if you don't want to use the default free Yahoo Finance option." Type="Variable" Display="advanced" Required="false" Mask="true"/>
-
+  
   <!-- Advanced: SMTP -->
   <Config Name="[Email] SMTP Address" Target="SMTP_ADDRESS" Default="" Mode="" Description="Hostname for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Email] SMTP Port" Target="SMTP_PORT" Default="465" Mode="" Description="Port for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Email] SMTP Username" Target="SMTP_USERNAME" Default="" Mode="" Description="Username for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Email] SMTP Password" Target="SMTP_PASSWORD" Default="" Mode="" Description="Password for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[Email] Sender Address" Target="EMAIL_SENDER" Default="" Mode="" Description="The email address your app will send mail from (e.g., finance@mydomain.com)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-
-  <!-- Advanced: Enterprise Auth -->
-  <Config Name="[Auth] OIDC Client ID" Target="OIDC_CLIENT_ID" Default="" Mode="" Description="OpenID Connect Client ID (Authentik/Authelia)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Auth] OIDC Client Secret" Target="OIDC_CLIENT_SECRET" Default="" Mode="" Description="OpenID Connect Client Secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
-  <Config Name="[Auth] OIDC Issuer" Target="OIDC_ISSUER" Default="" Mode="" Description="OpenID Connect Issuer URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-
-  <!-- Advanced: Observability -->
-  <Config Name="[Telemetry] Langfuse Host" Target="LANGFUSE_HOST" Default="" Mode="" Description="Langfuse instance URL for LLM observability." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Telemetry] Langfuse Public Key" Target="LANGFUSE_PUBLIC_KEY" Default="" Mode="" Description="Langfuse Public Key." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Telemetry] Langfuse Secret Key" Target="LANGFUSE_SECRET_KEY" Default="" Mode="" Description="Langfuse Secret Key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
-
-  <!-- Advanced: Encryption -->
-  <Config Name="[DB] Active Record Primary Key" Target="ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY" Default="" Mode="" Description="(Optional) Explicit DB encryption key. If blank, derives from SECRET_KEY_BASE." Type="Variable" Display="advanced" Required="false" Mask="true"/>
 
 </Container>

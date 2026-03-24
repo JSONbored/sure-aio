@@ -1,0 +1,2 @@
+#!/command/with-contenv sh
+exec sudo -u redis redis-server /etc/redis/redis.conf --dir /var/lib/redis
