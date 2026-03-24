@@ -75,12 +75,12 @@ This template uses a custom AIO image that effortlessly consolidates the Rails W
   <Config Name="Secret Key Base" Target="SECRET_KEY_BASE" Default="" Mode="" Description="Critical: Run 'openssl rand -hex 64' in your terminal and paste the result here." Type="Variable" Display="always" Required="true" Mask="true"/>
   
   <!-- Database & Redis (Required) -->
-  <Config Name="Database Host" Target="DB_HOST" Default="postgres-shared" Mode="" Description="Hostname or IP of your Postgres database." Type="Variable" Display="always" Required="true" Mask="false">postgres-shared</Config>
+  <Config Name="Database Host" Target="DB_HOST" Default="192.168.1.100" Mode="" Description="Hostname or IP of your Postgres database." Type="Variable" Display="always" Required="true" Mask="false">192.168.1.100</Config>
   <Config Name="Database Port" Target="DB_PORT" Default="5432" Mode="" Description="Port for your Postgres database." Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
   <Config Name="Database Name" Target="POSTGRES_DB" Default="sure_production" Mode="" Description="Name of the database to use." Type="Variable" Display="always" Required="true" Mask="false">sure_production</Config>
   <Config Name="Database User" Target="POSTGRES_USER" Default="sure_user" Mode="" Description="Database username." Type="Variable" Display="always" Required="true" Mask="false">sure_user</Config>
   <Config Name="Database Password" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="Database password." Type="Variable" Display="always" Required="true" Mask="true"/>
-  <Config Name="Redis URL" Target="REDIS_URL" Default="redis://redis-shared:6379/1" Mode="" Description="Full connection string for Redis (e.g., redis://host:port/db)." Type="Variable" Display="always" Required="true" Mask="false">redis://redis-shared:6379/1</Config>
+  <Config Name="Redis URL" Target="REDIS_URL" Default="redis://192.168.1.100:6379/1" Mode="" Description="Full connection string for Redis (e.g., redis://host:port/db)." Type="Variable" Display="always" Required="true" Mask="false">redis://192.168.1.100:6379/1</Config>
 
   <!-- Advanced: Overrides & Proxy -->
   <Config Name="Onboarding State" Target="ONBOARDING_STATE" Default="open" Mode="" Description="Controls user registration. Use 'open', 'closed', or 'invite_only'." Type="Variable" Display="advanced" Required="false" Mask="false">open</Config>
