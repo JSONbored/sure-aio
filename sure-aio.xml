@@ -9,19 +9,20 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/JSONbored/sure-aio/issues</Support>
   <Project>https://github.com/we-promise/sure</Project>
-  <Overview>Sure (formerly Maybe Finance) is a personal finance app for everyone.&#xD;
+  <Overview>Sure (formerly Maybe Finance) is a self-hosted personal finance app.&#xD;
 &#xD;
 [b]All-In-One (AIO) Edition[/b]&#xD;
-This template uses a custom image by JSONbored that consolidates the Rails Web Server and Sidekiq Worker into a single container using s6-overlay. Simplifies deployment significantly.&#xD;
+This template uses a custom AIO image that effortlessly consolidates the Rails Web Server and the Sidekiq Worker into a single container using s6-overlay.&#xD;
 &#xD;
-[b]Dependencies:[/b]&#xD;
-1. Postgres 16+ Database (external container)&#xD;
-2. Redis 5.4+ (external container)&#xD;
+[b]Required Dependencies:[/b]&#xD;
+1. Postgres 16+ (or pgvector image if using local AI document search)&#xD;
+2. Redis 5.4+&#xD;
 &#xD;
-[b]Setup:[/b]&#xD;
-1. Create a `sure` database and user in your Postgres instance.&#xD;
-2. Generate a `SECRET_KEY_BASE` (run `openssl rand -hex 64` in terminal).&#xD;
-3. Configure the variables below.</Overview>
+[b]Initial Setup:[/b]&#xD;
+1. Create a database named `sure` in your Postgres container.&#xD;
+2. Run `openssl rand -hex 64` in your Unraid terminal to generate your `SECRET_KEY_BASE`.&#xD;
+3. Click "Apply". On first boot, the app will setup the database schemas.&#xD;
+4. Visit the WebUI and click "Create Account".</Overview>
   <Category>Tools: Finance: Productivity:</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://github.com/JSONbored/awesome-unraid/raw/master/sure-aio.xml</TemplateURL>
@@ -32,19 +33,7 @@ This template uses a custom image by JSONbored that consolidates the Rails Web S
   <DateInstalled/>
   <DonateText/>
   <DonateLink/>
-  <Description>Sure (formerly Maybe Finance) is a personal finance app for everyone.&#xD;
-&#xD;
-[b]All-In-One (AIO) Edition[/b]&#xD;
-This template uses a custom image by JSONbored that consolidates the Rails Web Server and Sidekiq Worker into a single container using s6-overlay. Simplifies deployment significantly.&#xD;
-&#xD;
-[b]Dependencies:[/b]&#xD;
-1. Postgres 16+ Database (external container)&#xD;
-2. Redis 5.4+ (external container)&#xD;
-&#xD;
-[b]Setup:[/b]&#xD;
-1. Create a `sure` database and user in your Postgres instance.&#xD;
-2. Generate a `SECRET_KEY_BASE` (run `openssl rand -hex 64` in terminal).&#xD;
-3. Configure the variables below.</Description>
+  <Description/>
   <Networking>
     <Mode>bridge</Mode>
     <Publish>
@@ -69,67 +58,45 @@ This template uses a custom image by JSONbored that consolidates the Rails Web S
       <Mode/>
     </Variable>
     <Variable>
-      <Value>production</Value>
-      <Name>RAILS_ENV</Name>
+      <Value>yahoo_finance</Value>
+      <Name>EXCHANGE_RATE_PROVIDER</Name>
       <Mode/>
     </Variable>
     <Variable>
-      <Value/>
-      <Name>SECRET_KEY_BASE</Name>
-      <Mode/>
-    </Variable>
-    <Variable>
-      <Value>postgres-shared</Value>
-      <Name>DB_HOST</Name>
-      <Mode/>
-    </Variable>
-    <Variable>
-      <Value>5432</Value>
-      <Name>DB_PORT</Name>
-      <Mode/>
-    </Variable>
-    <Variable>
-      <Value>sure</Value>
-      <Name>POSTGRES_DB</Name>
-      <Mode/>
-    </Variable>
-    <Variable>
-      <Value>sure_user</Value>
-      <Name>POSTGRES_USER</Name>
-      <Mode/>
-    </Variable>
-    <Variable>
-      <Value/>
-      <Name>POSTGRES_PASSWORD</Name>
-      <Mode/>
-    </Variable>
-    <Variable>
-      <Value>redis://redis-shared:6379/1</Value>
-      <Name>REDIS_URL</Name>
-      <Mode/>
-    </Variable>
-    <Variable>
-      <Value>false</Value>
-      <Name>RAILS_FORCE_SSL</Name>
-      <Mode/>
-    </Variable>
-    <Variable>
-      <Value>true</Value>
-      <Name>RAILS_ASSUME_SSL</Name>
+      <Value>yahoo_finance</Value>
+      <Name>SECURITIES_PROVIDER</Name>
       <Mode/>
     </Variable>
   </Environment>
+
+  <!-- Core Required -->
   <Config Name="Web UI Port" Target="3000" Default="3000" Mode="tcp" Description="The main web interface port." Type="Port" Display="always" Required="true" Mask="false">3000</Config>
-  <Config Name="App Storage" Target="/rails/storage" Default="/mnt/user/appdata/sure/storage" Mode="rw" Description="Persistent storage for uploads and assets." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/sure/storage</Config>
-  <Config Name="Secret Key Base" Target="SECRET_KEY_BASE" Default="" Mode="" Description="Critical: Run 'openssl rand -hex 64' to generate this key. Do not share." Type="Variable" Display="always" Required="true" Mask="true"/>
-  <Config Name="Database Host" Target="DB_HOST" Default="postgres-shared" Mode="" Description="Hostname of your Postgres database container." Type="Variable" Display="always" Required="true" Mask="false">postgres-shared</Config>
-  <Config Name="Database Port" Target="DB_PORT" Default="5432" Mode="" Description="Port for Postgres." Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
-  <Config Name="Database Name" Target="POSTGRES_DB" Default="sure" Mode="" Description="Name of the database to use." Type="Variable" Display="always" Required="true" Mask="false">sure</Config>
+  <Config Name="App Storage" Target="/rails/storage" Default="/mnt/user/appdata/sure/storage" Mode="rw" Description="Persistent storage for file uploads and assets." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/sure/storage</Config>
+  <Config Name="Secret Key Base" Target="SECRET_KEY_BASE" Default="" Mode="" Description="Critical: Run 'openssl rand -hex 64' in your terminal and paste the result here." Type="Variable" Display="always" Required="true" Mask="true"/>
+  
+  <!-- Database & Redis (Required) -->
+  <Config Name="Database Host" Target="DB_HOST" Default="postgres-shared" Mode="" Description="Hostname or IP of your Postgres database." Type="Variable" Display="always" Required="true" Mask="false">postgres-shared</Config>
+  <Config Name="Database Port" Target="DB_PORT" Default="5432" Mode="" Description="Port for your Postgres database." Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
+  <Config Name="Database Name" Target="POSTGRES_DB" Default="sure_production" Mode="" Description="Name of the database to use." Type="Variable" Display="always" Required="true" Mask="false">sure_production</Config>
   <Config Name="Database User" Target="POSTGRES_USER" Default="sure_user" Mode="" Description="Database username." Type="Variable" Display="always" Required="true" Mask="false">sure_user</Config>
   <Config Name="Database Password" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="Database password." Type="Variable" Display="always" Required="true" Mask="true"/>
   <Config Name="Redis URL" Target="REDIS_URL" Default="redis://redis-shared:6379/1" Mode="" Description="Full connection string for Redis (e.g., redis://host:port/db)." Type="Variable" Display="always" Required="true" Mask="false">redis://redis-shared:6379/1</Config>
-  <Config Name="Self Hosted Mode" Target="SELF_HOSTED" Default="true" Mode="" Description="Enables self-hosted features." Type="Variable" Display="advanced" Required="true" Mask="false">true</Config>
-  <Config Name="Rails Env" Target="RAILS_ENV" Default="production" Mode="" Description="Run in production mode." Type="Variable" Display="advanced" Required="true" Mask="false">production</Config>
-  <Config Name="Force SSL" Target="RAILS_FORCE_SSL" Default="false" Mode="" Description="Set to true only if handling SSL internally (usually handled by Reverse Proxy)." Type="Variable" Display="advanced" Required="true" Mask="false">false</Config>
-  <Config Name="Assume SSL" Target="RAILS_ASSUME_SSL" Default="true" Mode="" Description="Set to true if using a reverse proxy with HTTPS." Type="Variable" Display="advanced" Required="true" Mask="false">true</Config>
+
+  <!-- Advanced: Overrides & Proxy -->
+  <Config Name="Onboarding State" Target="ONBOARDING_STATE" Default="open" Mode="" Description="Controls user registration. Use 'open', 'closed', or 'invite_only'." Type="Variable" Display="advanced" Required="false" Mask="false">open</Config>
+  <Config Name="Assume SSL" Target="RAILS_ASSUME_SSL" Default="true" Mode="" Description="Set to 'true' if you are putting this behind a reverse proxy like Nginx Proxy Manager or Cloudflare Tunnels." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+
+  <!-- Advanced: AI & Intelligence -->
+  <Config Name="[AI] OpenAI / Ollama Token" Target="OPENAI_ACCESS_TOKEN" Default="" Mode="" Description="API Key for OpenAI. If using a local Ollama container, enter 'ollama-local' here." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[AI] OpenAI URI Base" Target="OPENAI_URI_BASE" Default="" Mode="" Description="Leave blank for official OpenAI. For local LLMs, enter your endpoint (e.g., 'http://ollama:11434/v1')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Model Name" Target="OPENAI_MODEL" Default="" Mode="" Description="If using Ollama, you MUST define the model here (e.g., 'llama3.1:13b' or 'gemma2:7b')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Vector Store Provider" Target="VECTOR_STORE_PROVIDER" Default="pgvector" Mode="" Description="Backend for document search. Options: 'openai', 'pgvector', 'qdrant'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: SMTP -->
+  <Config Name="[Email] SMTP Address" Target="SMTP_ADDRESS" Default="" Mode="" Description="Hostname for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Email] SMTP Port" Target="SMTP_PORT" Default="465" Mode="" Description="Port for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Email] SMTP Username" Target="SMTP_USERNAME" Default="" Mode="" Description="Username for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Email] SMTP Password" Target="SMTP_PASSWORD" Default="" Mode="" Description="Password for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Email] Sender Address" Target="EMAIL_SENDER" Default="" Mode="" Description="The email address your app will send mail from (e.g., finance@mydomain.com)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  
 </Container>
