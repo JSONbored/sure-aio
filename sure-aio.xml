@@ -84,17 +84,63 @@ The absolute easiest way to deploy Sure on Unraid. This is a "mega-container" th
   <Config Name="App Volumes - Redis Cache" Target="/var/lib/redis" Default="/mnt/user/appdata/sure-aio/redis" Mode="rw" Description="Internal Redis memory cache." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/sure-aio/redis</Config>
 
   <!-- Advanced: Overrides & Proxy -->
+  <Config Name="App Domain" Target="APP_DOMAIN" Default="" Mode="" Description="The domain your Sure instance is hosted at (used for email links)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="Onboarding State" Target="ONBOARDING_STATE" Default="open" Mode="" Description="Controls user registration. Use 'open', 'closed', or 'invite_only'." Type="Variable" Display="advanced" Required="false" Mask="false">open</Config>
   <Config Name="Assume SSL" Target="RAILS_ASSUME_SSL" Default="true" Mode="" Description="Set to 'true' if you are putting this behind a reverse proxy like Nginx Proxy Manager or Cloudflare Tunnels." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+  <Config Name="Disable SSL Enforcing" Target="DISABLE_SSL" Default="false" Mode="" Description="Set to 'true' to completely disable SSL enforcement." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: External Databases (Override AIO defaults) -->
+  <Config Name="[External DB] DB Host Override" Target="DB_HOST" Default="" Mode="" Description="Optional: To use an external Postgres database instead of the internal one, enter its IP/Hostname here." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External DB] DB Port Override" Target="DB_PORT" Default="" Mode="" Description="Optional: External database port." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External DB] DB User Override" Target="POSTGRES_USER" Default="" Mode="" Description="Optional: External database user." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External DB] DB Password Override" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="Optional: External database password." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[External DB] Redis URL Override" Target="REDIS_URL" Default="" Mode="" Description="Optional: To use an external Redis instead of the internal one, enter URL here." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: Encryption & Names -->
+  <Config Name="[System] Product Name" Target="PRODUCT_NAME" Default="" Mode="" Description="Custom product name in UI." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[System] Brand Name" Target="BRAND_NAME" Default="" Mode="" Description="Custom brand name in UI." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[DB Encryption] Primary Key" Target="ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY" Default="" Mode="" Description="(Optional) Explicit DB encryption key. If blank, derives from SECRET_KEY_BASE." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[DB Encryption] Deterministic Key" Target="ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY" Default="" Mode="" Description="(Optional) Deterministic key for Active Record Encryption." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[DB Encryption] Derivation Salt" Target="ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT" Default="" Mode="" Description="(Optional) Key derivation salt." Type="Variable" Display="advanced" Required="false" Mask="true"/>
 
   <!-- Advanced: AI & Intelligence -->
   <Config Name="[AI] OpenAI / Ollama Token" Target="OPENAI_ACCESS_TOKEN" Default="" Mode="" Description="API Key for OpenAI. If using a local Ollama container, enter 'ollama-local'." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[AI] OpenAI URI Base" Target="OPENAI_URI_BASE" Default="" Mode="" Description="Leave blank for official OpenAI. For local LLMs, enter your endpoint (e.g., 'http://ollama:11434/v1')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[AI] Model Name" Target="OPENAI_MODEL" Default="" Mode="" Description="If using Ollama, you MUST define the model here (e.g., 'llama3.1:13b' or 'gemma2:7b')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
 
+  <!-- Advanced: External AI Assistant (OpenClaw / MCP) -->
+  <Config Name="[Ext. AI] Assistant Type" Target="ASSISTANT_TYPE" Default="" Mode="" Description="Set to 'external' to route all chat to an external agent via MCP." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] Assistant URL" Target="EXTERNAL_ASSISTANT_URL" Default="" Mode="" Description="URL for the external agent (e.g. https://your-openclaw/v1/chat/completions)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] Assistant Token" Target="EXTERNAL_ASSISTANT_TOKEN" Default="" Mode="" Description="Auth token for the external agent." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Ext. AI] Agent ID" Target="EXTERNAL_ASSISTANT_AGENT_ID" Default="" Mode="" Description="Optional Agent ID for OpenClaw routing." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] MCP User Email" Target="MCP_USER_EMAIL" Default="" Mode="" Description="Required if using Ext. AI: Email of an existing Sure user." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] MCP API Token" Target="MCP_API_TOKEN" Default="" Mode="" Description="Required if using Ext. AI: Bearer token for agent callbacks to /mcp." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <!-- Advanced: Telemetry (Langfuse / Posthog) -->
+  <Config Name="[Telemetry] PostHog Key" Target="POSTHOG_KEY" Default="" Mode="" Description="PostHog API Key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Telemetry] PostHog Host" Target="POSTHOG_HOST" Default="" Mode="" Description="PostHog Host URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Langfuse Host" Target="LANGFUSE_HOST" Default="" Mode="" Description="Langfuse instance URL for LLM observability." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Langfuse Public Key" Target="LANGFUSE_PUBLIC_KEY" Default="" Mode="" Description="Langfuse Public Key." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Langfuse Secret Key" Target="LANGFUSE_SECRET_KEY" Default="" Mode="" Description="Langfuse Secret Key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
   <!-- Advanced: External Providers -->
   <Config Name="[API] Brandfetch Client ID" Target="BRAND_FETCH_CLIENT_ID" Default="" Mode="" Description="Brandfetch OAuth key to auto-grab logos for banks and merchants." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[API] Twelve Data Key" Target="TWELVE_DATA_API_KEY" Default="" Mode="" Description="Optional API Key for Twelve Data (exchange rates/stocks) if you don't want to use the default free Yahoo Finance option." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   
+  <!-- Advanced: Enterprise Auth -->
+  <Config Name="[Auth] OIDC Client ID" Target="OIDC_CLIENT_ID" Default="" Mode="" Description="OpenID Connect Client ID (Authentik/Authelia)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Client Secret" Target="OIDC_CLIENT_SECRET" Default="" Mode="" Description="OpenID Connect Client Secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Auth] OIDC Issuer" Target="OIDC_ISSUER" Default="" Mode="" Description="OpenID Connect Issuer URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Redirect URI" Target="OIDC_REDIRECT_URI" Default="" Mode="" Description="OpenID Connect Redirect URI." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: Active Storage (S3 / R2) -->
+  <Config Name="[Storage] Provider Strategy" Target="ACTIVE_STORAGE_SERVICE" Default="" Mode="" Description="Change from local disk to: 'amazon', 'cloudflare', or 'generic_s3'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage] Access Key ID" Target="S3_ACCESS_KEY_ID" Default="" Mode="" Description="S3 Access Key (Also map to CLOUDFLARE_ACCESS_KEY_ID or GENERIC_S3_ACCESS_KEY_ID based on strategy)." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage] Secret Access Key" Target="S3_SECRET_ACCESS_KEY" Default="" Mode="" Description="S3 Secret Access Key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage] Region" Target="S3_REGION" Default="" Mode="" Description="S3 Region (defaults to us-east-1)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage] Bucket Name" Target="S3_BUCKET" Default="" Mode="" Description="Target Bucket." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage] Custom Endpoint" Target="GENERIC_S3_ENDPOINT" Default="" Mode="" Description="(Generic S3 Only) Custom Minio/S3 endpoint URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
   <!-- Advanced: SMTP -->
   <Config Name="[Email] SMTP Address" Target="SMTP_ADDRESS" Default="" Mode="" Description="Hostname for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Email] SMTP Port" Target="SMTP_PORT" Default="465" Mode="" Description="Port for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
