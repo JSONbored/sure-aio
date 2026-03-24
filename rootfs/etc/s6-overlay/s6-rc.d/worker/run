@@ -8,9 +8,5 @@ export POSTGRES_PASSWORD=internal_sure_pass
 export POSTGRES_DB=sure_production
 export REDIS_URL=redis://127.0.0.1:6379/1
 
-# Wait for postgres
-while ! pg_isready -h 127.0.0.1 -U sure_user; do
-  sleep 1
-done
-
+# Launch Background Worker
 exec bundle exec sidekiq
