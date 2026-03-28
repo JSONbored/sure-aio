@@ -18,7 +18,7 @@ Instead of configuring 4 different templates, managing custom Docker networks, a
 This image uses `s6-overlay v3` to gracefully orchestrate the entire self-hosted finance ecosystem invisibly:
 - 🌐 **The Web UI:** The core Ruby on Rails dashboard.
 - ⚙️ **The Task Runner:** Sidekiq Background Job Worker (for scraping/syncs).
-- 🗄️ **The Database:** **PostgreSQL 15** is auto-provisioned securely internally.
+- 🗄️ **The Database:** **PostgreSQL** is auto-provisioned securely internally.
 - ⚡ **The Cache:** **Redis** is auto-provisioned for rapid background queuing.
 
 ## 🚀 Installation (For Beginners)
@@ -35,7 +35,7 @@ If you just want to track your finances and don't care about databases, this is 
 5. Copy the output, and paste it into the **Secret Key Base** field in the template.
 6. Click **Apply**. 
 
-*Wait about 30-60 seconds on the very first boot. The container is secretly building your databases, running migrations, and setting up the web server. Once the logs settle, open the WebUI on port 3000.*
+*Wait about 30-60 seconds on the very first boot. The container is secretly building your databases, running migrations, and setting up the web server. Once the logs settle, open the WebUI on port 3000 over normal HTTP unless you deliberately put it behind your own reverse proxy.*
 
 ---
 

@@ -26,13 +26,14 @@ RUN mkdir -p /var/lib/postgresql/data /var/lib/redis /rails/storage /run/postgre
 COPY rootfs/ /
 
 # Ensure scripts are executable
-RUN find /etc/s6-overlay/s6-rc.d -type f -name "run" -exec chmod +x {} \; && \
-    find /etc/cont-init.d -type f -exec chmod +x {} \; || true
+RUN find /etc/s6-overlay/s6-rc.d -type f \( -name "run" -o -name "up" \) -exec chmod +x {} \; && \
+    find /etc/cont-init.d -type f -exec chmod +x {} \; && \
+    find /usr/local/bin -maxdepth 1 -type f -name "*.sh" -exec chmod +x {} \; || true
 
 # 4. Expose the App Storage
 VOLUME ["/rails/storage", "/var/lib/postgresql/data", "/var/lib/redis"]
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
+  CMD curl -f http://localhost:3000/up || exit 1
 
 ENTRYPOINT ["/init"]

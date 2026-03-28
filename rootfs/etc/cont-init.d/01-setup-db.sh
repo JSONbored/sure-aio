@@ -1,29 +1,11 @@
 #!/command/with-contenv sh
-# S6 Type declarations for all services
-mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d
-echo "longrun" > /etc/s6-overlay/s6-rc.d/postgres/type
-echo "longrun" > /etc/s6-overlay/s6-rc.d/redis/type
-echo "longrun" > /etc/s6-overlay/s6-rc.d/web/type
-echo "longrun" > /etc/s6-overlay/s6-rc.d/worker/type
-
-touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres
-touch /etc/s6-overlay/s6-rc.d/user/contents.d/redis
-touch /etc/s6-overlay/s6-rc.d/user/contents.d/web
-touch /etc/s6-overlay/s6-rc.d/user/contents.d/worker
-
-# Database setup logic
 PGDATA="/var/lib/postgresql/data"
+mkdir -p "$PGDATA" /var/lib/redis /run/postgresql
+chown -R postgres:postgres "$PGDATA" /run/postgresql /etc/postgresql
+chown -R redis:redis /var/lib/redis
 
-if [ -z "$(ls -A "$PGDATA")" ]; then
-    echo "Initializing PostgreSQL database..."
-    chown -R postgres:postgres "$PGDATA"
-    sudo -u postgres /usr/lib/postgresql/$(ls /usr/lib/postgresql)/bin/initdb -D "$PGDATA"
-    
-    # Temporarily start PG to create the sure_user
-    sudo -u postgres /usr/lib/postgresql/$(ls /usr/lib/postgresql)/bin/pg_ctl -D "$PGDATA" -w start
-    sudo -u postgres psql -c "CREATE USER sure_user WITH SUPERUSER PASSWORD 'internal_sure_pass';"
-    sudo -u postgres psql -c "CREATE DATABASE sure_production OWNER sure_user;"
-    sudo -u postgres /usr/lib/postgresql/$(ls /usr/lib/postgresql)/bin/pg_ctl -D "$PGDATA" -m fast -w stop
-else
+if [ -s "$PGDATA/PG_VERSION" ]; then
     echo "PostgreSQL database already initialized."
+else
+    echo "PostgreSQL database will be initialized by the postgres service on first start."
 fi

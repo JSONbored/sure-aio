@@ -13,7 +13,7 @@ If you already run a heavy-duty PostgreSQL/Redis container (like `postgres-share
 4. Input your `DB Host Override` (e.g. `192.168.1.50`, or the Unraid docker network hostname if you run them on a custom net).
 5. Input the `DB User` and `DB Password` overrides.
 6. Input the `Redis URL Override` (e.g. `redis://192.168.1.50:6379/1`).
-7. **Result:** The AIO container will still boot its internal services silently, but the Rails UI and Sidekiq workers will ignore them entirely and connect to your external servers.
+7. **Result:** The AIO container will still boot its internal services silently, but the Rails UI, Sidekiq workers, and first-boot database preparation will honor your external overrides instead of the built-in defaults.
 
 ---
 
@@ -93,3 +93,18 @@ If you are a cryptography purist who wants to separate these:
 1. Find the **[DB Encryption]** block.
 2. Manually define your `Primary Key`, `Deterministic Key`, and `Derivation Salt`. 
 *(Warning: Losing these means permanently losing access to your encrypted data).*
+
+---
+
+## 8. Reverse Proxy and HTTPS
+
+For a normal beginner install on your LAN, leave the SSL options at:
+
+1. `RAILS_FORCE_SSL=false`
+2. `RAILS_ASSUME_SSL=false`
+
+If you later place Sure behind Nginx Proxy Manager, Traefik, Caddy, Cloudflare Tunnel, or another SSL-terminating reverse proxy:
+
+1. Set `RAILS_ASSUME_SSL=true`
+2. Set `RAILS_FORCE_SSL=true` only if you want plain HTTP requests redirected to HTTPS
+3. Set `APP_DOMAIN` to the hostname you actually use for email links and callbacks

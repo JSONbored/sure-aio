@@ -91,8 +91,8 @@ The absolute easiest way to deploy Sure on Unraid. This is a "mega-container" th
   <!-- Advanced: Overrides & Proxy -->
   <Config Name="App Domain" Target="APP_DOMAIN" Default="" Mode="" Description="The domain your Sure instance is hosted at (used for email links)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="Onboarding State" Target="ONBOARDING_STATE" Default="open" Mode="" Description="Controls user registration. Use 'open', 'closed', or 'invite_only'." Type="Variable" Display="advanced" Required="false" Mask="false">open</Config>
-  <Config Name="Assume SSL" Target="RAILS_ASSUME_SSL" Default="true" Mode="" Description="Set to 'true' if you are putting this behind a reverse proxy like Nginx Proxy Manager or Cloudflare Tunnels." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
-  <Config Name="Disable SSL Enforcing" Target="DISABLE_SSL" Default="false" Mode="" Description="Set to 'true' to completely disable SSL enforcement." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Assume SSL" Target="RAILS_ASSUME_SSL" Default="false" Mode="" Description="Leave 'false' for direct LAN access. Set to 'true' only when Sure sits behind a SSL-terminating reverse proxy." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="Force SSL Redirects" Target="RAILS_FORCE_SSL" Default="false" Mode="" Description="Leave 'false' for the default Unraid install over plain HTTP. Set to 'true' only if you want direct HTTP requests redirected to HTTPS." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
 
   <!-- Advanced: External Databases (Override AIO defaults) -->
   <Config Name="[External DB] DB Host Override" Target="DB_HOST" Default="" Mode="" Description="Optional: To use an external Postgres database instead of the internal one, enter its IP/Hostname here." Type="Variable" Display="advanced" Required="false" Mask="false"/>

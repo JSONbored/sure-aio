@@ -1,3 +1,23 @@
 #!/command/with-contenv sh
-PG_VERSION=$(ls /usr/lib/postgresql)
-exec s6-setuidgid postgres /usr/lib/postgresql/$PG_VERSION/bin/postgres -D /var/lib/postgresql/data -c listen_addresses='localhost'
+set -eu
+
+PG_VERSION="$(ls /usr/lib/postgresql | sort -V | tail -n1)"
+PGDATA="/var/lib/postgresql/data"
+PGBIN="/usr/lib/postgresql/${PG_VERSION}/bin"
+
+mkdir -p "$PGDATA" /run/postgresql
+chown -R postgres:postgres "$PGDATA" /run/postgresql
+chmod 700 "$PGDATA"
+
+if [ ! -s "$PGDATA/PG_VERSION" ]; then
+    echo "Initializing PostgreSQL database..."
+    s6-setuidgid postgres "$PGBIN/initdb" -D "$PGDATA" >/dev/null
+    s6-setuidgid postgres "$PGBIN/pg_ctl" -D "$PGDATA" -w start >/dev/null
+    s6-setuidgid postgres psql -d postgres -c "CREATE USER sure_user WITH SUPERUSER PASSWORD 'internal_sure_pass';" >/dev/null
+    s6-setuidgid postgres psql -d postgres -c "CREATE DATABASE sure_production OWNER sure_user;" >/dev/null
+    s6-setuidgid postgres "$PGBIN/pg_ctl" -D "$PGDATA" -m fast -w stop >/dev/null
+else
+    echo "PostgreSQL database already initialized."
+fi
+
+exec s6-setuidgid postgres "$PGBIN/postgres" -D "$PGDATA" -c listen_addresses='localhost'
