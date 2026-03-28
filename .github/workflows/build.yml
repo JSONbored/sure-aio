@@ -50,7 +50,7 @@ jobs:
           
       # Run Docker Scout strictly for CVE scanning
       - name: Docker Scout
-        uses: docker/scout-action@v1 # Pinned to v1 safely for Scout integration
+        uses: docker/scout-action@cc6bf8dd03587425ef920278b3e2726ba8d791e8 # Pinned to v1 safely for Scout integration
         with:
           command: cves
           image: ${{ steps.build.outputs.imageid }}
@@ -60,7 +60,7 @@ jobs:
           only-severities: critical,high
           
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: docker-scout-findings
