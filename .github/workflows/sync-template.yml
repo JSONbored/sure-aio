@@ -8,7 +8,9 @@ on:
     branches:
       - master
 
-# Hyper-secure least privilege: drop all default GITHUB_TOKEN permissions
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: read
 
@@ -23,7 +25,8 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
         with:
           repository: JSONbored/awesome-unraid
-          token: ${{ secrets.SYNC_TOKEN }}
+          # Uses the provided fallback or the native runner token if undefined
+          token: ${{ secrets.SYNC_TOKEN || secrets.GITHUB_TOKEN }}
           path: target-repo
           
       - name: Copy and Commit Template
@@ -31,11 +34,9 @@ jobs:
           cp sure-aio.xml target-repo/sure-aio.xml
           cd target-repo
           
-          # Use standard bot identity
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           git add sure-aio.xml
           
-          # Only commit and push if there are actual changes
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-sync sure-aio.xml from upstream" && git push)
