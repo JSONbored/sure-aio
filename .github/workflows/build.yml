@@ -20,7 +20,6 @@ jobs:
       packages: write
       attestations: write
       id-token: write
-      security-events: write
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       
@@ -47,18 +46,3 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/jsonbored/sure-aio:latest
           load: false
-          
-      - name: Scan Image with Anchore Grype
-        if: github.event_name != 'pull_request'
-        uses: anchore/scan-action@64a33b277ea7a1215a3c142735a1091341939ff5 # v4.1.2
-        with:
-          image: ${{ env.REGISTRY }}/jsonbored/sure-aio:latest
-          fail-build: false
-          output-format: sarif
-          
-      - name: Upload Scan Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
-        with:
-          name: security-scan-report
-          path: results.sarif
