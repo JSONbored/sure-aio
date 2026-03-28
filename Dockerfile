@@ -32,4 +32,7 @@ RUN find /etc/s6-overlay/s6-rc.d -type f -name "run" -exec chmod +x {} \; && \
 # 4. Expose the App Storage
 VOLUME ["/rails/storage", "/var/lib/postgresql/data", "/var/lib/redis"]
 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
 ENTRYPOINT ["/init"]

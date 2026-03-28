@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Container version="2">
-  <Name>Sure-AIO</Name>
+  <Name>sure-aio</Name>
   <Repository>ghcr.io/jsonbored/sure-aio:latest</Repository>
   <Registry>https://ghcr.io/jsonbored/sure-aio</Registry>
   <Network>bridge</Network>
@@ -10,6 +10,11 @@
   <Support>https://github.com/JSONbored/sure-aio/issues</Support>
   <Project>https://github.com/JSONbored/sure-aio</Project>
   <Overview>Sure (formerly Maybe Finance) is a self-hosted personal finance app.&#xD;
+[center][b][color=#ff8c00]JSONbored Verified AIO Template[/color][/b][/center]
+
+Standardized with immutable SHA-pinned pipelines and automated security scanning. This image is updated nightly.
+
+[b]Note:[/b] High-stability users can pin versions via the tag (e.g. v0.6.8-aio-v1) if preferred.
 &#xD;
 [b]All-In-One (AIO) Edition[/b]&#xD;
 The absolute easiest way to deploy Sure on Unraid. This is a "mega-container" that internally manages the Rails Server, Sidekiq Worker, PostgreSQL 15, and Redis. It requires NO external database setups and NO custom networks. Just click install.&#xD;
