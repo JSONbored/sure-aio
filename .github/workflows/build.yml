@@ -2,10 +2,15 @@ name: Build Sure-AIO
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
   schedule:
     - cron: '0 0 * * 0'
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -15,23 +20,48 @@ jobs:
       packages: write
       attestations: write
       id-token: write
+      security-events: write # Required for CodeQL/Scout uploading
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3
+        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
+      
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb
+        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+      
       - name: Login to GHCR
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Build and push
-        uses: docker/build-push-action@2cdde99a3119bf7410cdd40de1e52ee3e3b0b5fe
+        id: build
+        uses: docker/build-push-action@2cdde99a3119bf7410cdd40de1e52ee3e3b0b5fe # v6.0.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ghcr.io/jsonbored/sure-aio:latest
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          load: true # Allows local scanning before push
+          
+      # Run Docker Scout strictly for CVE scanning
+      - name: Docker Scout
+        uses: docker/scout-action@v1 # Pinned to v1 safely for Scout integration
+        with:
+          command: cves
+          image: ${{ steps.build.outputs.imageid }}
+          sarif-file: scout-report.sarif
+          ignore-base: true
+          ignore-unchanged: true
+          only-severities: critical,high
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docker-scout-findings
+          path: scout-report.sarif
