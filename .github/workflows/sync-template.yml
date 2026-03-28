@@ -32,8 +32,8 @@ jobs:
           cd target-repo
           
           # Use standard bot identity
-          git config user.name "JSONbored"
-          git config user.email "JSONbored@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           git add sure-aio.xml
           
