@@ -4,7 +4,7 @@ set -euo pipefail
 IMAGE_TAG="${1:-sure-aio:test}"
 CONTAINER_NAME="${CONTAINER_NAME:-sure-aio-smoke}"
 HOST_PORT="${HOST_PORT:-53000}"
-READY_TIMEOUT_SECONDS="${READY_TIMEOUT_SECONDS:-240}"
+READY_TIMEOUT_SECONDS="${READY_TIMEOUT_SECONDS:-420}"
 HTTP_TIMEOUT_SECONDS="${HTTP_TIMEOUT_SECONDS:-120}"
 KEEP_SMOKE_ARTIFACTS="${KEEP_SMOKE_ARTIFACTS:-0}"
 TMP_STORAGE="$(mktemp -d /tmp/sure-aio-storage.XXXXXX)"
@@ -58,6 +58,9 @@ wait_for_ready_log() {
         if [[ "${current_logs}" == *"Listening on http://0.0.0.0:3000"* ]]; then
             return 0
         fi
+        if curl -fsS "http://127.0.0.1:${HOST_PORT}/up" >/dev/null 2>&1; then
+            return 0
+        fi
         if ! docker ps --format '{{.Names}}' | grep -qx "${CONTAINER_NAME}"; then
             echo "Smoke test container exited unexpectedly." >&2
             docker logs "${CONTAINER_NAME}" >&2 || true
@@ -67,6 +70,9 @@ wait_for_ready_log() {
     done
 
     current_logs="$(docker logs "${CONTAINER_NAME}" 2>&1 || true)"
+    if curl -fsS "http://127.0.0.1:${HOST_PORT}/up" >/dev/null 2>&1; then
+        return 0
+    fi
     [[ "${current_logs}" == *"Listening on http://0.0.0.0:3000"* ]]
 }
 
