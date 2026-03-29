@@ -1,0 +1,14 @@
+[upstream]
+name = "Sure"
+type = "github-tag"
+repo = "we-promise/sure"
+image = "we-promise/sure"
+version_source = "dockerfile-arg"
+version_key = "UPSTREAM_VERSION"
+digest_source = "dockerfile-arg"
+digest_key = "UPSTREAM_IMAGE_DIGEST"
+strategy = "pr"
+stable_only = true
+
+[notifications]
+release_notes_url = "https://github.com/we-promise/sure/releases"

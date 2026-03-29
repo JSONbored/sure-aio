@@ -1,12 +1,12 @@
 <div align="center">
 
-# Sure AIO (All-in-One) for Unraid 💸
+# Sure AIO (All-in-One) for Unraid
 
 [![Docker Image Size](https://img.shields.io/docker/image-size/jsonbored/sure-aio/latest?color=blue&label=Image%20Size)](https://github.com/JSONbored/sure-aio/pkgs/container/sure-aio)
 [![GitHub License](https://img.shields.io/github/license/we-promise/sure?color=green)](https://github.com/we-promise/sure/blob/main/LICENSE)
 [![Unraid Community Applications](https://img.shields.io/badge/Unraid-CA%20Template-orange)](https://unraid.net/community/apps)
 
-An ultra-simplified, 100% self-contained deployment of [Sure](https://github.com/we-promise/sure) (the community fork of Maybe Finance) designed explicitly for Unraid homelabs.
+An ultra-simplified, self-contained deployment of [Sure](https://github.com/we-promise/sure) designed explicitly for Unraid homelabs.
 
 </div>
 
@@ -15,11 +15,11 @@ An ultra-simplified, 100% self-contained deployment of [Sure](https://github.com
 Instead of configuring 4 different templates, managing custom Docker networks, and bootstrapping external PostgreSQL/Redis databases, this image handles the entire stack internals for you. It's designed to provide a "Binhex-style" one-click installation experience for users who just want it to work.
 
 ## 📦 What's Inside the "Mega-Container"
-This image uses `s6-overlay v3` to gracefully orchestrate the entire self-hosted finance ecosystem invisibly:
-- 🌐 **The Web UI:** The core Ruby on Rails dashboard.
-- ⚙️ **The Task Runner:** Sidekiq Background Job Worker (for scraping/syncs).
-- 🗄️ **The Database:** **PostgreSQL** is auto-provisioned securely internally.
-- ⚡ **The Cache:** **Redis** is auto-provisioned for rapid background queuing.
+This image uses `s6-overlay v3` to orchestrate the stack internally:
+- The Web UI: the core Ruby on Rails dashboard.
+- The Task Runner: Sidekiq background job worker.
+- The Database: PostgreSQL auto-provisioned securely inside the container.
+- The Cache: Redis auto-provisioned for background queuing.
 
 ## 🚀 Installation (For Beginners)
 
@@ -43,7 +43,7 @@ If you just want to track your finances and don't care about databases, this is 
 
 While designed for absolute beginners, this container does not neuter the upstream application. It supports **100%** of the features the Sure team has built.
 
-If you click **"Show more settings..."** in the Unraid template, you can customize the system violently. 
+If you click **"Show more settings..."** in the Unraid template, you can customize the system deeply.
 
 Read the comprehensive [Power User Guide here](docs/power-user.md) for instructions on how to configure:
 - **[Local AI / Ollama Integration](docs/power-user.md#2-artificial-intelligence-categorization--chat):** Replace OpenAI with your own LLM for categorization.
@@ -61,7 +61,13 @@ Even though the databases roar silently inside the container, their data is mapp
 
 Just make sure `/mnt/user/appdata/sure-aio` is covered by your standard Unraid Community Applications Backup schedule.
 
-## ⚖️ License & Acknowledgements
+## Versioning & Upstream
+
+- `Sure-AIO` now pins a specific upstream Sure version instead of following the floating `stable` tag.
+- The repo monitors stable upstream Sure tags and opens a PR when a newer stable version is released.
+- Image publishing supports `latest`, `sha-<commit>`, and release tags when you cut versioned releases.
+
+## License & Acknowledgements
 - The underlying application code is maintained by the incredible [community at we-promise/sure](https://github.com/we-promise/sure). 
 - The Sure codebase is licensed under **AGPLv3**.
 - This specific Dockerfile deployment wrapper (the AIO architecture) is provided by JSONbored to ease deployment burdens on Unraid.
@@ -70,11 +76,3 @@ Just make sure `/mnt/user/appdata/sure-aio` is covered by your standard Unraid C
 
 [![Star History Chart](https://api.star-history.com/svg?repos=JSONbored/sure-aio&type=date&legend=top-left)](https://www.star-history.com/#JSONbored/sure-aio&type=date&legend=top-left)
 ---
-
-## 👨‍💻 About the Creator
-
-Built with 🖤 by **[JSONbored](https://github.com/JSONbored)**.
-
-- 🌐 **Portfolio & Services:** [aethereal.dev](https://aethereal.dev)
-- 📅 **Book a Call:** [cal.com/aethereal](https://cal.com/aethereal) 
-- ☕ **Support my work:** [Sponsor on GitHub](https://github.com/sponsors/JSONbored)

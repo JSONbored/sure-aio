@@ -1,8 +1,11 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/we-promise/sure:stable
+ARG UPSTREAM_VERSION=v0.6.8
+ARG UPSTREAM_IMAGE_DIGEST=sha256:b623e13e2a97ae9ddcaca554f8847409f449b14c3e08c5e5faf78daab60dd9ad
+FROM ghcr.io/we-promise/sure@${UPSTREAM_IMAGE_DIGEST}
 
 ARG S6_OVERLAY_VERSION=3.1.6.2
+ARG TARGETARCH
 
 USER root
 
@@ -13,8 +16,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql postgresql-client redis-server && \
     curl -L -o /tmp/s6-overlay-noarch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
     tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
-    curl -L -o /tmp/s6-overlay-x86_64.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz && \
+    case "${TARGETARCH}" in \
+      amd64) s6_arch="x86_64" ;; \
+      arm64) s6_arch="aarch64" ;; \
+      *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac && \
+    curl -L -o /tmp/s6-overlay-arch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${s6_arch}.tar.xz && \
+    tar -C / -Jxpf /tmp/s6-overlay-arch.tar.xz && \
     rm -rf /tmp/* /var/lib/apt/lists/*
 
 # 2. Setup persistent internal storage paths

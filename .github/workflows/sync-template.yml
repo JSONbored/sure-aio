@@ -7,6 +7,7 @@ on:
       - '.github/workflows/sync-template.yml'
     branches:
       - master
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -14,18 +15,22 @@ env:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   sync:
+    if: ${{ secrets.SYNC_TOKEN != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         
       - name: Checkout Target Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: JSONbored/awesome-unraid
-          # Uses the provided fallback or the native runner token if undefined
           token: ${{ secrets.SYNC_TOKEN }}
           path: target-repo
           
