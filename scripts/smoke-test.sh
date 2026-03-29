@@ -101,7 +101,7 @@ start_container
 wait_for_ready_log
 
 verify_http
-test -f "${TMP_PGDATA}/PG_VERSION"
+docker exec "${CONTAINER_NAME}" sh -lc 'test -f /var/lib/postgresql/data/PG_VERSION'
 
 log_file="$(mktemp /tmp/sure-aio-logs.XXXXXX)"
 docker logs "${CONTAINER_NAME}" >"${log_file}" 2>&1
