@@ -1,2 +1,8 @@
 #!/command/with-contenv sh
+set -eu
+
+mkdir -p /var/lib/redis
+chown -R redis:redis /var/lib/redis
+chmod 770 /var/lib/redis
+
 exec sudo -u redis redis-server /etc/redis/redis.conf --dir /var/lib/redis

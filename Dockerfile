@@ -33,6 +33,12 @@ RUN mkdir -p /var/lib/postgresql/data /var/lib/redis /rails/storage /run/postgre
 # 3. Apply S6 Root Filesystem logic
 COPY rootfs/ /
 
+# Remove retired service definitions that may still exist in older base layers.
+RUN rm -rf /etc/s6-overlay/s6-rc.d/init-db \
+    /etc/s6-overlay/s6-rc.d/user/contents.d/init-db \
+    /etc/s6-overlay/s6-rc.d/web/dependencies.d/init-db \
+    /etc/s6-overlay/s6-rc.d/worker/dependencies.d/init-db
+
 # Ensure scripts are executable
 RUN find /etc/s6-overlay/s6-rc.d -type f \( -name "run" -o -name "up" \) -exec chmod +x {} \; && \
     find /etc/cont-init.d -type f -exec chmod +x {} \; && \

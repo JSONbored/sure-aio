@@ -12,6 +12,9 @@ cd /rails
 
 export DB_HOST DB_PORT POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB REDIS_URL
 
+echo "Running Sure database preparations (create/migrate/seed)..."
+bundle exec rails db:prepare
+
 # Clean stale pid
 rm -f tmp/pids/server.pid
 

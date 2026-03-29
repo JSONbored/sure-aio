@@ -12,5 +12,10 @@ cd /rails
 
 export DB_HOST DB_PORT POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB REDIS_URL
 
+echo "Waiting for Sure web service to finish bootstrapping..."
+until curl -fsS http://127.0.0.1:3000/up >/dev/null 2>&1; do
+  sleep 2
+done
+
 # Launch Background Worker
 exec bundle exec sidekiq
