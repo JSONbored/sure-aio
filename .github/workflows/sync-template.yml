@@ -21,13 +21,25 @@ concurrency:
 
 jobs:
   sync:
-    if: ${{ secrets.SYNC_TOKEN != '' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check sync configuration
+        env:
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+        run: |
+          if [[ -z "${SYNC_TOKEN}" ]]; then
+            echo "SYNC_ENABLED=false" >> "${GITHUB_ENV}"
+            echo "SYNC_TOKEN is not configured; skipping sync."
+          else
+            echo "SYNC_ENABLED=true" >> "${GITHUB_ENV}"
+          fi
+
       - name: Checkout Source Repository
+        if: ${{ env.SYNC_ENABLED == 'true' }}
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         
       - name: Checkout Target Repository
+        if: ${{ env.SYNC_ENABLED == 'true' }}
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: JSONbored/awesome-unraid
@@ -35,6 +47,7 @@ jobs:
           path: target-repo
           
       - name: Copy and Commit Template
+        if: ${{ env.SYNC_ENABLED == 'true' }}
         run: |
           cp sure-aio.xml target-repo/sure-aio.xml
           cd target-repo
