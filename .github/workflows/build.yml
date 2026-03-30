@@ -1,4 +1,5 @@
-name: Build Sure-AIO
+name: CI / Sure-AIO
+
 on:
   push:
     branches: [ main ]
@@ -7,7 +8,9 @@ on:
       - 'rootfs/**'
       - 'scripts/**'
       - 'upstream.toml'
-      - '.github/workflows/build.yml'
+      - 'sure-aio.xml'
+      - 'renovate.json'
+      - '.github/workflows/**'
   pull_request:
     branches: [ main ]
     paths:
@@ -15,7 +18,9 @@ on:
       - 'rootfs/**'
       - 'scripts/**'
       - 'upstream.toml'
-      - '.github/workflows/build.yml'
+      - 'sure-aio.xml'
+      - 'renovate.json'
+      - '.github/workflows/**'
   workflow_dispatch:
     inputs:
       run_smoke_test:
@@ -39,7 +44,82 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      build_related: ${{ steps.filter.outputs.build_related }}
+      xml_related: ${{ steps.filter.outputs.xml_related }}
+      renovate_related: ${{ steps.filter.outputs.renovate_related }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Classify changed files
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before || '' }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          GITHUB_SHA_VALUE: ${{ github.sha }}
+        run: |
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "build_related=true" >> "${GITHUB_OUTPUT}"
+            echo "xml_related=true" >> "${GITHUB_OUTPUT}"
+            echo "renovate_related=true" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            base="${BASE_SHA}"
+            head="${HEAD_SHA}"
+          else
+            base="${BEFORE_SHA}"
+            head="${GITHUB_SHA_VALUE}"
+          fi
+
+          if [[ -z "${base}" || "${base}" =~ ^0+$ ]]; then
+            changed_files="$(git show --pretty='' --name-only "${head}")"
+          else
+            changed_files="$(git diff --name-only "${base}" "${head}")"
+          fi
+
+          printf 'Changed files:\n%s\n' "${changed_files}"
+
+          build_related=false
+          xml_related=false
+          renovate_related=false
+
+          while IFS= read -r path; do
+            [[ -z "${path}" ]] && continue
+            case "${path}" in
+              Dockerfile|upstream.toml|rootfs/*|scripts/*)
+                build_related=true
+                ;;
+              sure-aio.xml)
+                xml_related=true
+                ;;
+              renovate.json)
+                renovate_related=true
+                ;;
+              .github/workflows/*)
+                build_related=true
+                renovate_related=true
+                ;;
+            esac
+          done <<< "${changed_files}"
+
+          echo "build_related=${build_related}" >> "${GITHUB_OUTPUT}"
+          echo "xml_related=${xml_related}" >> "${GITHUB_OUTPUT}"
+          echo "renovate_related=${renovate_related}" >> "${GITHUB_OUTPUT}"
+
   validate-template:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.build_related == 'true' || needs.detect-changes.outputs.xml_related == 'true' || needs.detect-changes.outputs.renovate_related == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,6 +128,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Validate shell and python scripts
+        if: ${{ needs.detect-changes.outputs.build_related == 'true' }}
         run: |
           bash -n scripts/smoke-test.sh
           PYTHONPYCACHEPREFIX=/tmp/sure-aio-pyc python3 -m py_compile scripts/check-upstream.py
@@ -56,6 +137,7 @@ jobs:
           find rootfs -type f -path '*/up' -print0 | xargs -0 -n1 sh -n
 
       - name: Validate XML
+        if: ${{ needs.detect-changes.outputs.build_related == 'true' || needs.detect-changes.outputs.xml_related == 'true' }}
         run: |
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
@@ -63,9 +145,63 @@ jobs:
           print('sure-aio.xml parsed successfully')
           PY
 
+      - name: Validate Renovate config
+        if: ${{ needs.detect-changes.outputs.renovate_related == 'true' }}
+        run: npx --yes --package renovate renovate-config-validator renovate.json
+
+  pinned-actions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Enforce pinned action SHAs
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import re
+          import sys
+
+          workflow_dir = pathlib.Path(".github/workflows")
+          pattern = re.compile(r"^\s*uses:\s*([^@\s]+)@([^\s#]+)")
+          sha_pattern = re.compile(r"^[0-9a-f]{40}$")
+          failures = []
+
+          for path in sorted(workflow_dir.glob("*.yml")):
+              for lineno, line in enumerate(path.read_text().splitlines(), start=1):
+                  match = pattern.match(line)
+                  if not match:
+                      continue
+                  target, ref = match.groups()
+                  if target.startswith("./"):
+                      continue
+                  if not sha_pattern.fullmatch(ref):
+                      failures.append(f"{path}:{lineno}: action is not pinned to a full SHA -> {line.strip()}")
+
+          if failures:
+              print("\n".join(failures), file=sys.stderr)
+              sys.exit(1)
+          print("All workflow actions are pinned to full commit SHAs.")
+          PY
+
+  dependency-review:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Dependency review
+        uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # v4.8.2
+
   smoke-test:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_smoke_test == true }}
-    needs: validate-template
+    if: ${{ needs.detect-changes.outputs.build_related == 'true' && (github.event_name != 'workflow_dispatch' || inputs.run_smoke_test == true) }}
+    needs:
+      - detect-changes
+      - validate-template
+      - pinned-actions
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -104,9 +240,11 @@ jobs:
           docker logs sure-aio-smoke || true
 
   publish:
-    if: ${{ github.event_name != 'pull_request' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.publish_image == true)) }}
+    if: ${{ needs.detect-changes.outputs.build_related == 'true' && github.event_name != 'pull_request' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.publish_image == true)) }}
     needs:
+      - detect-changes
       - validate-template
+      - pinned-actions
       - smoke-test
     runs-on: ubuntu-latest
     permissions:
@@ -172,3 +310,49 @@ jobs:
             org.opencontainers.image.version=${{ steps.prep.outputs.upstream_version || '' }}
             io.jsonbored.upstream.name=Sure
           load: false
+
+  sync-awesome-unraid:
+    if: ${{ needs.detect-changes.outputs.xml_related == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs:
+      - detect-changes
+      - validate-template
+      - pinned-actions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check sync configuration
+        env:
+          SYNC_TOKEN: ${{ secrets.SYNC_TOKEN }}
+        run: |
+          if [[ -z "${SYNC_TOKEN}" ]]; then
+            echo "SYNC_ENABLED=false" >> "${GITHUB_ENV}"
+            echo "SYNC_TOKEN is not configured; skipping sync."
+          else
+            echo "SYNC_ENABLED=true" >> "${GITHUB_ENV}"
+          fi
+
+      - name: Checkout Source Repository
+        if: ${{ env.SYNC_ENABLED == 'true' }}
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        
+      - name: Checkout Target Repository
+        if: ${{ env.SYNC_ENABLED == 'true' }}
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          repository: JSONbored/awesome-unraid
+          token: ${{ secrets.SYNC_TOKEN }}
+          path: target-repo
+          
+      - name: Copy and Commit Template
+        if: ${{ env.SYNC_ENABLED == 'true' }}
+        run: |
+          cp sure-aio.xml target-repo/sure-aio.xml
+          cd target-repo
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add sure-aio.xml
+          
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-sync sure-aio.xml from upstream" && git push)
