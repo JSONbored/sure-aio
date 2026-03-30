@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:4a43a54dd1fedceb30ba47e76cfcf2b47304f4161c0caeac2db1c61804ea3c91
 
 ARG UPSTREAM_VERSION=v0.6.8
 ARG UPSTREAM_IMAGE_DIGEST=sha256:b623e13e2a97ae9ddcaca554f8847409f449b14c3e08c5e5faf78daab60dd9ad
