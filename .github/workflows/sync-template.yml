@@ -6,7 +6,7 @@ on:
       - 'sure-aio.xml'
       - '.github/workflows/sync-template.yml'
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 env:

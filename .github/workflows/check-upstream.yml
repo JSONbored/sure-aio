@@ -83,14 +83,14 @@ jobs:
           This PR was opened automatically by the upstream monitor workflow.
           EOF
 
-          existing_pr="$(gh pr list --head "codex/upstream-${{ steps.upstream.outputs.latest_version }}" --base master --json number --jq '.[0].number')"
+          existing_pr="$(gh pr list --head "codex/upstream-${{ steps.upstream.outputs.latest_version }}" --base main --json number --jq '.[0].number')"
           if [[ -n "${existing_pr}" ]]; then
             gh pr edit "${existing_pr}" \
               --title "chore: bump upstream Sure to ${{ steps.upstream.outputs.latest_version }}" \
               --body-file "${body_file}"
           else
             gh pr create \
-              --base master \
+              --base main \
               --head "codex/upstream-${{ steps.upstream.outputs.latest_version }}" \
               --title "chore: bump upstream Sure to ${{ steps.upstream.outputs.latest_version }}" \
               --body-file "${body_file}"
