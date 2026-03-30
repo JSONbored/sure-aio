@@ -368,11 +368,18 @@ jobs:
         if: ${{ env.SYNC_ENABLED == 'true' }}
         run: |
           cp sure-aio.xml target-repo/sure-aio.xml
-          cd target-repo
-          
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          git add sure-aio.xml
-          
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-sync sure-aio.xml from upstream" && git push)
+
+      - name: Create sync pull request
+        if: ${{ env.SYNC_ENABLED == 'true' }}
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        with:
+          token: ${{ secrets.SYNC_TOKEN }}
+          path: target-repo
+          add-paths: sure-aio.xml
+          commit-message: "chore: auto-sync sure-aio.xml from upstream"
+          branch: "sync-awesome-unraid/sure-aio"
+          delete-branch: true
+          base: main
+          title: "chore: sync sure-aio template"
+          body: |
+            Automated sync from `JSONbored/sure-aio`.
