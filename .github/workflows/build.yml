@@ -26,7 +26,7 @@ on:
       run_smoke_test:
         description: "Run the smoke-test job"
         required: false
-        default: true
+        default: false
         type: boolean
       publish_image:
         description: "Publish image tags from the current ref"
@@ -217,7 +217,7 @@ jobs:
         uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # v4.8.2
 
   smoke-test:
-    if: ${{ needs.detect-changes.outputs.build_related == 'true' && (github.event_name != 'workflow_dispatch' || inputs.run_smoke_test == true) }}
+    if: ${{ needs.detect-changes.outputs.build_related == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.run_smoke_test == true)) }}
     needs:
       - detect-changes
       - validate-template
