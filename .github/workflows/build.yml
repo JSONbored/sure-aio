@@ -82,10 +82,30 @@ jobs:
             head="${GITHUB_SHA_VALUE}"
           fi
 
+          if ! git rev-parse --git-dir >/dev/null 2>&1; then
+            echo "Git metadata is unavailable; treating the workflow as fully impacted."
+            echo "build_related=true" >> "${GITHUB_OUTPUT}"
+            echo "xml_related=true" >> "${GITHUB_OUTPUT}"
+            echo "renovate_related=true" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
           if [[ -z "${base}" || "${base}" =~ ^0+$ ]]; then
-            changed_files="$(git show --pretty='' --name-only "${head}")"
+            if ! changed_files="$(git show --pretty='' --name-only "${head}" 2>/dev/null)"; then
+              echo "Unable to inspect commit range; treating the workflow as fully impacted."
+              echo "build_related=true" >> "${GITHUB_OUTPUT}"
+              echo "xml_related=true" >> "${GITHUB_OUTPUT}"
+              echo "renovate_related=true" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
           else
-            changed_files="$(git diff --name-only "${base}" "${head}")"
+            if ! changed_files="$(git diff --name-only "${base}" "${head}" 2>/dev/null)"; then
+              echo "Unable to diff commit range; treating the workflow as fully impacted."
+              echo "build_related=true" >> "${GITHUB_OUTPUT}"
+              echo "xml_related=true" >> "${GITHUB_OUTPUT}"
+              echo "renovate_related=true" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
           fi
 
           printf 'Changed files:\n%s\n' "${changed_files}"
