@@ -65,7 +65,9 @@ Just make sure `/mnt/user/appdata/sure-aio` is covered by your standard Unraid C
 
 - `Sure-AIO` now pins a specific upstream Sure version instead of following the floating `stable` tag.
 - The repo monitors stable upstream Sure tags and opens a PR when a newer stable version is released.
-- Image publishing supports `latest`, `sha-<commit>`, and release tags when you cut versioned releases.
+- Every `main` package publish now ships the exact upstream version tag, an explicit AIO packaging line tag, `latest`, and `sha-<commit>`.
+- Formal wrapper releases follow the upstream version plus an AIO revision, such as `v0.6.8-aio.1`.
+- See the release workflow details in [docs/releases.md](docs/releases.md).
 
 ## License & Acknowledgements
 - The underlying application code is maintained by the incredible [community at we-promise/sure](https://github.com/we-promise/sure). 

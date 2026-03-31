@@ -289,26 +289,19 @@ jobs:
       - name: Compute image tags
         id: prep
         run: |
-          image="${REGISTRY}/${IMAGE_NAME}"
+          image="$(printf '%s' "${REGISTRY}/${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
           sha_tag="${image}:sha-${GITHUB_SHA}"
-          aio_version="aio-v1"
-          upstream_version="$(sed -n 's/^ARG UPSTREAM_VERSION=//p' Dockerfile | head -n1)"
-          upstream_no_v="${upstream_version#v}"
+          raw_version="$(sed -n 's/^ARG UPSTREAM_VERSION=//p' Dockerfile | head -n1)"
+          upstream_version="${raw_version%%@*}"
+          aio_track="aio-v1"
 
           {
             echo "upstream_version=${upstream_version}"
             echo "tags<<EOF"
             echo "${image}:latest"
             if [[ -n "${upstream_version}" ]]; then
-              IFS='.' read -r major minor patch <<< "${upstream_no_v}"
               echo "${image}:${upstream_version}"
-              echo "${image}:${upstream_version}-${aio_version}"
-              if [[ -n "${major:-}" ]]; then
-                echo "${image}:v${major}"
-              fi
-              if [[ -n "${major:-}" && -n "${minor:-}" ]]; then
-                echo "${image}:v${major}.${minor}"
-              fi
+              echo "${image}:${upstream_version}-${aio_track}"
             fi
             echo "${sha_tag}"
             echo "EOF"
