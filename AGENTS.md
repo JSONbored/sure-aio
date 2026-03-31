@@ -1,35 +1,40 @@
-# sure-aio Agent Notes
+# AGENTS.md
 
-`sure-aio` packages Sure as a single Unraid-friendly container with internal PostgreSQL and Redis.
+This repository is part of a broader portfolio of Unraid-first AIO projects.
 
-## Runtime Shape
+## Repository intent
 
-- Web app: Sure Rails app
-- Background jobs: Sidekiq worker
-- Database: internal PostgreSQL
-- Cache/queue: internal Redis
-- Supervision: `s6-overlay`
+- This repo packages an opinionated, beginner-friendly Unraid AIO deployment.
+- Default behavior should optimize for a reliable first boot on Unraid.
+- Advanced users should retain escape hatches where supported.
 
-## Important Behavior
+## Engineering expectations
 
-- This repo is intentionally beginner-first: one container, one appdata path, no external database required by default.
-- Redis runtime permissions matter because Unraid bind mounts can break ownership assumptions.
-- Database preparation was moved away from a fragile standalone oneshot path and into the runtime flow that actually boots the app.
-- Worker startup should wait for web readiness rather than racing app boot.
+- Prefer consistency with `unraid-aio-template` over one-off repo behavior.
+- Keep CI and release behavior aligned with the rest of the AIO fleet.
+- Respect protected branches and use PR-based automation for external sync flows.
+- Favor operational clarity over cleverness.
 
-## CI And Publish Policy
+## Release model
 
-- Validation and smoke tests should run on PRs and branch pushes.
-- Publish should happen only from the default branch.
-- GHCR image naming must stay lowercase.
+- Container packages publish automatically from `main`.
+- Formal changelog updates and GitHub Releases are release-driven.
+- Releases use `upstream version + aio revision`, for example `v0.6.8-aio.1`.
+- Keep changelog-friendly Conventional Commit titles and PR titles.
 
-## What To Preserve
+## Unraid expectations
 
-- Keep the Unraid XML contract stable unless there is a strong reason to change user-facing setup.
-- Public docs should stay product-facing and beginner-friendly.
-- Smoke tests should cover first boot, restart, and persistence.
+- Unraid-facing XML/icon assets should stay aligned with `awesome-unraid`.
+- User-facing metadata should remain accurate:
+  - `Project`
+  - `Support`
+  - `TemplateURL`
+  - `Icon`
+  - `Overview`
+  - `Category`
 
-## Known Good Pattern
+## Documentation expectations
 
-- Local smoke testing should verify the running service, not brittle host-side file assumptions.
-- If CI flaps, prefer making readiness checks more robust instead of weakening coverage.
+- Be explicit about operational tradeoffs.
+- Do not imply the AIO model removes inherent complexity from the upstream software.
+- Keep beginner defaults simple, but document power-user override paths where they exist.
