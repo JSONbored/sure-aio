@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## v0.6.8-aio.1 - 2026-03-31
+## v0.6.8-aio.2 - 2026-03-31
 ### Dependency Updates
 - Update docker/setup-qemu-action action to v4 (#13)
 - Update docker/setup-buildx-action action to v4 (#12)
