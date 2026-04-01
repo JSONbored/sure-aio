@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## v0.6.8-aio.1 - 2026-03-31
+## v0.6.9-aio.1 - 2026-04-01
 ### Dependency Updates
 - Update docker/setup-qemu-action action to v4 (#13)
 - Update docker/setup-buildx-action action to v4 (#12)
@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Update non-major infrastructure updates (#9)
 - Update ghcr.io/we-promise/sure docker digest to 12f32c0 (#7)
 - Pin docker/dockerfile docker tag to 4a43a54 (#6)
+- Update ghcr.io/we-promise/sure docker digest to 3d899b3 (#21)
 
 
 ### Documentation
@@ -24,6 +25,7 @@ All notable changes to this project will be documented in this file.
 - Exhaustive XML mapping of all upstream env variables including Active Storage, PostHog, encryption salts, and raw external AI configs
 - Finalize enterprise standards for sure-aio (healthchecks, nightly scans, and branding)
 - Standardize package tags and add release automation (#19)
+- Align sure-aio with upstream v0.6.9 self-hosting surface (#23)
 
 
 ### Fixes
@@ -40,6 +42,7 @@ All notable changes to this project will be documented in this file.
 - Fix missing token resolution and globalize node24 fallback in sync action
 - Enforce strict SYNC_TOKEN and remove unsecured GitHub token fallback
 - Fix default startup and add smoke coverage
+- Make releases manual and gate heavy workflows
 
 
 ### Maintenance
