@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+TEMPLATE_PATH = ROOT / "sure-aio.xml"
+
+# This is the audited upstream self-hosting/runtime surface we intentionally expose
+# in the Unraid template. Exclusions like PORT and DISABLE_SSL are deliberate.
+REQUIRED_TARGETS = {
+    "ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY",
+    "ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT",
+    "ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY",
+    "ACTIVE_STORAGE_SERVICE",
+    "AI_DEBUG_MODE",
+    "APP_DOMAIN",
+    "APP_URL",
+    "ASSISTANT_TYPE",
+    "AUTH_JIT_MODE",
+    "AUTH_LOCAL_ADMIN_OVERRIDE_ENABLED",
+    "AUTH_LOCAL_LOGIN_ENABLED",
+    "ALLOWED_OIDC_DOMAINS",
+    "BRAND_FETCH_CLIENT_ID",
+    "BRAND_FETCH_HIGH_RES_LOGOS",
+    "BRAND_NAME",
+    "CLOUDFLARE_ACCESS_KEY_ID",
+    "CLOUDFLARE_ACCOUNT_ID",
+    "CLOUDFLARE_BUCKET",
+    "CLOUDFLARE_SECRET_ACCESS_KEY",
+    "DB_HOST",
+    "DB_PORT",
+    "DEFAULT_UI_LAYOUT",
+    "EMAIL_SENDER",
+    "EMBEDDING_ACCESS_TOKEN",
+    "EMBEDDING_DIMENSIONS",
+    "EMBEDDING_MODEL",
+    "EMBEDDING_URI_BASE",
+    "EXCHANGE_RATE_PROVIDER",
+    "EXTERNAL_ASSISTANT_AGENT_ID",
+    "EXTERNAL_ASSISTANT_ALLOWED_EMAILS",
+    "EXTERNAL_ASSISTANT_SESSION_KEY",
+    "EXTERNAL_ASSISTANT_TOKEN",
+    "EXTERNAL_ASSISTANT_URL",
+    "GENERIC_S3_ACCESS_KEY_ID",
+    "GENERIC_S3_BUCKET",
+    "GENERIC_S3_ENDPOINT",
+    "GENERIC_S3_FORCE_PATH_STYLE",
+    "GENERIC_S3_REGION",
+    "GENERIC_S3_SECRET_ACCESS_KEY",
+    "GITHUB_BUTTON_ICON",
+    "GITHUB_BUTTON_LABEL",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+    "GOOGLE_BUTTON_ICON",
+    "GOOGLE_BUTTON_LABEL",
+    "GOOGLE_OAUTH_CLIENT_ID",
+    "GOOGLE_OAUTH_CLIENT_SECRET",
+    "LANGFUSE_HOST",
+    "LANGFUSE_PUBLIC_KEY",
+    "LANGFUSE_REGION",
+    "LANGFUSE_SECRET_KEY",
+    "LEGAL_PRIVACY_URL",
+    "LEGAL_TERMS_URL",
+    "LOGTAIL_API_KEY",
+    "LOGTAIL_INGESTING_HOST",
+    "MCP_API_TOKEN",
+    "MCP_USER_EMAIL",
+    "OIDC_BUTTON_ICON",
+    "OIDC_BUTTON_LABEL",
+    "OIDC_CLIENT_ID",
+    "OIDC_CLIENT_SECRET",
+    "OIDC_ISSUER",
+    "OIDC_REDIRECT_URI",
+    "ONBOARDING_STATE",
+    "OPENAI_ACCESS_TOKEN",
+    "OPENAI_MODEL",
+    "OPENAI_SUPPORTS_PDF_PROCESSING",
+    "OPENAI_URI_BASE",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_USER",
+    "POSTHOG_HOST",
+    "POSTHOG_KEY",
+    "PRODUCT_NAME",
+    "QDRANT_API_KEY",
+    "QDRANT_URL",
+    "RAILS_ASSUME_SSL",
+    "RAILS_FORCE_SSL",
+    "RAILS_LOG_LEVEL",
+    "REDIS_PASSWORD",
+    "REDIS_SENTINEL_HOSTS",
+    "REDIS_SENTINEL_MASTER",
+    "REDIS_SENTINEL_USERNAME",
+    "REDIS_URL",
+    "S3_ACCESS_KEY_ID",
+    "S3_BUCKET",
+    "S3_REGION",
+    "S3_SECRET_ACCESS_KEY",
+    "SECRET_KEY_BASE",
+    "SECURITIES_PROVIDER",
+    "SMTP_ADDRESS",
+    "SMTP_PASSWORD",
+    "SMTP_PORT",
+    "SMTP_TLS_ENABLED",
+    "SMTP_USERNAME",
+    "SSL_CA_FILE",
+    "SSL_DEBUG",
+    "SSL_VERIFY",
+    "TWELVE_DATA_API_KEY",
+    "VECTOR_STORE_PROVIDER",
+}
+
+
+def main() -> int:
+    tree = ET.parse(TEMPLATE_PATH)
+    root = tree.getroot()
+
+    targets = {
+        elem.attrib["Target"]
+        for elem in root.findall(".//Config")
+        if "Target" in elem.attrib and elem.attrib["Target"]
+    }
+
+    missing = sorted(REQUIRED_TARGETS - targets)
+    if missing:
+        print("sure-aio.xml is missing required upstream/runtime targets:", file=sys.stderr)
+        for target in missing:
+            print(f"  - {target}", file=sys.stderr)
+        return 1
+
+    print(f"sure-aio.xml parsed successfully and includes {len(REQUIRED_TARGETS)} required targets")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

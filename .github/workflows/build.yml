@@ -158,6 +158,7 @@ jobs:
         run: |
           bash -n scripts/smoke-test.sh
           PYTHONPYCACHEPREFIX=/tmp/sure-aio-pyc python3 -m py_compile scripts/check-upstream.py
+          PYTHONPYCACHEPREFIX=/tmp/sure-aio-pyc python3 -m py_compile scripts/validate-template.py
           find rootfs -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
           find rootfs -type f -path '*/run' -print0 | xargs -0 -n1 bash -n
           find rootfs -type f -path '*/up' -print0 | xargs -0 -n1 sh -n
@@ -165,11 +166,7 @@ jobs:
       - name: Validate XML
         if: ${{ needs.detect-changes.outputs.build_related == 'true' || needs.detect-changes.outputs.xml_related == 'true' }}
         run: |
-          python3 - <<'PY'
-          import xml.etree.ElementTree as ET
-          ET.parse('sure-aio.xml')
-          print('sure-aio.xml parsed successfully')
-          PY
+          python3 scripts/validate-template.py
 
       - name: Validate Renovate config
         if: ${{ needs.detect-changes.outputs.renovate_related == 'true' }}
