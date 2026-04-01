@@ -9,24 +9,26 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/JSONbored/sure-aio/issues</Support>
   <Project>https://github.com/JSONbored/sure-aio</Project>
-  <Overview>Sure (formerly Maybe Finance) is a self-hosted personal finance app.&#xD;
-[center][b][color=#ff8c00]JSONbored Verified AIO Template[/color][/b][/center]
-
-Standardized with immutable SHA-pinned pipelines and automated security scanning. This image is updated nightly.
-
-[b]Note:[/b] High-stability users can pin versions via the tag (e.g. v0.6.8-aio-v1) if preferred.
+  <Overview>Sure (formerly Maybe Finance) is a self-hosted personal finance app for budgeting, net worth tracking, and account aggregation.&#xD;
 &#xD;
-[b]All-In-One (AIO) Edition[/b]&#xD;
-The absolute easiest way to deploy Sure on Unraid. This is a "mega-container" that internally manages the Rails Server, Sidekiq Worker, PostgreSQL 15, and Redis. It requires NO external database setups and NO custom networks. Just click install.&#xD;
+[b]All-In-One Unraid Edition[/b]&#xD;
+sure-aio packages the web app, worker, PostgreSQL, and Redis into one Unraid template with persistent appdata paths and no external database setup required.&#xD;
 &#xD;
-[b]Initial Setup:[/b]&#xD;
-1. Generate a SECRET_KEY_BASE (Run `openssl rand -hex 64` in your Unraid terminal) and paste it below.&#xD;
-2. Click "Apply".&#xD;
-3. Wait for the WebUI. Databases are auto-provisioned securely inside the container.</Overview>
+[b]First install[/b]&#xD;
+1. Generate a [code]SECRET_KEY_BASE[/code] with [code]openssl rand -hex 64[/code].&#xD;
+2. Paste it below and click Apply.&#xD;
+3. Wait for first boot to finish provisioning the internal services.&#xD;
+&#xD;
+[b]Advanced note[/b]&#xD;
+External database, Redis, proxy, SMTP, AI, and storage overrides are available in Advanced View.</Overview>
   <Category>Tools: Finance: Productivity:</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/icons/sure.png</Icon>
+  <ExtraSearchTerms>finance budgeting personal-finance net-worth money maybe-finance sure plaid bank accounts</ExtraSearchTerms>
+  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/01-dashboard.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/02-account-activity.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/03-budgets.png</Screenshot>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
