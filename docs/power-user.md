@@ -1,6 +1,6 @@
 # Power User Guide: Sure-AIO Configs
 
-Because `Sure-AIO` is a 1:1 wrapper around the actual `ghcr.io/we-promise/sure` image, every single upstream feature is supported. This guide comprehensively explains how to use the "Advanced" fields in the Unraid Template to highly customize your instance.
+`Sure-AIO` is a Unraid-first wrapper around upstream `ghcr.io/we-promise/sure`. The wrapper is expected to track upstream self-hosting features closely, but it still adds its own operational opinionation around internal Postgres, Redis, and Unraid-facing defaults. This guide explains how to use the Advanced template fields without pretending the wrapper is magic.
 
 ---
 
@@ -34,13 +34,24 @@ To handle chat entirely inside an external AI agent rather than the basic Sure U
 2. **Assistant Type:** Set to `external` (forces all users to use the remote agent).
 3. **Assistant URL:** e.g., `http://192.168.1.X:18789/v1/chat/completions` (OpenClaw completions endpoint).
 4. **Assistant Token:** Your gateway token.
-5. **MCP User Email:** The email of the Sure user the agent will act as.
-6. **MCP API Token:** Create a secure password. The external agent uses this to securely callback into Sure to read transaction data.
+5. **Agent ID:** Optional if your provider exposes multiple agents.
+6. **Session Key:** Optional stable conversation key for providers that keep remote session state.
+7. **Allowed Emails:** Optional comma-separated allowlist to restrict who can use the external assistant.
+8. **MCP User Email:** The email of the Sure user the agent will act as.
+9. **MCP API Token:** Create a secure password. The external agent uses this to securely callback into Sure to read transaction data.
 
-### Option C: Local Vector Database (Document RAG)
-Sure allows chatting with uploaded financial PDFs.
+### Option C: Local Vector Search (pgvector / Qdrant)
+Sure allows chatting with uploaded financial PDFs and other indexed documents.
 1. Find the **[AI] Vector Store Provider** field.
-2. The default for OpenAI is `openai`. If you use local LLMs, change this to `pgvector` or `qdrant`. *(Note: Using `pgvector` requires you to override the database to a custom external Postgres container compiled with the pgvector extension).*
+2. Set it to `pgvector` to keep vectors inside the bundled internal PostgreSQL service, or `qdrant` if you want an external Qdrant instance.
+3. For `pgvector`, set:
+   - `EMBEDDING_MODEL` such as `nomic-embed-text`
+   - `EMBEDDING_DIMENSIONS` to match the model output, usually `1024`
+   - `EMBEDDING_URI_BASE` if your embedding endpoint differs from `OPENAI_URI_BASE`
+   - `EMBEDDING_ACCESS_TOKEN` if your embedding endpoint needs a different token than `OPENAI_ACCESS_TOKEN`
+4. For `qdrant`, also provide `QDRANT_URL` and `QDRANT_API_KEY` if needed.
+5. If you use Ollama for embeddings, make sure the embedding model is actually pulled and available. Exposing the vars is not enough if the model is missing.
+6. If you want verbose AI troubleshooting in the container logs, set **[AI] Debug Logging** to `true`.
 
 ---
 
@@ -66,8 +77,8 @@ Avoid filling your Unraid cache drive by piping PDFs/receipts straight to object
 ## 5. Free vs Paid External Data Providers
 Sure relies on upstream providers for currency exchange rates and stock logos.
 
-*   **Free (Default):** The template invisibly hardcodes `yahoo_finance` so you don't have to register for API keys.
-*   **Paid API Keys (Optional):** If you prefer `twelve_data` and have an API key, drop it in the **[API] Twelve Data Key** field to unseat the Yahoo default.
+*   **Free (Default):** The template defaults both exchange-rate and securities data to `yahoo_finance` so a first boot works without extra accounts.
+*   **Paid API Keys (Optional):** If you prefer Twelve Data, add your API key and change **[API] Exchange Rate Provider** and **[API] Securities Provider** to `twelve_data`.
 *   **Logos:** Provide a **[API] Brandfetch Client ID** to automatically scrape high-res logos for your bank names and merchants.
 
 ---
@@ -78,6 +89,12 @@ Sure relies on upstream providers for currency exchange rates and stock logos.
 To enable Single Sign-On (SSO):
 1. Find the **[Auth]** block.
 2. Provide your `OIDC Client ID`, `Client Secret`, `Issuer URL`, and the `Redirect URI` you configured in your Identity Provider.
+3. If you want tighter onboarding control, set:
+   - `AUTH_LOCAL_LOGIN_ENABLED=false` to make the instance SSO-first
+   - `AUTH_LOCAL_ADMIN_OVERRIDE_ENABLED=true` if you still want a super-admin emergency login path
+   - `AUTH_JIT_MODE=link_only` if SSO should only link to existing users rather than auto-create them
+   - `ALLOWED_OIDC_DOMAINS` to restrict which email domains may auto-create accounts through JIT SSO
+4. Optional button labels/icons are exposed too, along with dedicated Google and GitHub OAuth client fields if you want those providers separately.
 
 ### SMTP Mail Relay (For Password Resets / Reports)
 1. Find the **[Email]** block.
@@ -108,3 +125,25 @@ If you later place Sure behind Nginx Proxy Manager, Traefik, Caddy, Cloudflare T
 1. Set `RAILS_ASSUME_SSL=true`
 2. Set `RAILS_FORCE_SSL=true` only if you want plain HTTP requests redirected to HTTPS
 3. Set `APP_DOMAIN` to the hostname you actually use for email links and callbacks
+
+---
+
+## 9. External Object Storage Variants
+
+The template now exposes the real upstream storage split instead of pretending all S3-style providers use the same env names.
+
+1. For Amazon S3, use the **[Storage:AWS]** fields.
+2. For Cloudflare R2, use the **[Storage:R2]** fields, including `CLOUDFLARE_ACCOUNT_ID`.
+3. For MinIO or other S3-compatible endpoints, use the **[Storage:Generic S3]** fields.
+4. Only set **Force Path Style** to `true` when your provider actually requires path-style S3 requests.
+
+---
+
+## 10. External Redis With Sentinel
+
+For normal AIO installs, leave Redis internal. If you already run a real HA Redis stack:
+
+1. Fill **[External Redis] Sentinel Hosts** with a comma-separated list like `redis-sentinel-1:26379,redis-sentinel-2:26379`.
+2. Set **[External Redis] Sentinel Master** if your master name is not `mymaster`.
+3. Add username/password only if your Sentinel deployment requires them.
+4. Sentinel settings take precedence over `REDIS_URL` when both are present.

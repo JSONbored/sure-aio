@@ -69,16 +69,6 @@ External database, Redis, proxy, SMTP, AI, and storage overrides are available i
       <Name>SELF_HOSTED</Name>
       <Mode/>
     </Variable>
-    <Variable>
-      <Value>yahoo_finance</Value>
-      <Name>EXCHANGE_RATE_PROVIDER</Name>
-      <Mode/>
-    </Variable>
-    <Variable>
-      <Value>yahoo_finance</Value>
-      <Name>SECURITIES_PROVIDER</Name>
-      <Mode/>
-    </Variable>
   </Environment>
 
   <!-- Core Required -->
@@ -102,6 +92,10 @@ External database, Redis, proxy, SMTP, AI, and storage overrides are available i
   <Config Name="[External DB] DB User Override" Target="POSTGRES_USER" Default="" Mode="" Description="Optional: External database user." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[External DB] DB Password Override" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="Optional: External database password." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[External DB] Redis URL Override" Target="REDIS_URL" Default="" Mode="" Description="Optional: To use an external Redis instead of the internal one, enter URL here." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External Redis] Sentinel Hosts" Target="REDIS_SENTINEL_HOSTS" Default="" Mode="" Description="Optional Redis Sentinel hosts, comma-separated like 'host1:26379,host2:26379'. Takes precedence over REDIS_URL when set." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External Redis] Sentinel Master" Target="REDIS_SENTINEL_MASTER" Default="mymaster" Mode="" Description="Redis Sentinel master name." Type="Variable" Display="advanced" Required="false" Mask="false">mymaster</Config>
+  <Config Name="[External Redis] Sentinel Username" Target="REDIS_SENTINEL_USERNAME" Default="default" Mode="" Description="Redis Sentinel username if your Sentinel deployment requires authentication." Type="Variable" Display="advanced" Required="false" Mask="false">default</Config>
+  <Config Name="[External Redis] Sentinel Password" Target="REDIS_PASSWORD" Default="" Mode="" Description="Redis password used for Sentinel-backed Redis deployments." Type="Variable" Display="advanced" Required="false" Mask="true"/>
 
   <!-- Advanced: Encryption & Names -->
   <Config Name="[System] Product Name" Target="PRODUCT_NAME" Default="" Mode="" Description="Custom product name in UI." Type="Variable" Display="advanced" Required="false" Mask="false"/>
@@ -114,12 +108,22 @@ External database, Redis, proxy, SMTP, AI, and storage overrides are available i
   <Config Name="[AI] OpenAI / Ollama Token" Target="OPENAI_ACCESS_TOKEN" Default="" Mode="" Description="API Key for OpenAI. If using a local Ollama container, enter 'ollama-local'." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[AI] OpenAI URI Base" Target="OPENAI_URI_BASE" Default="" Mode="" Description="Leave blank for official OpenAI. For local LLMs, enter your endpoint (e.g., 'http://ollama:11434/v1')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[AI] Model Name" Target="OPENAI_MODEL" Default="" Mode="" Description="If using Ollama, you MUST define the model here (e.g., 'llama3.1:13b' or 'gemma2:7b')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Debug Logging" Target="AI_DEBUG_MODE" Default="false" Mode="" Description="Set to 'true' to enable verbose AI chat debugging in logs." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="[AI] Vector Store Provider" Target="VECTOR_STORE_PROVIDER" Default="" Mode="" Description="Optional document-search backend. Use 'pgvector' for local PostgreSQL vectors or 'qdrant' for an external Qdrant instance." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Embedding Model" Target="EMBEDDING_MODEL" Default="" Mode="" Description="Embedding model for document search (e.g. 'nomic-embed-text')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Embedding Dimensions" Target="EMBEDDING_DIMENSIONS" Default="1024" Mode="" Description="Embedding width for the selected model. Must match the provider output." Type="Variable" Display="advanced" Required="false" Mask="false">1024</Config>
+  <Config Name="[AI] Embedding URI Base" Target="EMBEDDING_URI_BASE" Default="" Mode="" Description="Optional dedicated embeddings endpoint. If blank, Sure falls back to OPENAI_URI_BASE." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Embedding Access Token" Target="EMBEDDING_ACCESS_TOKEN" Default="" Mode="" Description="Optional dedicated embeddings token. If blank, Sure falls back to OPENAI_ACCESS_TOKEN." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[AI] Qdrant URL" Target="QDRANT_URL" Default="" Mode="" Description="Optional external Qdrant endpoint for vector storage." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Qdrant API Key" Target="QDRANT_API_KEY" Default="" Mode="" Description="Optional API key for authenticated Qdrant instances." Type="Variable" Display="advanced" Required="false" Mask="true"/>
 
   <!-- Advanced: External AI Assistant (OpenClaw / MCP) -->
   <Config Name="[Ext. AI] Assistant Type" Target="ASSISTANT_TYPE" Default="" Mode="" Description="Set to 'external' to route all chat to an external agent via MCP." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Ext. AI] Assistant URL" Target="EXTERNAL_ASSISTANT_URL" Default="" Mode="" Description="URL for the external agent (e.g. https://your-openclaw/v1/chat/completions)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Ext. AI] Assistant Token" Target="EXTERNAL_ASSISTANT_TOKEN" Default="" Mode="" Description="Auth token for the external agent." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[Ext. AI] Agent ID" Target="EXTERNAL_ASSISTANT_AGENT_ID" Default="" Mode="" Description="Optional Agent ID for OpenClaw routing." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] Session Key" Target="EXTERNAL_ASSISTANT_SESSION_KEY" Default="agent:main:main" Mode="" Description="Optional stable session key for remote agent conversation persistence." Type="Variable" Display="advanced" Required="false" Mask="false">agent:main:main</Config>
+  <Config Name="[Ext. AI] Allowed Emails" Target="EXTERNAL_ASSISTANT_ALLOWED_EMAILS" Default="" Mode="" Description="Optional comma-separated allowlist of users permitted to use the external assistant." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Ext. AI] MCP User Email" Target="MCP_USER_EMAIL" Default="" Mode="" Description="Required if using Ext. AI: Email of an existing Sure user." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Ext. AI] MCP API Token" Target="MCP_API_TOKEN" Default="" Mode="" Description="Required if using Ext. AI: Bearer token for agent callbacks to /mcp." Type="Variable" Display="advanced" Required="false" Mask="true"/>
 
@@ -131,28 +135,54 @@ External database, Redis, proxy, SMTP, AI, and storage overrides are available i
   <Config Name="[Telemetry] Langfuse Secret Key" Target="LANGFUSE_SECRET_KEY" Default="" Mode="" Description="Langfuse Secret Key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
 
   <!-- Advanced: External Providers -->
+  <Config Name="[API] Exchange Rate Provider" Target="EXCHANGE_RATE_PROVIDER" Default="yahoo_finance" Mode="" Description="Defaults to free Yahoo Finance. Change to 'twelve_data' if you want Sure to actually use your Twelve Data API key." Type="Variable" Display="advanced" Required="false" Mask="false">yahoo_finance</Config>
+  <Config Name="[API] Securities Provider" Target="SECURITIES_PROVIDER" Default="yahoo_finance" Mode="" Description="Defaults to free Yahoo Finance. Change to 'twelve_data' if you want market data pulled from Twelve Data." Type="Variable" Display="advanced" Required="false" Mask="false">yahoo_finance</Config>
   <Config Name="[API] Brandfetch Client ID" Target="BRAND_FETCH_CLIENT_ID" Default="" Mode="" Description="Brandfetch OAuth key to auto-grab logos for banks and merchants." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[API] Twelve Data Key" Target="TWELVE_DATA_API_KEY" Default="" Mode="" Description="Optional API Key for Twelve Data (exchange rates/stocks) if you don't want to use the default free Yahoo Finance option." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   
   <!-- Advanced: Enterprise Auth -->
+  <Config Name="[Auth] Local Login Enabled" Target="AUTH_LOCAL_LOGIN_ENABLED" Default="true" Mode="" Description="Set to 'false' to disable local email/password login and move users toward SSO-only auth." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+  <Config Name="[Auth] Local Admin Override" Target="AUTH_LOCAL_ADMIN_OVERRIDE_ENABLED" Default="false" Mode="" Description="If local login is disabled, set to 'true' to let super admins keep local login as an emergency backdoor." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="[Auth] JIT SSO Mode" Target="AUTH_JIT_MODE" Default="create_and_link" Mode="" Description="SSO behavior for first-time users: 'create_and_link' creates accounts automatically, 'link_only' requires an existing user." Type="Variable" Display="advanced" Required="false" Mask="false">create_and_link</Config>
+  <Config Name="[Auth] Allowed OIDC Domains" Target="ALLOWED_OIDC_DOMAINS" Default="" Mode="" Description="Optional comma-separated email domains allowed for JIT SSO account creation." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Auth] OIDC Client ID" Target="OIDC_CLIENT_ID" Default="" Mode="" Description="OpenID Connect Client ID (Authentik/Authelia)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Auth] OIDC Client Secret" Target="OIDC_CLIENT_SECRET" Default="" Mode="" Description="OpenID Connect Client Secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[Auth] OIDC Issuer" Target="OIDC_ISSUER" Default="" Mode="" Description="OpenID Connect Issuer URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Auth] OIDC Redirect URI" Target="OIDC_REDIRECT_URI" Default="" Mode="" Description="OpenID Connect Redirect URI." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Button Label" Target="OIDC_BUTTON_LABEL" Default="" Mode="" Description="Optional custom sign-in button label for the default OIDC provider." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Button Icon" Target="OIDC_BUTTON_ICON" Default="key" Mode="" Description="Optional icon slug for the default OIDC sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">key</Config>
+  <Config Name="[Auth] Google OAuth Client ID" Target="GOOGLE_OAUTH_CLIENT_ID" Default="" Mode="" Description="Optional Google OAuth client ID if you want a dedicated Google sign-in provider." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] Google OAuth Client Secret" Target="GOOGLE_OAUTH_CLIENT_SECRET" Default="" Mode="" Description="Optional Google OAuth client secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Auth] Google Button Label" Target="GOOGLE_BUTTON_LABEL" Default="Sign in with Google" Mode="" Description="Optional custom label for the Google sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">Sign in with Google</Config>
+  <Config Name="[Auth] Google Button Icon" Target="GOOGLE_BUTTON_ICON" Default="google" Mode="" Description="Optional icon slug for the Google sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">google</Config>
+  <Config Name="[Auth] GitHub OAuth Client ID" Target="GITHUB_CLIENT_ID" Default="" Mode="" Description="Optional GitHub OAuth client ID if you want a dedicated GitHub sign-in provider." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] GitHub OAuth Client Secret" Target="GITHUB_CLIENT_SECRET" Default="" Mode="" Description="Optional GitHub OAuth client secret." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Auth] GitHub Button Label" Target="GITHUB_BUTTON_LABEL" Default="Sign in with GitHub" Mode="" Description="Optional custom label for the GitHub sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">Sign in with GitHub</Config>
+  <Config Name="[Auth] GitHub Button Icon" Target="GITHUB_BUTTON_ICON" Default="github" Mode="" Description="Optional icon slug for the GitHub sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">github</Config>
 
   <!-- Advanced: Active Storage (S3 / R2) -->
-  <Config Name="[Storage] Provider Strategy" Target="ACTIVE_STORAGE_SERVICE" Default="" Mode="" Description="Change from local disk to: 'amazon', 'cloudflare', or 'generic_s3'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Storage] Access Key ID" Target="S3_ACCESS_KEY_ID" Default="" Mode="" Description="S3 Access Key (Also map to CLOUDFLARE_ACCESS_KEY_ID or GENERIC_S3_ACCESS_KEY_ID based on strategy)." Type="Variable" Display="advanced" Required="false" Mask="true"/>
-  <Config Name="[Storage] Secret Access Key" Target="S3_SECRET_ACCESS_KEY" Default="" Mode="" Description="S3 Secret Access Key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
-  <Config Name="[Storage] Region" Target="S3_REGION" Default="" Mode="" Description="S3 Region (defaults to us-east-1)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Storage] Bucket Name" Target="S3_BUCKET" Default="" Mode="" Description="Target Bucket." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Storage] Custom Endpoint" Target="GENERIC_S3_ENDPOINT" Default="" Mode="" Description="(Generic S3 Only) Custom Minio/S3 endpoint URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage] Provider Strategy" Target="ACTIVE_STORAGE_SERVICE" Default="" Mode="" Description="Leave blank for internal disk storage. Change to 'amazon', 'cloudflare', or 'generic_s3' to move uploads out of the container." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:AWS] Access Key ID" Target="S3_ACCESS_KEY_ID" Default="" Mode="" Description="Amazon S3 access key ID." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:AWS] Secret Access Key" Target="S3_SECRET_ACCESS_KEY" Default="" Mode="" Description="Amazon S3 secret access key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:AWS] Region" Target="S3_REGION" Default="" Mode="" Description="Amazon S3 region. Defaults to us-east-1 if left blank." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:AWS] Bucket Name" Target="S3_BUCKET" Default="" Mode="" Description="Amazon S3 bucket name." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:R2] Cloudflare Account ID" Target="CLOUDFLARE_ACCOUNT_ID" Default="" Mode="" Description="Cloudflare account ID used to construct the R2 endpoint URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:R2] Access Key ID" Target="CLOUDFLARE_ACCESS_KEY_ID" Default="" Mode="" Description="Cloudflare R2 access key ID." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:R2] Secret Access Key" Target="CLOUDFLARE_SECRET_ACCESS_KEY" Default="" Mode="" Description="Cloudflare R2 secret access key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:R2] Bucket Name" Target="CLOUDFLARE_BUCKET" Default="" Mode="" Description="Cloudflare R2 bucket name." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:Generic S3] Access Key ID" Target="GENERIC_S3_ACCESS_KEY_ID" Default="" Mode="" Description="Generic S3 or MinIO access key ID." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:Generic S3] Secret Access Key" Target="GENERIC_S3_SECRET_ACCESS_KEY" Default="" Mode="" Description="Generic S3 or MinIO secret access key." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:Generic S3] Region" Target="GENERIC_S3_REGION" Default="" Mode="" Description="Generic S3 region value expected by your provider." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:Generic S3] Bucket Name" Target="GENERIC_S3_BUCKET" Default="" Mode="" Description="Generic S3 or MinIO bucket name." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:Generic S3] Custom Endpoint" Target="GENERIC_S3_ENDPOINT" Default="" Mode="" Description="Custom MinIO or S3-compatible endpoint URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:Generic S3] Force Path Style" Target="GENERIC_S3_FORCE_PATH_STYLE" Default="false" Mode="" Description="Set to 'true' for providers that require path-style S3 requests." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
 
   <!-- Advanced: SMTP -->
   <Config Name="[Email] SMTP Address" Target="SMTP_ADDRESS" Default="" Mode="" Description="Hostname for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Email] SMTP Port" Target="SMTP_PORT" Default="465" Mode="" Description="Port for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Email] SMTP Username" Target="SMTP_USERNAME" Default="" Mode="" Description="Username for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Email] SMTP Password" Target="SMTP_PASSWORD" Default="" Mode="" Description="Password for your SMTP server." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Email] SMTP TLS Enabled" Target="SMTP_TLS_ENABLED" Default="true" Mode="" Description="Leave 'true' for normal secure SMTP. Set to 'false' only if your mail relay expects plain SMTP without TLS." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
   <Config Name="[Email] Sender Address" Target="EMAIL_SENDER" Default="" Mode="" Description="The email address your app will send mail from (e.g., finance@mydomain.com)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
 
 </Container>

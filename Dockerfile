@@ -2,18 +2,24 @@
 
 ARG UPSTREAM_VERSION=v0.6.9
 ARG UPSTREAM_IMAGE_DIGEST=sha256:3d899b3eced520d8d3166a3d53184cbb1356670fb52d050f94f8e62e59754d70
+ARG PGVECTOR_VERSION=0.8.2
 FROM ghcr.io/we-promise/sure@${UPSTREAM_IMAGE_DIGEST}
 
+ARG PGVECTOR_VERSION
 ARG S6_OVERLAY_VERSION=3.1.6.2
 ARG TARGETARCH
 
 USER root
 
-# 1. Install prerequisites, s6-overlay, and Redis
+# 1. Install prerequisites, s6-overlay, Redis, and pgvector support
 # We use standard PATH binaries for Postgres (it's installed as postgresql)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl xz-utils sudo \
-    postgresql postgresql-client redis-server && \
+    build-essential ca-certificates curl git xz-utils sudo \
+    postgresql postgresql-client postgresql-server-dev-all redis-server && \
+    git clone --branch "v${PGVECTOR_VERSION}" --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
+    make -C /tmp/pgvector OPTFLAGS="" && \
+    make -C /tmp/pgvector install && \
+    apt-get purge -y --auto-remove build-essential git postgresql-server-dev-all && \
     curl -L -o /tmp/s6-overlay-noarch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
     tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
     case "${TARGETARCH}" in \

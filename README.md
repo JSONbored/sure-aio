@@ -41,13 +41,14 @@ If you just want to track your finances and don't care about databases, this is 
 
 ## 🛠️ Power User Configuration (Advanced Options)
 
-While designed for absolute beginners, this container does not neuter the upstream application. It supports **100%** of the features the Sure team has built.
+While designed for absolute beginners, this container is intended to keep pace with upstream self-hosting features rather than stripping them out. The goal is straightforward: if upstream exposes a real self-hosting feature, the Unraid wrapper should either support it or document the gap plainly.
 
 If you click **"Show more settings..."** in the Unraid template, you can customize the system deeply.
 
 Read the comprehensive [Power User Guide here](docs/power-user.md) for instructions on how to configure:
 - **[Local AI / Ollama Integration](docs/power-user.md#2-artificial-intelligence-categorization--chat):** Replace OpenAI with your own LLM for categorization.
 - **[External OpenClaw / MCP Agent Routing](docs/power-user.md#option-b-external-agent-routing-openclaw--mcp):** Bypass the built-in bot entirely.
+- **[Local Vector Search / pgvector](docs/power-user.md#option-c-local-vector-search-pgvector--qdrant):** Keep document embeddings inside the bundled Postgres service.
 - **[AWS S3 / Cloudflare R2 Storage](docs/power-user.md#4-offloading-storage-to-s3--cloudflare-r2--minio):** Offload receipt and statement uploads.
 - **[External Database Overrides](docs/power-user.md#1-using-an-external-database-bypassing-aio-internals):** Don't want to use our internal Postgres? Wire it up to your dedicated DB server.
 - **[Enterprise Auth & SMTP](docs/power-user.md#6-enterprise-setup-oidc--email):** Set up SSO and password recovery emails.
