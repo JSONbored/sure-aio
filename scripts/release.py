@@ -11,6 +11,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_CHANGELOG = ROOT / "CHANGELOG.md"
 DEFAULT_DOCKERFILE = ROOT / "Dockerfile"
+AIO_TAG_PATTERN = "v*-aio.*"
 
 
 def read_upstream_version(dockerfile: pathlib.Path) -> str:
@@ -25,6 +26,19 @@ def read_upstream_version(dockerfile: pathlib.Path) -> str:
 def git_tags() -> list[str]:
     output = subprocess.check_output(["git", "tag", "--list"], cwd=ROOT, text=True)
     return [line.strip() for line in output.splitlines() if line.strip()]
+
+
+def latest_aio_release_tag() -> str | None:
+    completed = subprocess.run(
+        ["git", "describe", "--tags", "--abbrev=0", "--match", AIO_TAG_PATTERN, "HEAD"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    if completed.returncode != 0:
+        return None
+    tag = completed.stdout.strip()
+    return tag or None
 
 
 def latest_release_tag(dockerfile: pathlib.Path) -> str | None:
@@ -42,7 +56,7 @@ def latest_release_tag(dockerfile: pathlib.Path) -> str | None:
 
 
 def has_unreleased_changes(dockerfile: pathlib.Path) -> bool:
-    latest_tag = latest_release_tag(dockerfile)
+    latest_tag = latest_aio_release_tag()
     if latest_tag is None:
         return True
     output = subprocess.check_output(["git", "log", "--format=%s", f"{latest_tag}..HEAD"], cwd=ROOT, text=True)
@@ -125,6 +139,7 @@ def main() -> None:
     next_parser.add_argument("--dockerfile", type=pathlib.Path, default=DEFAULT_DOCKERFILE)
     changes_parser = subparsers.add_parser("has-unreleased-changes")
     changes_parser.add_argument("--dockerfile", type=pathlib.Path, default=DEFAULT_DOCKERFILE)
+    previous_parser = subparsers.add_parser("latest-aio-tag")
 
     latest_parser = subparsers.add_parser("latest-changelog-version")
     latest_parser.add_argument("--changelog", type=pathlib.Path, default=DEFAULT_CHANGELOG)
@@ -146,6 +161,11 @@ def main() -> None:
         return
     if args.command == "has-unreleased-changes":
         print("true" if has_unreleased_changes(args.dockerfile) else "false")
+        return
+    if args.command == "latest-aio-tag":
+        latest_tag = latest_aio_release_tag()
+        if latest_tag:
+            print(latest_tag)
         return
     if args.command == "latest-changelog-version":
         print(latest_changelog_version(args.changelog))
