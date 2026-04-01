@@ -52,6 +52,7 @@ Sure allows chatting with uploaded financial PDFs and other indexed documents.
 4. For `qdrant`, also provide `QDRANT_URL` and `QDRANT_API_KEY` if needed.
 5. If you use Ollama for embeddings, make sure the embedding model is actually pulled and available. Exposing the vars is not enough if the model is missing.
 6. If you want verbose AI troubleshooting in the container logs, set **[AI] Debug Logging** to `true`.
+7. If your OpenAI-compatible endpoint does not support PDF or vision input, set **[AI] Enable PDF Processing** to `false` so Sure does not try to send PDF workloads to a provider that cannot handle them.
 
 ---
 
@@ -61,6 +62,7 @@ Track LLM inference costs and app usage.
 1. Find the **[Telemetry]** block.
 2. **PostHog:** Fill in your `POSTHOG_KEY` and `HOST` to track user analytics.
 3. **Langfuse:** Fill in your `LANGFUSE_HOST`, `PUBLIC_KEY`, and `SECRET_KEY` to chart token usage, latency, and costs of your AI operations.
+4. If you use hosted Langfuse and prefer a region shortcut instead of a full host URL, set `LANGFUSE_REGION` to `us` or `eu`. If `LANGFUSE_HOST` is set, it wins over the region shortcut.
 
 ---
 
@@ -80,6 +82,7 @@ Sure relies on upstream providers for currency exchange rates and stock logos.
 *   **Free (Default):** The template defaults both exchange-rate and securities data to `yahoo_finance` so a first boot works without extra accounts.
 *   **Paid API Keys (Optional):** If you prefer Twelve Data, add your API key and change **[API] Exchange Rate Provider** and **[API] Securities Provider** to `twelve_data`.
 *   **Logos:** Provide a **[API] Brandfetch Client ID** to automatically scrape high-res logos for your bank names and merchants.
+*   **High-res logos:** Set `BRAND_FETCH_HIGH_RES_LOGOS=true` if you want Sure to prefer larger Brandfetch logo assets where available.
 
 ---
 
@@ -96,6 +99,7 @@ To enable Single Sign-On (SSO):
    - `ALLOWED_OIDC_DOMAINS` to restrict which email domains may auto-create accounts through JIT SSO
 4. Optional button labels/icons are exposed too, along with dedicated Google and GitHub OAuth client fields if you want those providers separately.
 5. Upstream also supports additional named OIDC providers through env patterns like `OIDC_KEYCLOAK_*` or `OIDC_AUTHENTIK_*`. That is practical in raw compose files, but not cleanly representable in a static Unraid CA template. For this wrapper, the default generic OIDC path plus dedicated Google/GitHub options are exposed in the template; anything beyond that is a manual power-user customization.
+6. Upstream also uses `APP_URL` for some advanced SSO flows, especially SAML-style absolute callback and issuer generation. If you are doing advanced auth beyond the normal generic OIDC path, set `APP_URL` to your full external base URL such as `https://finance.example.com`.
 
 ### SMTP Mail Relay (For Password Resets / Reports)
 1. Find the **[Email]** block.
@@ -126,6 +130,18 @@ If you later place Sure behind Nginx Proxy Manager, Traefik, Caddy, Cloudflare T
 1. Set `RAILS_ASSUME_SSL=true`
 2. Set `RAILS_FORCE_SSL=true` only if you want plain HTTP requests redirected to HTTPS
 3. Set `APP_DOMAIN` to the hostname you actually use for email links and callbacks
+4. If advanced auth or metadata generation expects a full URL, also set `APP_URL` to the full external base URL
+
+### Private CA / Self-Signed HTTPS Support
+If your OIDC provider, MinIO endpoint, Qdrant node, or another upstream integration uses a private CA:
+
+1. Use the optional **[SSL] Custom CA Certificate Mount** field to bind your CA PEM file into the container.
+2. Set **[SSL] Custom CA File** to the in-container path, for example `/certs/custom-ca.pem`.
+3. Leave **[SSL] Verify Remote Certificates** at `true` for normal operation.
+4. Set **[SSL] Debug Logging** to `true` only while troubleshooting certificate trust issues.
+5. Only set `SSL_VERIFY=false` as a temporary test. It weakens outbound TLS validation globally inside the app process.
+
+This matters more than it sounds. Upstream applies this CA bundle globally so OIDC discovery, webhook callbacks, object storage, and other HTTPS clients all trust the same internal CA.
 
 ---
 
@@ -158,3 +174,16 @@ For most Unraid installs, plain container logs are enough. If you want centraliz
 1. Set **[Telemetry] Rails Log Level** to `debug` temporarily when troubleshooting application behavior.
 2. Add **[Telemetry] Logtail API Key** and **[Telemetry] Logtail Ingest Host** if you want Sure logs forwarded to Better Stack Logtail.
 3. Leave those fields blank for the normal beginner path. Shipping logs externally is optional and not part of the default AIO experience.
+
+---
+
+## Trial / Subscription Note
+
+Upstream `v0.6.9` is supposed to disable subscription and trial gating in self-hosted mode when `SELF_HOSTED=true`. The 45-day trial logic still exists in the codebase, but upstream guards it behind `app_mode != self_hosted`.
+
+That means if you see a trial banner or upgrade flow on a self-hosted Sure-AIO install, the likely causes are:
+1. The running container is not actually seeing `SELF_HOSTED=true`.
+2. Existing app state was created before self-hosted mode was applied.
+3. There is an upstream bug in a specific onboarding or UI path.
+
+It is not caused by missing Stripe billing envs in this wrapper. Those Stripe envs exist upstream for managed billing flows, but upstream self-hosted mode is designed to bypass them.
