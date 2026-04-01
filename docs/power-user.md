@@ -95,6 +95,7 @@ To enable Single Sign-On (SSO):
    - `AUTH_JIT_MODE=link_only` if SSO should only link to existing users rather than auto-create them
    - `ALLOWED_OIDC_DOMAINS` to restrict which email domains may auto-create accounts through JIT SSO
 4. Optional button labels/icons are exposed too, along with dedicated Google and GitHub OAuth client fields if you want those providers separately.
+5. Upstream also supports additional named OIDC providers through env patterns like `OIDC_KEYCLOAK_*` or `OIDC_AUTHENTIK_*`. That is practical in raw compose files, but not cleanly representable in a static Unraid CA template. For this wrapper, the default generic OIDC path plus dedicated Google/GitHub options are exposed in the template; anything beyond that is a manual power-user customization.
 
 ### SMTP Mail Relay (For Password Resets / Reports)
 1. Find the **[Email]** block.
@@ -147,3 +148,13 @@ For normal AIO installs, leave Redis internal. If you already run a real HA Redi
 2. Set **[External Redis] Sentinel Master** if your master name is not `mymaster`.
 3. Add username/password only if your Sentinel deployment requires them.
 4. Sentinel settings take precedence over `REDIS_URL` when both are present.
+
+---
+
+## 11. Logging And External Log Shipping
+
+For most Unraid installs, plain container logs are enough. If you want centralized production logging:
+
+1. Set **[Telemetry] Rails Log Level** to `debug` temporarily when troubleshooting application behavior.
+2. Add **[Telemetry] Logtail API Key** and **[Telemetry] Logtail Ingest Host** if you want Sure logs forwarded to Better Stack Logtail.
+3. Leave those fields blank for the normal beginner path. Shipping logs externally is optional and not part of the default AIO experience.
