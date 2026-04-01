@@ -42,6 +42,8 @@ To handle chat entirely inside an external AI agent rather than the basic Sure U
 
 ### Option C: Local Vector Search (pgvector / Qdrant)
 Sure allows chatting with uploaded financial PDFs and other indexed documents.
+For the exact Sure-AIO pgvector behavior, including the default "installed but not enabled" model and the external PostgreSQL limitation, see [docs/pgvector.md](pgvector.md).
+
 1. Find the **[AI] Vector Store Provider** field.
 2. Set it to `pgvector` to keep vectors inside the bundled internal PostgreSQL service, or `qdrant` if you want an external Qdrant instance.
 3. For `pgvector`, set:

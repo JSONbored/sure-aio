@@ -49,6 +49,7 @@ Read the comprehensive [Power User Guide here](docs/power-user.md) for instructi
 - **[Local AI / Ollama Integration](docs/power-user.md#2-artificial-intelligence-categorization--chat):** Replace OpenAI with your own LLM for categorization.
 - **[External OpenClaw / MCP Agent Routing](docs/power-user.md#option-b-external-agent-routing-openclaw--mcp):** Bypass the built-in bot entirely.
 - **[Local Vector Search / pgvector](docs/power-user.md#option-c-local-vector-search-pgvector--qdrant):** Keep document embeddings inside the bundled Postgres service.
+- **[Dedicated pgvector behavior doc](docs/pgvector.md):** Exact internal-vs-external pgvector behavior, defaults, and limitations.
 - **[AWS S3 / Cloudflare R2 Storage](docs/power-user.md#4-offloading-storage-to-s3--cloudflare-r2--minio):** Offload receipt and statement uploads.
 - **[External Database Overrides](docs/power-user.md#1-using-an-external-database-bypassing-aio-internals):** Don't want to use our internal Postgres? Wire it up to your dedicated DB server.
 - **[Enterprise Auth & SMTP](docs/power-user.md#6-enterprise-setup-oidc--email):** Set up SSO and password recovery emails.
