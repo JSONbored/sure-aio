@@ -92,12 +92,19 @@ jobs:
         run: |
           release_version="$(python3 scripts/release.py latest-changelog-version)"
           echo "release_version=${release_version}" >> "${GITHUB_OUTPUT}"
-          release_commit="$(git log --format='%H%x09%s' HEAD | awk -F '\t' -v title="chore(release): ${release_version}" '$2 == title {print $1; exit}')"
+          release_subject="chore(release): ${release_version}"
+          release_commit="$(
+            git log --format='%H%x09%s' HEAD | \
+              awk -F '\t' -v title="${release_subject}" \
+                '$2 == title || $2 ~ ("^" title " \\(#" "[0-9]+" "\\)$") {print $1; exit}'
+          )"
           if [[ -z "${release_commit}" ]]; then
             echo "Unable to find a merged release commit for ${release_version} on main." >&2
+            echo "Expected a commit subject matching '${release_subject}' (optionally with a GitHub PR suffix like '(#123)')." >&2
             exit 1
           fi
           echo "release_commit=${release_commit}" >> "${GITHUB_OUTPUT}"
+          echo "Matched release commit ${release_commit} for ${release_version}"
           changelog_version="$(python3 scripts/release.py latest-changelog-version)"
           if [[ "${changelog_version}" != "${release_version}" ]]; then
             echo "CHANGELOG top entry ${changelog_version} does not match ${release_version}" >&2
