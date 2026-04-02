@@ -63,17 +63,10 @@ External database, Redis, proxy, SMTP, AI, and storage overrides are available i
       <Mode>rw</Mode>
     </Volume>
   </Data>
-  <Environment>
-    <Variable>
-      <Value>true</Value>
-      <Name>SELF_HOSTED</Name>
-      <Mode/>
-    </Variable>
-  </Environment>
-
   <!-- Core Required -->
   <Config Name="Web UI Port" Target="3000" Default="3000" Mode="tcp" Description="The main web interface port." Type="Port" Display="always" Required="true" Mask="false">3000</Config>
   <Config Name="Secret Key Base" Target="SECRET_KEY_BASE" Default="" Mode="" Description="Critical: Run 'openssl rand -hex 64' in your Unraid terminal and paste the randomized hash here." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="[Internal] Self Hosted Mode" Target="SELF_HOSTED" Default="true" Mode="" Description="Internal wrapper flag required for Sure self-hosted mode. Leave unchanged." Type="Variable" Display="advanced-hide" Required="false" Mask="false">true</Config>
   
   <!-- Internal Volumes -->
   <Config Name="App Volumes - Rails Storage" Target="/rails/storage" Default="/mnt/user/appdata/sure-aio/system" Mode="rw" Description="Internal rails file storage." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/sure-aio/system</Config>
