@@ -1,16 +1,12 @@
 <div align="center">
 
-# Sure AIO (All-in-One) for Unraid
-
-[![Docker Image Size](https://img.shields.io/docker/image-size/jsonbored/sure-aio/latest?color=blue&label=Image%20Size)](https://github.com/JSONbored/sure-aio/pkgs/container/sure-aio)
-[![GitHub License](https://img.shields.io/github/license/we-promise/sure?color=green)](https://github.com/we-promise/sure/blob/main/LICENSE)
-[![Unraid Community Applications](https://img.shields.io/badge/Unraid-CA%20Template-orange)](https://unraid.net/community/apps)
-
-An ultra-simplified, self-contained deployment of [Sure](https://github.com/we-promise/sure) designed explicitly for Unraid homelabs.
+<img src="https://socialify.git.ci/jsonbored/sure-aio/image?custom_description=The+easiest+way+to+deploy+Sure+Finance+%28Maybe+Finance+fork%29+via+Unraid+CA.&custom_language=Dockerfile&description=1&font=KoHo&forks=1&language=1&logo=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F49853598%3Fv%3D4&name=1&owner=1&pattern=Signal&pulls=1&stargazers=1&theme=Dark" alt="sure-aio" width="640" height="320" />
 
 </div>
 
 ---
+
+An ultra-simplified, self-contained deployment of [Sure](https://github.com/we-promise/sure) designed explicitly for Unraid homelabs.
 
 Instead of configuring 4 different templates, managing custom Docker networks, and bootstrapping external PostgreSQL/Redis databases, this image handles the entire stack internals for you. It's designed to provide a "Binhex-style" one-click installation experience for users who just want it to work.
 
