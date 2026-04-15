@@ -6,7 +6,7 @@ PGDATA="/var/lib/postgresql/data"
 PGBIN="/usr/lib/postgresql/${PG_VERSION}/bin"
 
 mkdir -p "$PGDATA" /run/postgresql
-chown -R postgres:postgres "$PGDATA" /run/postgresql
+chown postgres:postgres "$PGDATA" /run/postgresql
 chmod 700 "$PGDATA"
 
 if [ ! -s "$PGDATA/PG_VERSION" ]; then

@@ -14,12 +14,14 @@ USER root
 # 1. Install prerequisites, s6-overlay, Redis, and pgvector support
 # We use standard PATH binaries for Postgres (it's installed as postgresql)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential ca-certificates curl git xz-utils sudo \
-    postgresql postgresql-client postgresql-server-dev-all redis-server && \
+    build-essential ca-certificates curl git xz-utils \
+    postgresql postgresql-client postgresql-server-dev-17 redis-server && \
     git clone --branch "v${PGVECTOR_VERSION}" --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
     make -C /tmp/pgvector OPTFLAGS="" && \
     make -C /tmp/pgvector install && \
-    apt-get purge -y --auto-remove build-essential git postgresql-server-dev-all && \
+    apt-get purge -y --auto-remove \
+      build-essential git postgresql-server-dev-17 \
+      clang-19 llvm-19 llvm-19-dev llvm-19-linker-tools llvm-19-runtime llvm-19-tools && \
     curl -L -o /tmp/s6-overlay-noarch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
     tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
     case "${TARGETARCH}" in \
@@ -29,6 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     esac && \
     curl -L -o /tmp/s6-overlay-arch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${s6_arch}.tar.xz && \
     tar -C / -Jxpf /tmp/s6-overlay-arch.tar.xz && \
+    rm -f /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/certs/ssl-cert-snakeoil.pem && \
     rm -rf /tmp/* /var/lib/apt/lists/*
 
 # 2. Setup persistent internal storage paths

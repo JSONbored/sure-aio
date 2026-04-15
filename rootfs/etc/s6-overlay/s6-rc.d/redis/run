@@ -2,7 +2,7 @@
 set -eu
 
 mkdir -p /var/lib/redis
-chown -R redis:redis /var/lib/redis
+chown redis:redis /var/lib/redis
 chmod 770 /var/lib/redis
 
-exec sudo -u redis redis-server /etc/redis/redis.conf --dir /var/lib/redis
+exec s6-setuidgid redis redis-server /etc/redis/redis.conf --dir /var/lib/redis
