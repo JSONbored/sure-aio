@@ -40,6 +40,7 @@ If you just want to track your finances and don't care about databases, this is 
 While designed for absolute beginners, this container is intended to keep pace with upstream self-hosting features rather than stripping them out. The goal is straightforward: if upstream exposes a real self-hosting feature, the Unraid wrapper should either support it or document the gap plainly.
 
 Some advanced Sure settings are intentionally managed as container environment variables in the Unraid template instead of only through Sure's web UI. When upstream sees one of those env vars, it may disable the matching control in the app and treat the template value as the source of truth. That is expected for this wrapper.
+This wrapper also defaults `SKYLIGHT_ENABLED=false` at the image level (and exposes it in the template) so AIO users are not required to configure upstream Skylight APM.
 
 If you click **"Show more settings..."** in the Unraid template, you can customize the system deeply.
 

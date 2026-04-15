@@ -65,6 +65,7 @@ Track LLM inference costs and app usage.
 2. **PostHog:** Fill in your `POSTHOG_KEY` and `HOST` to track user analytics.
 3. **Langfuse:** Fill in your `LANGFUSE_HOST`, `PUBLIC_KEY`, and `SECRET_KEY` to chart token usage, latency, and costs of your AI operations.
 4. If you use hosted Langfuse and prefer a region shortcut instead of a full host URL, set `LANGFUSE_REGION` to `us` or `eu`. If `LANGFUSE_HOST` is set, it wins over the region shortcut.
+5. **Skylight APM:** `SKYLIGHT_ENABLED` defaults to `false` in this AIO wrapper (image default + template field) so users do not need any extra external service for normal operation. If you explicitly want Skylight, set `SKYLIGHT_ENABLED=true` and provide `SKYLIGHT_AUTHENTICATION` from your Skylight app settings.
 
 ---
 
