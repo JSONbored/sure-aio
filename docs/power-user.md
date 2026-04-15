@@ -82,11 +82,12 @@ Avoid filling your Unraid cache drive by piping PDFs/receipts straight to object
 ## 5. Free vs Paid External Data Providers
 Sure relies on upstream providers for currency exchange rates and stock logos.
 
-*   **Free (Default):** The template defaults both exchange-rate and securities data to `yahoo_finance` so a first boot works without extra accounts.
+*   **Free (Default):** If you leave provider overrides blank, upstream Sure defaults to `yahoo_finance` for first-boot friendliness.
 *   **Paid API Keys (Optional):** If you prefer Twelve Data, add your API key and change **[API] Exchange Rate Provider** and **[API] Securities Provider** to `twelve_data`.
 *   **Logos:** Provide a **[API] Brandfetch Client ID** to automatically scrape high-res logos for your bank names and merchants.
 *   **High-res logos:** Set `BRAND_FETCH_HIGH_RES_LOGOS=true` if you want Sure to prefer larger Brandfetch logo assets where available.
-*   **Important override behavior:** If you set these provider and logo values in the Unraid template, upstream Sure treats them as env overrides and disables the matching controls in the self-hosting UI. In `sure-aio`, that is deliberate: the template is the power-user control plane.
+*   **Indexa token path:** If you use Indexa Capital and want a single global token fallback, set `INDEXA_API_TOKEN`.
+*   **Important override behavior:** Upstream only locks matching settings UI controls when the related env var is present. Leaving provider/logo env fields blank keeps the UI controls interactive.
 *   **Advanced provider tuning:** The template also exposes `TWELVE_DATA_URL`, `YAHOO_FINANCE_URL`, `YAHOO_FINANCE_MAX_RETRIES`, `YAHOO_FINANCE_RETRY_INTERVAL`, and `YAHOO_FINANCE_MIN_REQUEST_INTERVAL` if you need proxying or retry tuning.
 
 ---
@@ -193,6 +194,10 @@ The template now exposes the main upstream runtime toggles that were previously 
 2. **Pending transaction behavior**
    - `SIMPLEFIN_INCLUDE_PENDING`
    - `PLAID_INCLUDE_PENDING`
+   - `LUNCHFLOW_INCLUDE_PENDING`
+   - `SIMPLEFIN_DEBUG_RAW`
+   - `LUNCHFLOW_DEBUG_RAW`
+   - `SIMPLEFIN_CC_OVERPAYMENT_HEURISTIC`
    - Just like provider selection, these env overrides lock the matching Sync control in Sure's UI when set.
 3. **Plaid credentials**
    - `PLAID_CLIENT_ID`
@@ -208,11 +213,18 @@ The template now exposes the main upstream runtime toggles that were previously 
    - `CHAT_PROVIDER` / `CHAT_MODEL`
 5. **Auth and onboarding behavior**
    - `REQUIRE_EMAIL_CONFIRMATION`
+   - `REQUIRE_INVITE_CODE`
    - `AUTH_PROVIDERS_SOURCE`
 6. **Database and SSL edge cases**
    - `POSTGRES_DB`
    - `SSL_CERT_FILE`
-7. **Advanced outbound networking**
+   - `SELF_HOSTING_ENABLED` (legacy alias; keep `SELF_HOSTED=true` as the main switch)
+7. **Runtime/process tuning**
+   - `RAILS_MAX_THREADS`
+   - `WEB_CONCURRENCY`
+   - `SIDEKIQ_WEB_USERNAME`
+   - `SIDEKIQ_WEB_PASSWORD`
+8. **Advanced outbound networking**
    - `HTTPS_PROXY`
    - `HTTP_PROXY`
    - `NO_PROXY`
