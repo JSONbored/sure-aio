@@ -297,11 +297,26 @@ jobs:
           raw_version="$(sed -n 's/^ARG UPSTREAM_VERSION=//p' Dockerfile | head -n1)"
           upstream_version="${raw_version%%@*}"
           upstream_digest="$(sed -n 's/^ARG UPSTREAM_IMAGE_DIGEST=//p' Dockerfile | head -n1)"
-          aio_track="aio-v1"
+          changelog_version="$(python3 scripts/release.py latest-changelog-version 2>/dev/null || true)"
+          aio_revision=""
+          case "${changelog_version}" in
+            "${upstream_version}"-aio.*)
+              candidate_revision="${changelog_version##*.}"
+              if [[ "${candidate_revision}" =~ ^[0-9]+$ ]]; then
+                aio_revision="${candidate_revision}"
+              fi
+              ;;
+          esac
+          if [[ -n "${aio_revision}" ]]; then
+            aio_track="aio-v${aio_revision}"
+          else
+            aio_track="aio-v1"
+          fi
 
           {
             echo "upstream_version=${upstream_version}"
             echo "upstream_digest=${upstream_digest}"
+            echo "aio_track=${aio_track}"
             echo "tags<<EOF"
             echo "${image}:latest"
             if [[ -n "${upstream_version}" ]]; then
