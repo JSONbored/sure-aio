@@ -68,6 +68,9 @@ Just make sure `/mnt/user/appdata/sure-aio` is covered by your standard Unraid C
 - The repo monitors stable upstream Sure tags and opens a PR when a newer stable version is released.
 - Upstream image digest drift is tracked separately so digest-only refreshes do not masquerade as version-bump PRs.
 - Every `main` package publish now ships the exact upstream version tag, an explicit AIO packaging line tag, `latest`, and `sha-<commit>`.
+- Published images include explicit metadata labels for both layers:
+  - upstream app: `io.jsonbored.upstream.version`, `io.jsonbored.upstream.digest`
+  - wrapper identity: `io.jsonbored.wrapper.name`, `io.jsonbored.wrapper.type`, `io.jsonbored.wrapper.track`
 - Formal wrapper releases follow the upstream version plus an AIO revision, such as `v0.6.8-aio.1`.
 - See the release workflow details in [docs/releases.md](docs/releases.md).
 

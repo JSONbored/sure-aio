@@ -296,10 +296,12 @@ jobs:
           sha_tag="${image}:sha-${GITHUB_SHA}"
           raw_version="$(sed -n 's/^ARG UPSTREAM_VERSION=//p' Dockerfile | head -n1)"
           upstream_version="${raw_version%%@*}"
+          upstream_digest="$(sed -n 's/^ARG UPSTREAM_IMAGE_DIGEST=//p' Dockerfile | head -n1)"
           aio_track="aio-v1"
 
           {
             echo "upstream_version=${upstream_version}"
+            echo "upstream_digest=${upstream_digest}"
             echo "tags<<EOF"
             echo "${image}:latest"
             if [[ -n "${upstream_version}" ]]; then
@@ -324,7 +326,13 @@ jobs:
             org.opencontainers.image.source=https://github.com/JSONbored/sure-aio
             org.opencontainers.image.title=sure-aio
             org.opencontainers.image.version=${{ steps.prep.outputs.upstream_version || '' }}
+            org.opencontainers.image.description=Unraid-first AIO wrapper image for Sure (web, worker, postgres, redis)
             io.jsonbored.upstream.name=Sure
+            io.jsonbored.upstream.version=${{ steps.prep.outputs.upstream_version || '' }}
+            io.jsonbored.upstream.digest=${{ steps.prep.outputs.upstream_digest || '' }}
+            io.jsonbored.wrapper.name=sure-aio
+            io.jsonbored.wrapper.type=unraid-aio
+            io.jsonbored.wrapper.track=aio-v1
           load: false
 
   sync-awesome-unraid:
