@@ -86,6 +86,7 @@ jobs:
     if: ${{ github.event.inputs.action == 'publish' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:
+      actions: write
       contents: write
     steps:
       - name: Checkout main
@@ -165,3 +166,13 @@ jobs:
             --title "${RELEASE_VERSION}" \
             --notes-file "${notes_file}" \
             --target "${RELEASE_COMMIT}"
+
+      - name: Trigger image publish workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run "CI / Sure-AIO" \
+            --ref main \
+            -f publish_image=true \
+            -f run_smoke_test=false
+          echo "Triggered CI / Sure-AIO workflow_dispatch with publish_image=true."

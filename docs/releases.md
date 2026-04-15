@@ -26,3 +26,4 @@ Every `main` build publishes:
 3. Review and merge that PR into `main`.
 4. Trigger **Release / Sure-AIO** from `main` again with `action=publish`.
 5. The workflow reads the merged `CHANGELOG.md` entry, creates the Git tag, and publishes the GitHub Release.
+6. The same publish job automatically dispatches **CI / Sure-AIO** (`workflow_dispatch`) with `publish_image=true` so GHCR package tags (including `upstream-aio-vN`) stay aligned with the new release revision.
