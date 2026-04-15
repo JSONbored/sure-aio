@@ -204,12 +204,18 @@ The template now exposes the main upstream runtime toggles that were previously 
 4. **OpenAI compatibility tuning**
    - `OPENAI_REQUEST_TIMEOUT`
    - `LLM_JSON_MODE`
+   - `CATEGORIZATION_PROVIDER` / `CATEGORIZATION_MODEL`
+   - `CHAT_PROVIDER` / `CHAT_MODEL`
 5. **Auth and onboarding behavior**
    - `REQUIRE_EMAIL_CONFIRMATION`
    - `AUTH_PROVIDERS_SOURCE`
 6. **Database and SSL edge cases**
    - `POSTGRES_DB`
    - `SSL_CERT_FILE`
+7. **Advanced outbound networking**
+   - `HTTPS_PROXY`
+   - `HTTP_PROXY`
+   - `NO_PROXY`
 
 These are all legitimate upstream runtime knobs, but not all of them belong in a beginner walkthrough. They are here because `sure-aio` should expose the real self-hosting surface without forcing users to rebuild the image just to reach it.
 

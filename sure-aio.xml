@@ -21,7 +21,7 @@ sure-aio packages the web app, worker, PostgreSQL, and Redis into one Unraid tem
 &#xD;
 [b]Advanced note[/b]&#xD;
 External database, Redis, proxy, SMTP, AI, and storage overrides are available in Advanced View.</Overview>
-  <Category>Tools: Finance: Productivity:</Category>
+  <Category>Tools: Utilities: Productivity:</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/icons/sure.png</Icon>
@@ -112,6 +112,10 @@ External database, Redis, proxy, SMTP, AI, and storage overrides are available i
   <Config Name="[AI] OpenAI / Ollama Token" Target="OPENAI_ACCESS_TOKEN" Default="" Mode="" Description="OpenAI-compatible API key. Get OpenAI keys from platform.openai.com/api-keys. If using local Ollama, enter any non-empty placeholder such as 'ollama-local'." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[AI] OpenAI URI Base" Target="OPENAI_URI_BASE" Default="" Mode="" Description="Leave blank for official OpenAI. For local LLMs, enter your endpoint (e.g., 'http://ollama:11434/v1')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[AI] Model Name" Target="OPENAI_MODEL" Default="" Mode="" Description="If using Ollama, you MUST define the model here (e.g., 'llama3.1:13b' or 'gemma2:7b')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Categorization Provider" Target="CATEGORIZATION_PROVIDER" Default="" Mode="" Description="Optional provider override used only for transaction categorization. Example: 'openai' or 'ollama'. If blank, Sure uses its normal AI provider behavior." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Categorization Model" Target="CATEGORIZATION_MODEL" Default="" Mode="" Description="Optional model override used only for categorization, such as 'gemma2:7b'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Chat Provider" Target="CHAT_PROVIDER" Default="" Mode="" Description="Optional provider override used only for chat-assistant requests. Example: 'openai' or 'ollama'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Chat Model" Target="CHAT_MODEL" Default="" Mode="" Description="Optional model override used only for chat-assistant requests, such as 'gpt-4.1' or a local Ollama model." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[AI] Request Timeout" Target="OPENAI_REQUEST_TIMEOUT" Default="60" Mode="" Description="OpenAI-compatible request timeout in seconds. Raise this only if your provider or local LLM is slow to respond." Type="Variable" Display="advanced" Required="false" Mask="false">60</Config>
   <Config Name="[AI] JSON Mode Override" Target="LLM_JSON_MODE" Default="" Mode="" Description="Optional structured-output override. Valid values are '', 'strict', 'none', or 'json_object'. Set this only if you need to force Sure's OpenAI JSON behavior globally." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[AI] Debug Logging" Target="AI_DEBUG_MODE" Default="false" Mode="" Description="Set to 'true' to enable verbose AI chat debugging in logs." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
@@ -147,6 +151,9 @@ External database, Redis, proxy, SMTP, AI, and storage overrides are available i
   <Config Name="[Telemetry] Logtail API Key" Target="LOGTAIL_API_KEY" Default="" Mode="" Description="Optional Better Stack / Logtail source token from your log source settings." Type="Variable" Display="advanced" Required="false" Mask="true"/>
   <Config Name="[Telemetry] Logtail Ingest Host" Target="LOGTAIL_INGESTING_HOST" Default="" Mode="" Description="Optional Logtail ingest host used with LOGTAIL_API_KEY." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Telemetry] Rails Log Level" Target="RAILS_LOG_LEVEL" Default="info" Mode="" Description="Application log verbosity. Use 'info' for normal operation or 'debug' for deeper troubleshooting." Type="Variable" Display="advanced" Required="false" Mask="false">info</Config>
+  <Config Name="[Network] HTTPS Proxy" Target="HTTPS_PROXY" Default="" Mode="" Description="Optional outbound HTTPS proxy URL (for advanced egress controls like Pipelock). Leave blank for normal direct outbound traffic." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Network] HTTP Proxy" Target="HTTP_PROXY" Default="" Mode="" Description="Optional outbound HTTP proxy URL. Leave blank unless your network requires a proxy." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Network] No Proxy Hosts" Target="NO_PROXY" Default="" Mode="" Description="Optional comma-separated hosts/domains that should bypass HTTP(S) proxy routing." Type="Variable" Display="advanced" Required="false" Mask="false"/>
 
   <!-- Advanced: External Providers -->
   <Config Name="[API] Exchange Rate Provider" Target="EXCHANGE_RATE_PROVIDER" Default="yahoo_finance" Mode="" Description="Container-level override for exchange-rate provider. Default stays on free Yahoo Finance for newcomer installs. If you set this here, upstream disables changing the provider in the Sure UI." Type="Variable" Display="advanced" Required="false" Mask="false">yahoo_finance</Config>
