@@ -1,4 +1,6 @@
 #!/command/with-contenv sh
+set -eu
+
 PGDATA="/var/lib/postgresql/data"
 mkdir -p "$PGDATA" /var/lib/redis /run/postgresql
 # Avoid recursive ownership fixes on every boot for better restart performance.
@@ -6,7 +8,10 @@ mkdir -p "$PGDATA" /var/lib/redis /run/postgresql
 if [ -s "$PGDATA/PG_VERSION" ]; then
     chown postgres:postgres "$PGDATA" /run/postgresql
 else
-    chown -R postgres:postgres "$PGDATA" /run/postgresql /etc/postgresql
+    chown -R postgres:postgres "$PGDATA" /run/postgresql
+    if [ -d /etc/postgresql ]; then
+        chown -R postgres:postgres /etc/postgresql
+    fi
 fi
 chown redis:redis /var/lib/redis
 chmod 700 "$PGDATA"

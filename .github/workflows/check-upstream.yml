@@ -36,47 +36,44 @@ jobs:
           chmod +x scripts/check-upstream.py
           ./scripts/check-upstream.py
 
-      - name: Stop if no stable version bump is available
-        if: ${{ steps.upstream.outputs.version_update_available != 'true' }}
+      - name: Stop if no stable upstream updates are available
+        if: ${{ steps.upstream.outputs.updates_available != 'true' }}
         run: |
-          echo "No newer stable upstream Sure tag is available."
-          if [[ "${{ steps.upstream.outputs.digest_update_available }}" == "true" ]]; then
-            echo "Digest-only drift detected; leave that to Renovate or manual dependency refresh."
-          fi
+          echo "No stable upstream version or digest updates are available."
 
       - name: Create update branch
-        if: ${{ steps.upstream.outputs.version_update_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
-        run: git checkout -B "codex/upstream-${{ steps.upstream.outputs.latest_version }}"
+        if: ${{ steps.upstream.outputs.updates_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
+        run: git checkout -B "${{ steps.upstream.outputs.branch_name }}"
 
       - name: Apply upstream version bump
-        if: ${{ steps.upstream.outputs.version_update_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
+        if: ${{ steps.upstream.outputs.updates_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
         env:
           WRITE_UPSTREAM_VERSION: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./scripts/check-upstream.py
 
-      - name: Commit upstream version bump
-        if: ${{ steps.upstream.outputs.version_update_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
+      - name: Commit upstream update
+        if: ${{ steps.upstream.outputs.updates_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add Dockerfile
-          git commit -m "chore(sync): bump upstream sure to ${{ steps.upstream.outputs.latest_version }}"
+          git commit -m "${{ steps.upstream.outputs.pr_title }}"
 
       - name: Push update branch
-        if: ${{ steps.upstream.outputs.version_update_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
+        if: ${{ steps.upstream.outputs.updates_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: git push --force --set-upstream origin "codex/upstream-${{ steps.upstream.outputs.latest_version }}"
+        run: git push --force --set-upstream origin "${{ steps.upstream.outputs.branch_name }}"
 
       - name: Open or update pull request
-        if: ${{ steps.upstream.outputs.version_update_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
+        if: ${{ steps.upstream.outputs.updates_available == 'true' && steps.upstream.outputs.strategy == 'pr' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           body_file="$(mktemp)"
           cat > "${body_file}" <<EOF
-          Sure upstream has a newer stable version.
+          Sure upstream has stable updates available.
 
           - Current pinned upstream version: \`${{ steps.upstream.outputs.current_version }}\`
           - Latest upstream version: \`${{ steps.upstream.outputs.latest_version }}\`
@@ -87,15 +84,15 @@ jobs:
           This PR was opened automatically by the upstream monitor workflow.
           EOF
 
-          existing_pr="$(gh pr list --head "codex/upstream-${{ steps.upstream.outputs.latest_version }}" --base main --json number --jq '.[0].number')"
+          existing_pr="$(gh pr list --head "${{ steps.upstream.outputs.branch_name }}" --base main --json number --jq '.[0].number')"
           if [[ -n "${existing_pr}" ]]; then
             gh pr edit "${existing_pr}" \
-              --title "chore(sync): bump upstream sure to ${{ steps.upstream.outputs.latest_version }}" \
+              --title "${{ steps.upstream.outputs.pr_title }}" \
               --body-file "${body_file}"
           else
             gh pr create \
               --base main \
-              --head "codex/upstream-${{ steps.upstream.outputs.latest_version }}" \
-              --title "chore(sync): bump upstream sure to ${{ steps.upstream.outputs.latest_version }}" \
+              --head "${{ steps.upstream.outputs.branch_name }}" \
+              --title "${{ steps.upstream.outputs.pr_title }}" \
               --body-file "${body_file}"
           fi
