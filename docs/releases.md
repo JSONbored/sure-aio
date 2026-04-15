@@ -2,6 +2,8 @@
 
 `sure-aio` uses upstream-version-plus-AIO-revision releases such as `v0.6.8-aio.1`.
 
+Stable upstream version monitoring and upstream image digest monitoring are separate concerns. Version bumps should open explicit upstream-update PRs, while digest-only refreshes should flow through normal dependency update automation.
+
 ## Version format
 
 - first wrapper release for upstream `v0.6.8`: `v0.6.8-aio.1`

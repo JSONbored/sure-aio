@@ -85,6 +85,8 @@ Sure relies on upstream providers for currency exchange rates and stock logos.
 *   **Paid API Keys (Optional):** If you prefer Twelve Data, add your API key and change **[API] Exchange Rate Provider** and **[API] Securities Provider** to `twelve_data`.
 *   **Logos:** Provide a **[API] Brandfetch Client ID** to automatically scrape high-res logos for your bank names and merchants.
 *   **High-res logos:** Set `BRAND_FETCH_HIGH_RES_LOGOS=true` if you want Sure to prefer larger Brandfetch logo assets where available.
+*   **Important override behavior:** If you set these provider and logo values in the Unraid template, upstream Sure treats them as env overrides and disables the matching controls in the self-hosting UI. In `sure-aio`, that is deliberate: the template is the power-user control plane.
+*   **Advanced provider tuning:** The template also exposes `TWELVE_DATA_URL`, `YAHOO_FINANCE_URL`, `YAHOO_FINANCE_MAX_RETRIES`, `YAHOO_FINANCE_RETRY_INTERVAL`, and `YAHOO_FINANCE_MIN_REQUEST_INTERVAL` if you need proxying or retry tuning.
 
 ---
 
@@ -100,8 +102,8 @@ To enable Single Sign-On (SSO):
    - `AUTH_JIT_MODE=link_only` if SSO should only link to existing users rather than auto-create them
    - `ALLOWED_OIDC_DOMAINS` to restrict which email domains may auto-create accounts through JIT SSO
 4. Optional button labels/icons are exposed too, along with dedicated Google and GitHub OAuth client fields if you want those providers separately.
-5. Upstream also supports additional named OIDC providers through env patterns like `OIDC_KEYCLOAK_*` or `OIDC_AUTHENTIK_*`. That is practical in raw compose files, but not cleanly representable in a static Unraid CA template. For this wrapper, the default generic OIDC path plus dedicated Google/GitHub options are exposed in the template; anything beyond that is a manual power-user customization.
-6. Upstream also uses `APP_URL` for some advanced SSO flows, especially SAML-style absolute callback and issuer generation. If you are doing advanced auth beyond the normal generic OIDC path, set `APP_URL` to your full external base URL such as `https://finance.example.com`.
+5. The template now also exposes `AUTH_PROVIDERS_SOURCE` plus named multi-provider envs like `OIDC_KEYCLOAK_*` and `OIDC_AUTHENTIK_*` if you want upstream's YAML-based or database-backed multi-provider SSO model.
+6. Upstream also uses `APP_URL` for advanced auth flows, especially absolute callback and issuer generation. If you are doing advanced auth beyond the normal generic OIDC path, set `APP_URL` to your full external base URL such as `https://finance.example.com`.
 
 ### SMTP Mail Relay (For Password Resets / Reports)
 1. Find the **[Email]** block.
@@ -176,6 +178,39 @@ For most Unraid installs, plain container logs are enough. If you want centraliz
 1. Set **[Telemetry] Rails Log Level** to `debug` temporarily when troubleshooting application behavior.
 2. Add **[Telemetry] Logtail API Key** and **[Telemetry] Logtail Ingest Host** if you want Sure logs forwarded to Better Stack Logtail.
 3. Leave those fields blank for the normal beginner path. Shipping logs externally is optional and not part of the default AIO experience.
+
+---
+
+## 12. Sync, Plaid, and Runtime Tuning
+
+The template now exposes the main upstream runtime toggles that were previously only obvious in docs or code:
+
+1. **Sync scheduling**
+   - `AUTO_SYNC_ENABLED`
+   - `AUTO_SYNC_TIME`
+   - `AUTO_SYNC_TIMEZONE`
+2. **Pending transaction behavior**
+   - `SIMPLEFIN_INCLUDE_PENDING`
+   - `PLAID_INCLUDE_PENDING`
+   - Just like provider selection, these env overrides lock the matching Sync control in Sure's UI when set.
+3. **Plaid credentials**
+   - `PLAID_CLIENT_ID`
+   - `PLAID_SECRET`
+   - `PLAID_ENV`
+   - `PLAID_EU_CLIENT_ID`
+   - `PLAID_EU_SECRET`
+   - `PLAID_EU_ENV`
+4. **OpenAI compatibility tuning**
+   - `OPENAI_REQUEST_TIMEOUT`
+   - `LLM_JSON_MODE`
+5. **Auth and onboarding behavior**
+   - `REQUIRE_EMAIL_CONFIRMATION`
+   - `AUTH_PROVIDERS_SOURCE`
+6. **Database and SSL edge cases**
+   - `POSTGRES_DB`
+   - `SSL_CERT_FILE`
+
+These are all legitimate upstream runtime knobs, but not all of them belong in a beginner walkthrough. They are here because `sure-aio` should expose the real self-hosting surface without forcing users to rebuild the image just to reach it.
 
 ---
 

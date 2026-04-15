@@ -39,6 +39,8 @@ If you just want to track your finances and don't care about databases, this is 
 
 While designed for absolute beginners, this container is intended to keep pace with upstream self-hosting features rather than stripping them out. The goal is straightforward: if upstream exposes a real self-hosting feature, the Unraid wrapper should either support it or document the gap plainly.
 
+Some advanced Sure settings are intentionally managed as container environment variables in the Unraid template instead of only through Sure's web UI. When upstream sees one of those env vars, it may disable the matching control in the app and treat the template value as the source of truth. That is expected for this wrapper.
+
 If you click **"Show more settings..."** in the Unraid template, you can customize the system deeply.
 
 Read the comprehensive [Power User Guide here](docs/power-user.md) for instructions on how to configure:
@@ -63,6 +65,7 @@ Just make sure `/mnt/user/appdata/sure-aio` is covered by your standard Unraid C
 
 - `Sure-AIO` now pins a specific upstream Sure version instead of following the floating `stable` tag.
 - The repo monitors stable upstream Sure tags and opens a PR when a newer stable version is released.
+- Upstream image digest drift is tracked separately so digest-only refreshes do not masquerade as version-bump PRs.
 - Every `main` package publish now ships the exact upstream version tag, an explicit AIO packaging line tag, `latest`, and `sha-<commit>`.
 - Formal wrapper releases follow the upstream version plus an AIO revision, such as `v0.6.8-aio.1`.
 - See the release workflow details in [docs/releases.md](docs/releases.md).

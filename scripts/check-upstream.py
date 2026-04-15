@@ -251,9 +251,11 @@ def main() -> None:
     current_digest = read_local_digest(upstream)
     latest_version = latest_github_tag(str(upstream.get("repo", "")).strip(), stable_only)
     latest_digest = latest_ghcr_digest(str(upstream.get("image", "")).strip(), "latest")
-    updates_available = latest_version != current_version or latest_digest != current_digest
+    version_update_available = latest_version != current_version
+    digest_update_available = latest_digest != current_digest
+    updates_available = version_update_available
 
-    if os.environ.get("WRITE_UPSTREAM_VERSION") == "true" and updates_available:
+    if os.environ.get("WRITE_UPSTREAM_VERSION") == "true" and version_update_available:
         write_local_version(upstream, latest_version)
         write_local_digest(upstream, latest_digest)
 
@@ -270,6 +272,8 @@ def main() -> None:
             "current_digest": current_digest,
             "latest_digest": latest_digest,
             "updates_available": "true" if updates_available else "false",
+            "version_update_available": "true" if version_update_available else "false",
+            "digest_update_available": "true" if digest_update_available else "false",
             "strategy": str(upstream.get("strategy", "pr")).strip() or "pr",
             "upstream_name": str(upstream.get("name", "")).strip(),
             "release_notes_url": release_notes,
