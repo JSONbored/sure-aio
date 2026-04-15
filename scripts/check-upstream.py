@@ -108,7 +108,7 @@ def latest_github_tag(repo: str, stable_only: bool) -> str:
     return sorted(candidates, key=version_sort_key)[-1]
 
 
-def latest_ghcr_digest(image: str, tag: str = "latest") -> str:
+def ghcr_digest_for_tag(image: str, tag: str) -> str:
     token_data = http_json(f"https://ghcr.io/token?scope=repository:{image}:pull")
     if not isinstance(token_data, dict) or not token_data.get("token"):
         fail(f"Could not get GHCR token for {image}")
@@ -133,12 +133,45 @@ def latest_ghcr_digest(image: str, tag: str = "latest") -> str:
         with urllib.request.urlopen(request, timeout=30) as response:
             digest = response.headers.get("docker-content-digest", "").strip()
     except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            raise LookupError(f"Tag not found: {image}:{tag}") from exc
         fail(f"HTTP error while requesting GHCR manifest for {image}:{tag}: {exc.code} {exc.reason}")
     except urllib.error.URLError as exc:
         fail(f"Network error while requesting GHCR manifest for {image}:{tag}: {exc.reason}")
     if not digest:
-        fail(f"Could not determine digest for GHCR image {image}:{tag}")
+        raise LookupError(f"Digest header missing: {image}:{tag}")
     return digest
+
+
+def latest_ghcr_digest(image: str, latest_version: str, stable_only: bool) -> str:
+    # For stable-only tracking, resolve digest from the exact version tag instead of
+    # floating tags like "latest", which may point at prerelease images.
+    candidates: list[str] = []
+
+    if latest_version:
+        candidates.append(latest_version)
+        if latest_version.startswith("v"):
+            candidates.append(latest_version[1:])
+
+    if stable_only:
+        candidates.append("stable")
+    else:
+        candidates.append("latest")
+
+    seen: set[str] = set()
+    for candidate in candidates:
+        if not candidate or candidate in seen:
+            continue
+        seen.add(candidate)
+        try:
+            return ghcr_digest_for_tag(image, candidate)
+        except LookupError:
+            continue
+
+    fail(
+        f"Could not determine digest for GHCR image {image} using candidates: "
+        + ", ".join(candidates)
+    )
 
 
 def read_local_version(config: dict[str, object]) -> str:
@@ -250,7 +283,11 @@ def main() -> None:
     current_version = read_local_version(upstream)
     current_digest = read_local_digest(upstream)
     latest_version = latest_github_tag(str(upstream.get("repo", "")).strip(), stable_only)
-    latest_digest = latest_ghcr_digest(str(upstream.get("image", "")).strip(), "latest")
+    latest_digest = latest_ghcr_digest(
+        str(upstream.get("image", "")).strip(),
+        latest_version,
+        stable_only,
+    )
     version_update_available = latest_version != current_version
     digest_update_available = latest_digest != current_digest
     updates_available = version_update_available
