@@ -32,9 +32,29 @@
 - [code]/mnt/user/appdata/sure-aio/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/redis[/code]</Overview>
   <Changes>[b]Latest release[/b]&#xD;
-- v0.6.9-aio.3&#xD;
+- v0.6.9-aio.4&#xD;
+[b]Build[/b]&#xD;
+- Harden bundled dependencies and refresh security patches (#50)&#xD;
+&#xD;
+&#xD;
+[b]CI[/b]&#xD;
+- Add one-dispatch full release orchestration (#43)&#xD;
+- Fallback to direct merge when auto-merge is disabled&#xD;
+- Pass explicit aio track override from release&#xD;
+- Harden full release flow and deterministic aio tag publishing&#xD;
+- Trigger registry parity publish&#xD;
+&#xD;
+&#xD;
 [b]Fixes[/b]&#xD;
-- Stabilize upstream pinning and align AIO package tags (#41)&#xD;
+- Restore CA trust signals and automate changelog sync (#46)&#xD;
+- Gate Docker Hub login without direct secrets expressions&#xD;
+- Make workflow-dispatch publish gates deterministic (#48)&#xD;
+- Always publish on manual main workflow dispatch&#xD;
+- Let manual publish proceed when smoke test is skipped&#xD;
+&#xD;
+&#xD;
+[b]Maintenance[/b]&#xD;
+- Trigger package publish for aio tag alignment&#xD;
 &#xD;
 &#xD;
 Full changelog and release notes: [url=https://github.com/JSONbored/sure-aio/releases]GitHub Releases[/url]</Changes>
