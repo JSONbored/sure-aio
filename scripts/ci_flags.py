@@ -24,15 +24,15 @@ def resolve_flags(
     event_name: str,
     ref: str,
     run_smoke_test_input: str | None = None,
-    publish_image_input: str | None = None,
 ) -> CiFlags:
     if event_name == "push" and ref == "refs/heads/main":
         return CiFlags(run_smoke_requested=True, publish_requested=True)
 
-    if event_name == "workflow_dispatch":
+    if event_name == "workflow_dispatch" and ref == "refs/heads/main":
         return CiFlags(
             run_smoke_requested=parse_bool(run_smoke_test_input),
-            publish_requested=parse_bool(publish_image_input),
+            # Manual runs on main are explicitly for release/publish operations.
+            publish_requested=True,
         )
 
     return CiFlags(run_smoke_requested=False, publish_requested=False)
@@ -43,14 +43,12 @@ def main() -> int:
     parser.add_argument("--event-name", required=True)
     parser.add_argument("--ref", required=True)
     parser.add_argument("--run-smoke-test-input", default="")
-    parser.add_argument("--publish-image-input", default="")
     args = parser.parse_args()
 
     flags = resolve_flags(
         event_name=args.event_name,
         ref=args.ref,
         run_smoke_test_input=args.run_smoke_test_input,
-        publish_image_input=args.publish_image_input,
     )
     print(f"run_smoke_requested={'true' if flags.run_smoke_requested else 'false'}")
     print(f"publish_requested={'true' if flags.publish_requested else 'false'}")

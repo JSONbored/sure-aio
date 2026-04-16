@@ -28,11 +28,6 @@ on:
         required: false
         default: false
         type: boolean
-      publish_image:
-        description: "Publish image tags from the current ref"
-        required: false
-        default: false
-        type: boolean
       aio_track_override:
         description: "Optional package line override (example: aio-v3)"
         required: false
@@ -76,13 +71,11 @@ jobs:
           GITHUB_SHA_VALUE: ${{ github.sha }}
           GITHUB_REF_VALUE: ${{ github.ref }}
           RUN_SMOKE_TEST_INPUT: ${{ github.event.inputs.run_smoke_test || '' }}
-          PUBLISH_IMAGE_INPUT: ${{ github.event.inputs.publish_image || '' }}
         run: |
           python3 scripts/ci_flags.py \
             --event-name "${EVENT_NAME}" \
             --ref "${GITHUB_REF_VALUE}" \
-            --run-smoke-test-input "${RUN_SMOKE_TEST_INPUT}" \
-            --publish-image-input "${PUBLISH_IMAGE_INPUT}" >> "${GITHUB_OUTPUT}"
+            --run-smoke-test-input "${RUN_SMOKE_TEST_INPUT}" >> "${GITHUB_OUTPUT}"
 
           if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
             echo "build_related=true" >> "${GITHUB_OUTPUT}"
