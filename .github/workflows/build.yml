@@ -308,9 +308,11 @@ jobs:
         env:
           AIO_TRACK_OVERRIDE: ${{ github.event_name == 'workflow_dispatch' && inputs.aio_track_override || '' }}
           DOCKERHUB_ENABLED: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+          DOCKERHUB_IMAGE_NAME: ${{ secrets.DOCKERHUB_IMAGE_NAME }}
         run: |
           image_ghcr="$(printf '%s' "${REGISTRY}/${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
-          image_dockerhub="$(printf '%s' "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
+          dockerhub_image_name="${DOCKERHUB_IMAGE_NAME:-${IMAGE_NAME}}"
+          image_dockerhub="$(printf '%s' "${dockerhub_image_name}" | tr '[:upper:]' '[:lower:]')"
           sha_tag_ghcr="${image_ghcr}:sha-${GITHUB_SHA}"
           raw_version="$(sed -n 's/^ARG UPSTREAM_VERSION=//p' Dockerfile | head -n1)"
           upstream_version="${raw_version%%@*}"
