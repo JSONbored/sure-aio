@@ -31,10 +31,11 @@
 - [code]/mnt/user/appdata/sure-aio/system[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/redis[/code]</Overview>
-  <Changes>[b]Latest updates[/b]&#xD;
-- v0.6.9-aio.3: release/publish workflow hardening and deterministic aio image-track tagging.&#xD;
-- v0.6.9-aio.2: finalized CA metadata and expanded upstream env-surface coverage in the template.&#xD;
-- v0.6.9-aio.1: Sure 0.6.9 AIO baseline refresh.&#xD;
+  <Changes>[b]Latest release[/b]&#xD;
+- v0.6.9-aio.3&#xD;
+[b]Fixes[/b]&#xD;
+- Stabilize upstream pinning and align AIO package tags (#41)&#xD;
+&#xD;
 &#xD;
 Full changelog and release notes: [url=https://github.com/JSONbored/sure-aio/releases]GitHub Releases[/url]</Changes>
   <Category>Productivity Tools-Utilities</Category>
