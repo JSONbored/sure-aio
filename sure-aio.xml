@@ -12,15 +12,25 @@
   <Overview>Sure (formerly Maybe Finance) is a self-hosted personal finance app for budgeting, net worth tracking, and account aggregation.&#xD;
 &#xD;
 [b]All-In-One Unraid Edition[/b]&#xD;
-sure-aio packages the web app, worker, PostgreSQL, and Redis into one Unraid template with persistent appdata paths and no external database setup required.&#xD;
+`sure-aio` packages the web app, worker, PostgreSQL, and Redis into one Unraid template with persistent appdata paths, so beginners can run Sure without deploying separate DB/cache containers.&#xD;
 &#xD;
-[b]First install[/b]&#xD;
-1. Generate a [code]SECRET_KEY_BASE[/code] with [code]openssl rand -hex 64[/code].&#xD;
-2. Paste it below and click Apply.&#xD;
-3. Wait for first boot to finish provisioning the internal services.&#xD;
+[b]Quick Install (Beginners)[/b]&#xD;
+1. In Unraid, click Install for this template.&#xD;
+2. Open an Unraid terminal and generate your secret: [code]openssl rand -hex 64[/code]&#xD;
+3. Copy that value into [code]Secret Key Base[/code] ([code]SECRET_KEY_BASE[/code]) in the template form.&#xD;
+4. Leave defaults in place for first boot, then click Apply.&#xD;
+5. Wait for initialization to complete, then open [code]http://SERVER_IP:3000[/code] (or your mapped port).&#xD;
 &#xD;
-[b]Advanced note[/b]&#xD;
-External database, Redis, proxy, SMTP, AI, and storage overrides are available in Advanced View.</Overview>
+[b]Power Users (Advanced View)[/b]&#xD;
+- Enable [code]Advanced View[/code] in the template to expose full runtime/env controls.&#xD;
+- Override DB/Redis to external services if desired, or keep the AIO defaults.&#xD;
+- Configure SMTP, reverse-proxy SSL behavior, OIDC/SSO, telemetry/APM, and API/provider keys (Plaid, Yahoo, Brandfetch, AI, etc.).&#xD;
+- Keep defaults for easiest operation; only set overrides you actually need.&#xD;
+&#xD;
+[b]Data paths (default)[/b]&#xD;
+- [code]/mnt/user/appdata/sure-aio/system[/code]&#xD;
+- [code]/mnt/user/appdata/sure-aio/postgres[/code]&#xD;
+- [code]/mnt/user/appdata/sure-aio/redis[/code]</Overview>
   <Changes>[b]Latest updates[/b]&#xD;
 - v0.6.9-aio.3: release/publish workflow hardening and deterministic aio image-track tagging.&#xD;
 - v0.6.9-aio.2: finalized CA metadata and expanded upstream env-surface coverage in the template.&#xD;
