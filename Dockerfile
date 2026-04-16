@@ -16,7 +16,9 @@ USER root
 
 # 1. Install prerequisites, s6-overlay, Redis, and pgvector support
 # We use standard PATH binaries for Postgres (it's installed as postgresql)
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Refresh inherited Debian packages before adding our own runtime dependencies so
+# published security fixes from the upstream base layer land in the wrapper image.
+RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y --no-install-recommends \
     build-essential ca-certificates curl git xz-utils \
     postgresql postgresql-client postgresql-server-dev-17 redis-server && \
     git clone --branch "v${PGVECTOR_VERSION}" --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
