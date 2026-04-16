@@ -294,13 +294,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Login to Docker Hub
+        if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Compute image tags
         id: prep
         env:
           AIO_TRACK_OVERRIDE: ${{ github.event_name == 'workflow_dispatch' && inputs.aio_track_override || '' }}
+          DOCKERHUB_ENABLED: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
         run: |
-          image="$(printf '%s' "${REGISTRY}/${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
-          sha_tag="${image}:sha-${GITHUB_SHA}"
+          image_ghcr="$(printf '%s' "${REGISTRY}/${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
+          image_dockerhub="$(printf '%s' "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
+          sha_tag_ghcr="${image_ghcr}:sha-${GITHUB_SHA}"
           raw_version="$(sed -n 's/^ARG UPSTREAM_VERSION=//p' Dockerfile | head -n1)"
           upstream_version="${raw_version%%@*}"
           upstream_digest="$(sed -n 's/^ARG UPSTREAM_IMAGE_DIGEST=//p' Dockerfile | head -n1)"
@@ -329,12 +339,21 @@ jobs:
             echo "upstream_digest=${upstream_digest}"
             echo "aio_track=${aio_track}"
             echo "tags<<EOF"
-            echo "${image}:latest"
+            echo "${image_ghcr}:latest"
             if [[ -n "${upstream_version}" ]]; then
-              echo "${image}:${upstream_version}"
-              echo "${image}:${upstream_version}-${aio_track}"
+              echo "${image_ghcr}:${upstream_version}"
+              echo "${image_ghcr}:${upstream_version}-${aio_track}"
             fi
-            echo "${sha_tag}"
+            echo "${sha_tag_ghcr}"
+
+            if [[ "${DOCKERHUB_ENABLED}" == "true" ]]; then
+              echo "${image_dockerhub}:latest"
+              if [[ -n "${upstream_version}" ]]; then
+                echo "${image_dockerhub}:${upstream_version}"
+                echo "${image_dockerhub}:${upstream_version}-${aio_track}"
+              fi
+              echo "${image_dockerhub}:sha-${GITHUB_SHA}"
+            fi
             echo "EOF"
           } >> "${GITHUB_OUTPUT}"
 
@@ -358,7 +377,7 @@ jobs:
             io.jsonbored.upstream.digest=${{ steps.prep.outputs.upstream_digest || '' }}
             io.jsonbored.wrapper.name=sure-aio
             io.jsonbored.wrapper.type=unraid-aio
-            io.jsonbored.wrapper.track=aio-v1
+            io.jsonbored.wrapper.track=${{ steps.prep.outputs.aio_track }}
           load: false
 
   sync-awesome-unraid:

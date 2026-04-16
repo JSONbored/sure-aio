@@ -21,7 +21,13 @@ sure-aio packages the web app, worker, PostgreSQL, and Redis into one Unraid tem
 &#xD;
 [b]Advanced note[/b]&#xD;
 External database, Redis, proxy, SMTP, AI, and storage overrides are available in Advanced View.</Overview>
-  <Category>Tools: Utilities: Productivity:</Category>
+  <Changes>[b]Latest updates[/b]&#xD;
+- v0.6.9-aio.3: release/publish workflow hardening and deterministic aio image-track tagging.&#xD;
+- v0.6.9-aio.2: finalized CA metadata and expanded upstream env-surface coverage in the template.&#xD;
+- v0.6.9-aio.1: Sure 0.6.9 AIO baseline refresh.&#xD;
+&#xD;
+Full changelog and release notes: [url=https://github.com/JSONbored/sure-aio/releases]GitHub Releases[/url]</Changes>
+  <Category>Productivity Tools-Utilities</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/icons/sure.png</Icon>

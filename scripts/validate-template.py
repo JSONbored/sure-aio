@@ -165,6 +165,12 @@ REQUIRED_TARGETS = {
     "YAHOO_FINANCE_URL",
 }
 
+REQUIRED_CHANGELOG_LINK = "https://github.com/JSONbored/sure-aio/releases"
+ALLOWED_CATEGORY_TOKENS = {
+    "Productivity",
+    "Tools-Utilities",
+}
+
 
 def main() -> int:
     tree = ET.parse(TEMPLATE_PATH)
@@ -181,6 +187,34 @@ def main() -> int:
         print("sure-aio.xml is missing required upstream/runtime targets:", file=sys.stderr)
         for target in missing:
             print(f"  - {target}", file=sys.stderr)
+        return 1
+
+    category = (root.findtext("Category") or "").strip()
+    if not category:
+        print("sure-aio.xml is missing a <Category> value", file=sys.stderr)
+        return 1
+
+    category_tokens = [token for token in category.split(" ") if token]
+    unknown_categories = sorted(set(category_tokens) - ALLOWED_CATEGORY_TOKENS)
+    if unknown_categories:
+        print("sure-aio.xml contains unknown/unapproved category tokens:", file=sys.stderr)
+        for token in unknown_categories:
+            print(f"  - {token}", file=sys.stderr)
+        print(
+            f"Allowed tokens: {', '.join(sorted(ALLOWED_CATEGORY_TOKENS))}",
+            file=sys.stderr,
+        )
+        return 1
+
+    changes = (root.findtext("Changes") or "").strip()
+    if not changes:
+        print("sure-aio.xml is missing a non-empty <Changes> section", file=sys.stderr)
+        return 1
+    if REQUIRED_CHANGELOG_LINK not in changes:
+        print(
+            "sure-aio.xml <Changes> does not include the canonical GitHub releases URL",
+            file=sys.stderr,
+        )
         return 1
 
     print(f"sure-aio.xml parsed successfully and includes {len(REQUIRED_TARGETS)} required targets")
