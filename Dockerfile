@@ -21,6 +21,11 @@ USER root
 RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y --no-install-recommends \
     build-essential ca-certificates curl git xz-utils \
     postgresql postgresql-client postgresql-server-dev-17 redis-server && \
+    cd /rails && \
+    bundle config set frozen false && \
+    bundle update --conservative rack rack-session addressable rexml && \
+    bundle clean --force && \
+    bundle config set frozen true && \
     git clone --branch "v${PGVECTOR_VERSION}" --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
     make -C /tmp/pgvector OPTFLAGS="" && \
     make -C /tmp/pgvector install && \
