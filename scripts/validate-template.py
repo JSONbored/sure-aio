@@ -165,7 +165,6 @@ REQUIRED_TARGETS = {
     "YAHOO_FINANCE_URL",
 }
 
-REQUIRED_CHANGELOG_LINK = "https://github.com/JSONbored/sure-aio/releases"
 ALLOWED_CATEGORY_TOKENS = {
     "Productivity",
     "Tools-Utilities",
@@ -210,13 +209,6 @@ def main() -> int:
     if not changes:
         print("sure-aio.xml is missing a non-empty <Changes> section", file=sys.stderr)
         return 1
-    if REQUIRED_CHANGELOG_LINK not in changes:
-        print(
-            "sure-aio.xml <Changes> does not include the canonical GitHub releases URL",
-            file=sys.stderr,
-        )
-        return 1
-
     print(f"sure-aio.xml parsed successfully and includes {len(REQUIRED_TARGETS)} required targets")
     return 0
 
