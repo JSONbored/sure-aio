@@ -5,6 +5,7 @@
 ---
 
 ## 1. Using an External Database (Bypassing AIO Internals)
+
 If you already run a heavy-duty PostgreSQL/Redis container (like `postgres-shared`) and want Sure to use it instead of its own internal isolated database:
 
 1. Create a database (e.g. `sure_app`) and user on your external Postgres container.
@@ -21,15 +22,19 @@ If you already run a heavy-duty PostgreSQL/Redis container (like `postgres-share
 
 Sure uses AI to auto-categorize transactions and answer questions.
 
-### Option A: Local LLM (Ollama) - *Recommended Privacy Focus*
+### Option A: Local LLM (Ollama) - _Recommended Privacy Focus_
+
 To process your finances locally without sending data to the cloud:
+
 1. Find the **[AI]** block.
 2. **OpenAI / Ollama Token:** Enter `ollama-local` (bypasses validation).
 3. **OpenAI URI Base:** Enter your Ollama IP: `http://192.168.1.X:11434/v1`
 4. **Model Name:** Enter a local model you have pulled (e.g., `llama3.1:8b`).
 
 ### Option B: External Agent Routing (OpenClaw / MCP)
+
 To handle chat entirely inside an external AI agent rather than the basic Sure UI:
+
 1. Find the **[Ext. AI]** block.
 2. **Assistant Type:** Set to `external` (forces all users to use the remote agent).
 3. **Assistant URL:** e.g., `http://192.168.1.X:18789/v1/chat/completions` (OpenClaw completions endpoint).
@@ -41,6 +46,7 @@ To handle chat entirely inside an external AI agent rather than the basic Sure U
 9. **MCP API Token:** Create a secure password. The external agent uses this to securely callback into Sure to read transaction data.
 
 ### Option C: Local Vector Search (pgvector / Qdrant)
+
 Sure allows chatting with uploaded financial PDFs and other indexed documents.
 For the exact Sure-AIO pgvector behavior, including the default "installed but not enabled" model and the external PostgreSQL limitation, see [docs/pgvector.md](pgvector.md).
 
@@ -59,6 +65,7 @@ For the exact Sure-AIO pgvector behavior, including the default "installed but n
 ---
 
 ## 3. Telemetry & Observability (Langfuse / PostHog)
+
 Track LLM inference costs and app usage.
 
 1. Find the **[Telemetry]** block.
@@ -70,6 +77,7 @@ Track LLM inference costs and app usage.
 ---
 
 ## 4. Offloading Storage to S3 / Cloudflare R2 / Minio
+
 Avoid filling your Unraid cache drive by piping PDFs/receipts straight to object storage.
 
 1. Find the **[Storage]** block.
@@ -80,22 +88,25 @@ Avoid filling your Unraid cache drive by piping PDFs/receipts straight to object
 ---
 
 ## 5. Free vs Paid External Data Providers
+
 Sure relies on upstream providers for currency exchange rates and stock logos.
 
-*   **Free (Default):** If you leave provider overrides blank, upstream Sure defaults to `yahoo_finance` for first-boot friendliness.
-*   **Paid API Keys (Optional):** If you prefer Twelve Data, add your API key and change **[API] Exchange Rate Provider** and **[API] Securities Provider** to `twelve_data`.
-*   **Logos:** Provide a **[API] Brandfetch Client ID** to automatically scrape high-res logos for your bank names and merchants.
-*   **High-res logos:** Set `BRAND_FETCH_HIGH_RES_LOGOS=true` if you want Sure to prefer larger Brandfetch logo assets where available.
-*   **Indexa token path:** If you use Indexa Capital and want a single global token fallback, set `INDEXA_API_TOKEN`.
-*   **Important override behavior:** Upstream only locks matching settings UI controls when the related env var is present. Leaving provider/logo env fields blank keeps the UI controls interactive.
-*   **Advanced provider tuning:** The template also exposes `TWELVE_DATA_URL`, `YAHOO_FINANCE_URL`, `YAHOO_FINANCE_MAX_RETRIES`, `YAHOO_FINANCE_RETRY_INTERVAL`, and `YAHOO_FINANCE_MIN_REQUEST_INTERVAL` if you need proxying or retry tuning.
+- **Free (Default):** If you leave provider overrides blank, upstream Sure defaults to `yahoo_finance` for first-boot friendliness.
+- **Paid API Keys (Optional):** If you prefer Twelve Data, add your API key and change **[API] Exchange Rate Provider** and **[API] Securities Provider** to `twelve_data`.
+- **Logos:** Provide a **[API] Brandfetch Client ID** to automatically scrape high-res logos for your bank names and merchants.
+- **High-res logos:** Set `BRAND_FETCH_HIGH_RES_LOGOS=true` if you want Sure to prefer larger Brandfetch logo assets where available.
+- **Indexa token path:** If you use Indexa Capital and want a single global token fallback, set `INDEXA_API_TOKEN`.
+- **Important override behavior:** Upstream only locks matching settings UI controls when the related env var is present. Leaving provider/logo env fields blank keeps the UI controls interactive.
+- **Advanced provider tuning:** The template also exposes `TWELVE_DATA_URL`, `YAHOO_FINANCE_URL`, `YAHOO_FINANCE_MAX_RETRIES`, `YAHOO_FINANCE_RETRY_INTERVAL`, and `YAHOO_FINANCE_MIN_REQUEST_INTERVAL` if you need proxying or retry tuning.
 
 ---
 
 ## 6. Enterprise Setup (OIDC & Email)
 
 ### OpenID Connect (Authelia / Authentik)
+
 To enable Single Sign-On (SSO):
+
 1. Find the **[Auth]** block.
 2. Provide your `OIDC Client ID`, `Client Secret`, `Issuer URL`, and the `Redirect URI` you configured in your Identity Provider.
 3. If you want tighter onboarding control, set:
@@ -108,6 +119,7 @@ To enable Single Sign-On (SSO):
 6. Upstream also uses `APP_URL` for advanced auth flows, especially absolute callback and issuer generation. If you are doing advanced auth beyond the normal generic OIDC path, set `APP_URL` to your full external base URL such as `https://finance.example.com`.
 
 ### SMTP Mail Relay (For Password Resets / Reports)
+
 1. Find the **[Email]** block.
 2. Fill out standard credentials: `SMTP Address`, `Port`, `Username`, `Password`.
 3. Provide the `Sender Address` (e.g., `no-reply@finance.yourdomain.com`).
@@ -115,12 +127,14 @@ To enable Single Sign-On (SSO):
 ---
 
 ## 7. Advanced Database Encryption
+
 By default, Sure derives your database encryption keys securely from your `Secret Key Base`.
 
 If you are a cryptography purist who wants to separate these:
+
 1. Find the **[DB Encryption]** block.
-2. Manually define your `Primary Key`, `Deterministic Key`, and `Derivation Salt`. 
-*(Warning: Losing these means permanently losing access to your encrypted data).*
+2. Manually define your `Primary Key`, `Deterministic Key`, and `Derivation Salt`.
+   _(Warning: Losing these means permanently losing access to your encrypted data)._
 
 ---
 
@@ -139,6 +153,7 @@ If you later place Sure behind Nginx Proxy Manager, Traefik, Caddy, Cloudflare T
 4. If advanced auth or metadata generation expects a full URL, also set `APP_URL` to the full external base URL
 
 ### Private CA / Self-Signed HTTPS Support
+
 If your OIDC provider, MinIO endpoint, Qdrant node, or another upstream integration uses a private CA:
 
 1. Use the optional **[SSL] Custom CA Certificate Mount** field to bind your CA PEM file into the container.
@@ -238,6 +253,7 @@ These are all legitimate upstream runtime knobs, but not all of them belong in a
 Upstream `v0.6.9` is supposed to disable subscription and trial gating in self-hosted mode when `SELF_HOSTED=true`. The 45-day trial logic still exists in the codebase, but upstream guards it behind `app_mode != self_hosted`.
 
 That means if you see a trial banner or upgrade flow on a self-hosted Sure-AIO install, the likely causes are:
+
 1. The running container is not actually seeing `SELF_HOSTED=true`.
 2. Existing app state was created before self-hosted mode was applied.
 3. There is an upstream bug in a specific onboarding or UI path.

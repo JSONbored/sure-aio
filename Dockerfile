@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1@sha256:2780b5c3bab67f1f76c781860de469442999ed1a0d7992a5efdf2cffc0e3d769
+# checkov:skip=CKV_DOCKER_8: s6-overlay entrypoint must start as root so init scripts can prepare filesystem state before dropping privileges
 
 ARG UPSTREAM_VERSION=v0.6.9
 ARG UPSTREAM_IMAGE_DIGEST=sha256:3d899b3eced520d8d3166a3d53184cbb1356670fb52d050f94f8e62e59754d70
 ARG PGVECTOR_VERSION=0.8.2
-FROM ghcr.io/we-promise/sure@${UPSTREAM_IMAGE_DIGEST}
+FROM ghcr.io/we-promise/sure:${UPSTREAM_VERSION}@${UPSTREAM_IMAGE_DIGEST}
 
 ARG PGVECTOR_VERSION
 ARG S6_OVERLAY_VERSION=3.1.6.2
@@ -12,16 +13,27 @@ ARG S6_OVERLAY_AARCH64_SHA256=3fc0bae418a0e3811b3deeadfca9cc2f0869fb2f4787ab8a53
 ARG S6_OVERLAY_X86_64_SHA256=95081f11c56e5a351e9ccab4e70c2b1c3d7d056d82b72502b942762112c03d1c
 ARG TARGETARCH
 
+# hadolint ignore=DL3002
 USER root
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+WORKDIR /rails
 
 # 1. Install prerequisites, s6-overlay, Redis, and pgvector support
 # We use standard PATH binaries for Postgres (it's installed as postgresql)
 # Refresh inherited Debian packages before adding our own runtime dependencies so
 # published security fixes from the upstream base layer land in the wrapper image.
-RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y --no-install-recommends \
-    build-essential ca-certificates curl git xz-utils \
-    postgresql postgresql-client postgresql-server-dev-17 redis-server && \
-    cd /rails && \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade && \
+    apt-get install -y --no-install-recommends \
+    build-essential="$(apt-cache madison build-essential | awk 'NR==1 {print $3}')" \
+    ca-certificates="$(apt-cache madison ca-certificates | awk 'NR==1 {print $3}')" \
+    curl="$(apt-cache madison curl | awk 'NR==1 {print $3}')" \
+    git="$(apt-cache madison git | awk 'NR==1 {print $3}')" \
+    postgresql="$(apt-cache madison postgresql | awk 'NR==1 {print $3}')" \
+    postgresql-client="$(apt-cache madison postgresql-client | awk 'NR==1 {print $3}')" \
+    postgresql-server-dev-17="$(apt-cache madison postgresql-server-dev-17 | awk 'NR==1 {print $3}')" \
+    redis-server="$(apt-cache madison redis-server | awk 'NR==1 {print $3}')" \
+    xz-utils="$(apt-cache madison xz-utils | awk 'NR==1 {print $3}')" && \
     bundle config set frozen false && \
     bundle update --conservative rack rack-session addressable rexml && \
     bundle clean --force && \
@@ -32,7 +44,7 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y --no-install
     apt-get purge -y --auto-remove \
       build-essential git postgresql-server-dev-17 \
       clang-19 llvm-19 llvm-19-dev llvm-19-linker-tools llvm-19-runtime llvm-19-tools && \
-    curl -L -o /tmp/s6-overlay-noarch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
+    curl -L -o /tmp/s6-overlay-noarch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz" && \
     echo "${S6_OVERLAY_NOARCH_SHA256}  /tmp/s6-overlay-noarch.tar.xz" | sha256sum -c - && \
     tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
     case "${TARGETARCH}" in \
@@ -40,7 +52,7 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y --no-install
       arm64) s6_arch="aarch64"; s6_sha="${S6_OVERLAY_AARCH64_SHA256}" ;; \
       *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
     esac && \
-    curl -L -o /tmp/s6-overlay-arch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${s6_arch}.tar.xz && \
+    curl -L -o /tmp/s6-overlay-arch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${s6_arch}.tar.xz" && \
     echo "${s6_sha}  /tmp/s6-overlay-arch.tar.xz" | sha256sum -c - && \
     tar -C / -Jxpf /tmp/s6-overlay-arch.tar.xz && \
     rm -f /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/certs/ssl-cert-snakeoil.pem && \
@@ -70,6 +82,7 @@ RUN find /etc/s6-overlay/s6-rc.d -type f \( -name "run" -o -name "up" \) -exec c
 VOLUME ["/rails/storage", "/var/lib/postgresql/data", "/var/lib/redis"]
 
 ENV SKYLIGHT_ENABLED=false
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=300000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
   CMD curl -f http://localhost:3000/up || exit 1
