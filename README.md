@@ -69,9 +69,16 @@ python3 -m venv .venv-local
 .venv-local/bin/pip install -r requirements-dev.txt
 .venv-local/bin/pytest tests/unit tests/template --junit-xml=reports/pytest-unit.xml -o junit_family=xunit1
 .venv-local/bin/pytest tests/integration -m integration --junit-xml=reports/pytest-integration.xml -o junit_family=xunit1
-trunk flakytests validate --junit-paths "reports/pytest-unit.xml,reports/pytest-integration.xml"
+./trunk-analytics-cli validate --junit-paths "reports/pytest-unit.xml,reports/pytest-integration.xml"
 trunk check --show-existing --all
 ```
+
+CI cost model:
+
+- relevant PRs and `main` pushes run the fast validation layers first
+- Docker-backed integration tests run for build-relevant changes, for `main` release-metadata commits when publish is still in play, and for manual dispatches
+- image publish stays gated behind the integration suite instead of treating skipped integration as acceptable
+- local Docker validation stays explicit instead of hiding inside every routine commit hook
 
 ## Support
 

@@ -8,7 +8,12 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from tests.helpers import docker_available, reserve_host_port, run_command
+from tests.helpers import (
+    docker_available,
+    ensure_pytest_image,
+    reserve_host_port,
+    run_command,
+)
 
 IMAGE_TAG = "sure-aio:pytest"
 pytestmark = pytest.mark.integration
@@ -103,7 +108,7 @@ def container(storage_dir: Path, pgdata_dir: Path, redis_dir: Path):
 def build_image() -> None:
     if not docker_available():
         pytest.skip("Docker is unavailable; integration tests require Docker/OrbStack.")
-    run_command(["docker", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG, "."])
+    ensure_pytest_image(IMAGE_TAG)
 
 
 def test_happy_path_boot_and_recreate_persists_data() -> None:
