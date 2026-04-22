@@ -4,7 +4,9 @@ on:
   push:
     branches: [main]
     paths:
+      - CHANGELOG.md
       - Dockerfile
+      - cliff.toml
       - pyproject.toml
       - requirements-dev.txt
       - rootfs/**
@@ -18,7 +20,9 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - CHANGELOG.md
       - Dockerfile
+      - cliff.toml
       - pyproject.toml
       - requirements-dev.txt
       - rootfs/**
@@ -35,6 +39,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   REGISTRY: ghcr.io
   IMAGE_NAME: jsonbored/sure-aio
+  PYTHON_VERSION: "3.13"
+  PYTEST_IMAGE_TAG: sure-aio:pytest
   TRUNK_ORG_URL_SLUG: aethereal
 
 permissions:
@@ -54,6 +60,7 @@ jobs:
       xml_related: ${{ steps.filter.outputs.xml_related }}
       renovate_related: ${{ steps.filter.outputs.renovate_related }}
       tooling_related: ${{ steps.filter.outputs.tooling_related }}
+      workflow_related: ${{ steps.filter.outputs.workflow_related }}
       run_tests_requested: ${{ steps.filter.outputs.run_tests_requested }}
       publish_requested: ${{ steps.filter.outputs.publish_requested }}
     steps:
@@ -127,6 +134,7 @@ jobs:
           xml_related=false
           renovate_related=false
           tooling_related=false
+          workflow_related=false
 
           while IFS= read -r path; do
             [[ -z "${path}" ]] && continue
@@ -137,8 +145,12 @@ jobs:
               sure-aio.xml)
                 xml_related=true
                 ;;
-              scripts/*|.github/workflows/*|.trunk/*)
+              CHANGELOG.md|cliff.toml|scripts/*|.trunk/*)
                 tooling_related=true
+                ;;
+              .github/workflows/*)
+                tooling_related=true
+                workflow_related=true
                 ;;
               renovate.json)
                 renovate_related=true
@@ -150,8 +162,9 @@ jobs:
           echo "xml_related=${xml_related}" >> "${GITHUB_OUTPUT}"
           echo "renovate_related=${renovate_related}" >> "${GITHUB_OUTPUT}"
           echo "tooling_related=${tooling_related}" >> "${GITHUB_OUTPUT}"
+          echo "workflow_related=${workflow_related}" >> "${GITHUB_OUTPUT}"
 
-  validate-template:
+  fast-checks:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.build_related == 'true' || needs.detect-changes.outputs.xml_related == 'true' || needs.detect-changes.outputs.renovate_related == 'true' || needs.detect-changes.outputs.tooling_related == 'true' }}
     runs-on: ubuntu-latest
@@ -160,6 +173,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
 
       - name: Validate shell and python scripts
         if: ${{ needs.detect-changes.outputs.build_related == 'true' || needs.detect-changes.outputs.tooling_related == 'true' }}
@@ -188,15 +208,8 @@ jobs:
         if: ${{ needs.detect-changes.outputs.renovate_related == 'true' }}
         run: npx --yes --package renovate renovate-config-validator renovate.json
 
-  pinned-actions:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
       - name: Enforce pinned action SHAs
+        if: ${{ needs.detect-changes.outputs.workflow_related == 'true' }}
         run: |
           python3 - <<'PY'
           import pathlib
@@ -225,6 +238,12 @@ jobs:
           print("All workflow actions are pinned to full commit SHAs.")
           PY
 
+      - name: Install pytest
+        if: ${{ needs.detect-changes.outputs.build_related == 'true' || needs.detect-changes.outputs.xml_related == 'true' || needs.detect-changes.outputs.tooling_related == 'true' }}
+        run: |
+          python -m venv .venv-ci
+          .venv-ci/bin/python -m pip install -r requirements-dev.txt
+
   dependency-review:
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
@@ -239,8 +258,7 @@ jobs:
     if: ${{ needs.detect-changes.outputs.build_related == 'true' || needs.detect-changes.outputs.xml_related == 'true' || needs.detect-changes.outputs.tooling_related == 'true' }}
     needs:
       - detect-changes
-      - validate-template
-      - pinned-actions
+      - fast-checks
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -248,11 +266,17 @@ jobs:
       TRUNK_API_TOKEN: ${{ secrets.TRUNK_API_TOKEN }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
 
       - name: Install pytest
         run: |
-          python3 -m venv .venv-ci
-          .venv-ci/bin/pip install -r requirements-dev.txt
+          python -m venv .venv-ci
+          .venv-ci/bin/python -m pip install -r requirements-dev.txt
 
       - name: Run pytest unit tests
         id: unit_pytest
@@ -285,11 +309,10 @@ jobs:
         run: exit 1
 
   integration-tests:
-    if: ${{ needs.detect-changes.outputs.build_related == 'true' && needs.detect-changes.outputs.run_tests_requested == 'true' }}
+    if: ${{ needs.detect-changes.outputs.run_tests_requested == 'true' && (needs.detect-changes.outputs.build_related == 'true' || (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.publish_requested == 'true')) }}
     needs:
       - detect-changes
-      - validate-template
-      - pinned-actions
+      - fast-checks
       - unit-tests
     runs-on: ubuntu-latest
     permissions:
@@ -298,14 +321,36 @@ jobs:
       TRUNK_API_TOKEN: ${{ secrets.TRUNK_API_TOKEN }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+      - name: Prebuild pytest image
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          context: .
+          load: true
+          platforms: linux/amd64
+          tags: ${{ env.PYTEST_IMAGE_TAG }}
+          cache-from: type=gha,scope=sure-aio-pytest
+          cache-to: type=gha,mode=max,scope=sure-aio-pytest
 
       - name: Install pytest
         run: |
-          python3 -m venv .venv-ci
-          .venv-ci/bin/pip install -r requirements-dev.txt
+          python -m venv .venv-ci
+          .venv-ci/bin/python -m pip install -r requirements-dev.txt
 
       - name: Run pytest integration tests
         id: integration_pytest
+        env:
+          AIO_TEST_IMAGE: ${{ env.PYTEST_IMAGE_TAG }}
+          AIO_TEST_IMAGE_REUSE: "1"
         run: |
           mkdir -p reports
           rm -f reports/pytest-integration.xml
@@ -345,8 +390,7 @@ jobs:
     if: ${{ needs.detect-changes.outputs.build_related == 'true' && vars.ENABLE_AIO_AUTOMATION == 'true' && github.event_name == 'push' && needs.detect-changes.outputs.publish_requested == 'true' && (needs.integration-tests.result == 'success' || needs.integration-tests.result == 'skipped') }}
     needs:
       - detect-changes
-      - validate-template
-      - pinned-actions
+      - fast-checks
       - unit-tests
       - integration-tests
     runs-on: ubuntu-latest
@@ -460,8 +504,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=sure-aio-publish
+          cache-to: type=gha,mode=max,scope=sure-aio-publish
           tags: ${{ steps.prep.outputs.tags }}
           labels: |
             org.opencontainers.image.source=https://github.com/JSONbored/sure-aio
@@ -480,8 +524,8 @@ jobs:
     if: ${{ needs.detect-changes.outputs.xml_related == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     needs:
       - detect-changes
-      - validate-template
-      - pinned-actions
+      - fast-checks
+      - unit-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read

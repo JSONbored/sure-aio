@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import time
 import uuid
 from contextlib import contextmanager
@@ -8,9 +9,15 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from tests.helpers import docker_available, reserve_host_port, run_command
+from tests.helpers import (
+    build_test_image,
+    docker_available,
+    reserve_host_port,
+    restore_bind_mount_permissions,
+    run_command,
+)
 
-IMAGE_TAG = "sure-aio:pytest"
+IMAGE_TAG = os.environ.get("AIO_TEST_IMAGE", "sure-aio:pytest")
 pytestmark = pytest.mark.integration
 
 
@@ -97,13 +104,16 @@ def container(storage_dir: Path, pgdata_dir: Path, redis_dir: Path):
         yield name, host_port
     finally:
         run_command(["docker", "rm", "-f", name], check=False)
+        restore_bind_mount_permissions(IMAGE_TAG, storage_dir)
+        restore_bind_mount_permissions(IMAGE_TAG, pgdata_dir)
+        restore_bind_mount_permissions(IMAGE_TAG, redis_dir)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def build_image() -> None:
     if not docker_available():
         pytest.skip("Docker is unavailable; integration tests require Docker/OrbStack.")
-    run_command(["docker", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG, "."])
+    build_test_image(IMAGE_TAG)
 
 
 def test_happy_path_boot_and_recreate_persists_data() -> None:
