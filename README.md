@@ -1,85 +1,90 @@
-<div align="center">
+# sure-aio
 
-<img src="https://socialify.git.ci/jsonbored/sure-aio/image?custom_description=The+easiest+way+to+deploy+Sure+Finance+%28Maybe+Finance+fork%29+via+Unraid+CA.&custom_language=Dockerfile&description=1&font=KoHo&forks=1&language=1&logo=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F49853598%3Fv%3D4&name=1&owner=1&pattern=Signal&pulls=1&stargazers=1&theme=Dark" alt="sure-aio" width="640" height="320" />
+![sure-aio](https://socialify.git.ci/jsonbored/sure-aio/image?custom_description=The+easiest+way+to+deploy+Sure+Finance+%28Maybe+Finance+fork%29+via+Unraid+CA.&custom_language=Dockerfile&description=1&font=KoHo&forks=1&language=1&logo=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F49853598%3Fv%3D4&name=1&owner=1&pattern=Signal&pulls=1&stargazers=1&theme=Dark)
 
-</div>
+An Unraid-first, single-container deployment of [Sure](https://github.com/we-promise/sure) for people who want the easiest reliable self-hosted install without manually wiring PostgreSQL and Redis on day one.
 
----
+`sure-aio` packages the Rails web app, Sidekiq worker, PostgreSQL, and Redis into one Unraid template with persistent appdata paths. The wrapper is opinionated for a predictable beginner install, but it does not hide the real tradeoffs: backups still matter, reverse-proxy and SMTP settings still need operator judgment, and bundled services are convenience infrastructure rather than the ideal long-term topology for every deployment.
 
-An ultra-simplified, self-contained deployment of [Sure](https://github.com/we-promise/sure) designed explicitly for Unraid homelabs.
+## What This Image Includes
 
-Instead of configuring 4 different templates, managing custom Docker networks, and bootstrapping external PostgreSQL/Redis databases, this image handles the entire stack internals for you. It's designed to provide a "Binhex-style" one-click installation experience for users who just want it to work.
+- Sure web UI on port `3000`
+- bundled Sidekiq worker supervised in the same container
+- embedded PostgreSQL and Redis for the default beginner path
+- persistent Rails storage plus separate PostgreSQL and Redis appdata mounts
+- `SKYLIGHT_ENABLED=false` by default so AIO users are not forced into external APM setup
+- Unraid CA template at [sure-aio.xml](sure-aio.xml)
 
-## 📦 What's Inside the "Mega-Container"
-This image uses `s6-overlay v3` to orchestrate the stack internally:
-- The Web UI: the core Ruby on Rails dashboard.
-- The Task Runner: Sidekiq background job worker.
-- The Database: PostgreSQL auto-provisioned securely inside the container.
-- The Cache: Redis auto-provisioned for background queuing.
+## Beginner Install
 
-## 🚀 Installation (For Beginners)
+1. Install the Unraid template.
+2. Generate `SECRET_KEY_BASE` with `openssl rand -hex 64`.
+3. Leave the default appdata paths in place for first boot.
+4. Click Apply and wait for initialization to finish.
+5. Open `http://SERVER_IP:3000`.
+6. Move to Advanced View only when you actually need external services or upstream feature overrides.
 
-If you just want to track your finances and don't care about databases, this is for you.
+## Power User Surface
 
-1. Add this repository to your Unraid Template Repositories (or search it directly in CA): `https://github.com/JSONbored/awesome-unraid`
-2. Search and Install **Sure-AIO**.
-3. Open your Unraid Terminal (the `>_` icon top right).
-4. Run this specific command to generate a highly secure random password: 
-   ```bash
-   openssl rand -hex 64
-   ```
-5. Copy the output, and paste it into the **Secret Key Base** field in the template.
-6. Click **Apply**. 
+This repo is not a stripped-down wrapper. Advanced View exposes the broader practical Sure self-hosting surface plus AIO defaults for the bundled PostgreSQL + Redis path. Useful references:
 
-*Wait about 30-60 seconds on the very first boot. The container is secretly building your databases, running migrations, and setting up the web server. Once the logs settle, open the WebUI on port 3000 over normal HTTP unless you deliberately put it behind your own reverse proxy.*
+- [Power User Guide](docs/power-user.md) for external DB/Redis, AI routing, object storage, SSO, SMTP, and custom CA setup
+- [pgvector behavior notes](docs/pgvector.md) for the internal-vs-external vector-store path
+- `SKYLIGHT_ENABLED=false` is exposed intentionally so AIO users are not forced into upstream Skylight APM defaults
 
----
+Some settings are deliberately template-owned rather than UI-owned. When upstream sees those environment variables, it may disable the matching app control and treat the container value as source of truth. That is expected in this wrapper.
 
-## 🛠️ Power User Configuration (Advanced Options)
+## Data Persistence
 
-While designed for absolute beginners, this container is intended to keep pace with upstream self-hosting features rather than stripping them out. The goal is straightforward: if upstream exposes a real self-hosting feature, the Unraid wrapper should either support it or document the gap plainly.
+Persistent data lives under the normal Unraid appdata paths:
 
-Some advanced Sure settings are intentionally managed as container environment variables in the Unraid template instead of only through Sure's web UI. When upstream sees one of those env vars, it may disable the matching control in the app and treat the template value as the source of truth. That is expected for this wrapper.
-This wrapper also defaults `SKYLIGHT_ENABLED=false` at the image level (and exposes it in the template) so AIO users are not required to configure upstream Skylight APM.
+- Rails uploads: `/mnt/user/appdata/sure-aio/system`
+- PostgreSQL data: `/mnt/user/appdata/sure-aio/postgres`
+- Redis data: `/mnt/user/appdata/sure-aio/redis`
 
-If you click **"Show more settings..."** in the Unraid template, you can customize the system deeply.
+If you care about the instance, back up all three paths.
 
-Read the comprehensive [Power User Guide here](docs/power-user.md) for instructions on how to configure:
-- **[Local AI / Ollama Integration](docs/power-user.md#2-artificial-intelligence-categorization--chat):** Replace OpenAI with your own LLM for categorization.
-- **[External OpenClaw / MCP Agent Routing](docs/power-user.md#option-b-external-agent-routing-openclaw--mcp):** Bypass the built-in bot entirely.
-- **[Local Vector Search / pgvector](docs/power-user.md#option-c-local-vector-search-pgvector--qdrant):** Keep document embeddings inside the bundled Postgres service.
-- **[Dedicated pgvector behavior doc](docs/pgvector.md):** Exact internal-vs-external pgvector behavior, defaults, and limitations.
-- **[AWS S3 / Cloudflare R2 Storage](docs/power-user.md#4-offloading-storage-to-s3--cloudflare-r2--minio):** Offload receipt and statement uploads.
-- **[External Database Overrides](docs/power-user.md#1-using-an-external-database-bypassing-aio-internals):** Don't want to use our internal Postgres? Wire it up to your dedicated DB server.
-- **[Enterprise Auth & SMTP](docs/power-user.md#6-enterprise-setup-oidc--email):** Set up SSO and password recovery emails.
+## Runtime Notes
 
-## 💾 Data Persistence
-Even though the databases roar silently inside the container, their data is mapped physically to your Unraid cache drive. **You will not lose data when updating the container.**
+- the bundled PostgreSQL and Redis services keep first boot simple, but more advanced deployments may still prefer external infrastructure
+- `SECRET_KEY_BASE` is required; do not rotate it casually on a live deployment
+- `RAILS_ASSUME_SSL` and `RAILS_FORCE_SSL` should stay `false` unless you are intentionally fronting the app with a correct HTTPS-terminating reverse proxy
+- pgvector and qdrant-backed document search are advanced paths, not beginner defaults
 
-- **File Uploads:** `/mnt/user/appdata/sure-aio/system`
-- **Database:** `/mnt/user/appdata/sure-aio/postgres`
-- **Cache Data:** `/mnt/user/appdata/sure-aio/redis`
+## Publishing and Releases
 
-Just make sure `/mnt/user/appdata/sure-aio` is covered by your standard Unraid Community Applications Backup schedule.
+- wrapper releases follow the upstream version plus an AIO revision, such as `v0.6.9-aio.1`
+- the repo monitors stable upstream Sure tags and digest drift through [upstream.toml](upstream.toml) and [scripts/check-upstream.py](scripts/check-upstream.py)
+- `main` publishes `latest`, the exact upstream version tag, an explicit AIO packaging line tag, and `sha-<commit>`
+- release notes are generated with `git-cliff`, and the XML `<Changes>` block is synced from `CHANGELOG.md`
 
-## Versioning & Upstream
+See [docs/releases.md](docs/releases.md) for the release workflow details.
 
-- `Sure-AIO` now pins a specific upstream Sure version instead of following the floating `stable` tag.
-- The repo monitors stable upstream Sure tags and opens a PR when a newer stable version is released.
-- Upstream image digest drift is tracked separately so digest-only refreshes do not masquerade as version-bump PRs.
-- Every `main` package publish now ships the exact upstream version tag, an explicit AIO packaging line tag, `latest`, and `sha-<commit>`.
-- Published images include explicit metadata labels for both layers:
-  - upstream app: `io.jsonbored.upstream.version`, `io.jsonbored.upstream.digest`
-  - wrapper identity: `io.jsonbored.wrapper.name`, `io.jsonbored.wrapper.type`, `io.jsonbored.wrapper.track`
-- Formal wrapper releases follow the upstream version plus an AIO revision, such as `v0.6.8-aio.1`.
-- See the release workflow details in [docs/releases.md](docs/releases.md).
+## Validation
 
-## License & Acknowledgements
-- The underlying application code is maintained by the incredible [community at we-promise/sure](https://github.com/we-promise/sure). 
-- The Sure codebase is licensed under **AGPLv3**.
-- This specific Dockerfile deployment wrapper (the AIO architecture) is provided by JSONbored to ease deployment burdens on Unraid.
+Required local validation is pytest-first:
 
-## ⭐ Star History
+```bash
+python3 -m venv .venv-local
+.venv-local/bin/pip install -r requirements-dev.txt
+.venv-local/bin/pytest tests/unit tests/template --junit-xml=reports/pytest-unit.xml -o junit_family=xunit1
+.venv-local/bin/pytest tests/integration -m integration --junit-xml=reports/pytest-integration.xml -o junit_family=xunit1
+trunk flakytests validate --junit-paths "reports/pytest-unit.xml,reports/pytest-integration.xml"
+trunk check --show-existing --all
+```
+
+## Support
+
+- Repo issues: [JSONbored/sure-aio issues](https://github.com/JSONbored/sure-aio/issues)
+- Unraid support thread: [Sure-AIO support thread](https://forums.unraid.net/topic/198074-support-sure-aio-all-in-one-sure-for-unraid/)
+- Upstream app: [we-promise/sure](https://github.com/we-promise/sure)
+
+## Funding
+
+If this work saves you time, support it here:
+
+- [GitHub Sponsors](https://github.com/sponsors/JSONbored)
+
+## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=JSONbored/sure-aio&type=date&legend=top-left)](https://www.star-history.com/#JSONbored/sure-aio&type=date&legend=top-left)
----

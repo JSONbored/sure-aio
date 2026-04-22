@@ -9,7 +9,7 @@ import re
 import sys
 import urllib.error
 import urllib.request
-
+from typing import NoReturn
 
 ROOT = pathlib.Path(".")
 UPSTREAM_FILE = ROOT / "upstream.toml"
@@ -20,7 +20,7 @@ SEMVER_RE = re.compile(
 )
 
 
-def fail(message: str) -> "NoReturn":
+def fail(message: str) -> NoReturn:
     print(message, file=sys.stderr)
     raise SystemExit(1)
 
@@ -35,7 +35,7 @@ def http_json(url: str, headers: dict[str, str] | None = None) -> object:
         },
     )
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(request, timeout=30) as response:  # nosec B310
             return json.load(response)
     except urllib.error.HTTPError as exc:
         fail(f"HTTP error while requesting {url}: {exc.code} {exc.reason}")
@@ -67,7 +67,9 @@ def prerelease_sort_key(prerelease: str) -> tuple[tuple[int, object], ...]:
     return tuple(parts)
 
 
-def version_sort_key(value: str) -> tuple[int, int, int, int, tuple[tuple[int, object], ...]]:
+def version_sort_key(
+    value: str,
+) -> tuple[int, int, int, int, tuple[tuple[int, object], ...]]:
     major, minor, patch, is_prerelease, prerelease = parse_version(value)
     return (
         major,
@@ -98,10 +100,16 @@ def github_headers() -> dict[str, str]:
 
 
 def latest_github_tag(repo: str, stable_only: bool) -> str:
-    data = http_json(f"https://api.github.com/repos/{repo}/tags?per_page=100", github_headers())
+    data = http_json(
+        f"https://api.github.com/repos/{repo}/tags?per_page=100", github_headers()
+    )
     if not isinstance(data, list):
         fail(f"Unexpected GitHub tags response for {repo}")
-    tags = [entry["name"] for entry in data if isinstance(entry, dict) and isinstance(entry.get("name"), str)]
+    tags = [
+        entry["name"]
+        for entry in data
+        if isinstance(entry, dict) and isinstance(entry.get("name"), str)
+    ]
     candidates = filter_versions(tags, stable_only)
     if not candidates:
         fail(f"No matching tags found for upstream repo {repo}")
@@ -130,14 +138,18 @@ def try_ghcr_digest_for_tag(image: str, tag: str) -> str | None:
         method="HEAD",
     )
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(request, timeout=30) as response:  # nosec B310
             return response.headers.get("docker-content-digest", "").strip() or None
     except urllib.error.HTTPError as exc:
         if exc.code == 404:
             return None
-        fail(f"HTTP error while requesting GHCR manifest for {image}:{tag}: {exc.code} {exc.reason}")
+        fail(
+            f"HTTP error while requesting GHCR manifest for {image}:{tag}: {exc.code} {exc.reason}"
+        )
     except urllib.error.URLError as exc:
-        fail(f"Network error while requesting GHCR manifest for {image}:{tag}: {exc.reason}")
+        fail(
+            f"Network error while requesting GHCR manifest for {image}:{tag}: {exc.reason}"
+        )
     return None
 
 
@@ -149,7 +161,9 @@ def ghcr_digest_for_version(image: str, version: str) -> str:
         digest = try_ghcr_digest_for_tag(image, tag)
         if digest:
             return digest
-    fail(f"Could not determine digest for GHCR image {image} using version tags: {', '.join(candidates)}")
+    fail(
+        f"Could not determine digest for GHCR image {image} using version tags: {', '.join(candidates)}"
+    )
 
 
 def read_local_version(config: dict[str, object]) -> str:
@@ -260,8 +274,12 @@ def main() -> None:
     stable_only = bool(upstream.get("stable_only", True))
     current_version = read_local_version(upstream)
     current_digest = read_local_digest(upstream)
-    latest_version = latest_github_tag(str(upstream.get("repo", "")).strip(), stable_only)
-    latest_digest = ghcr_digest_for_version(str(upstream.get("image", "")).strip(), latest_version)
+    latest_version = latest_github_tag(
+        str(upstream.get("repo", "")).strip(), stable_only
+    )
+    latest_digest = ghcr_digest_for_version(
+        str(upstream.get("image", "")).strip(), latest_version
+    )
     version_update_available = latest_version != current_version
     digest_update_available = latest_digest != current_digest
     updates_available = version_update_available or digest_update_available

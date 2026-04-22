@@ -1,4 +1,5 @@
 #!/command/with-contenv sh
+# shellcheck shell=sh
 set -eu
 
 : "${DB_HOST:=127.0.0.1}"
@@ -13,8 +14,8 @@ export DB_HOST DB_PORT POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB REDIS_URL
 cd /rails
 
 echo "Waiting for PostgreSQL to become fully active..."
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$POSTGRES_USER" >/dev/null 2>&1; do
-  sleep 2
+until pg_isready -h "${DB_HOST}" -p "${DB_PORT}" -U "${POSTGRES_USER}" >/dev/null 2>&1; do
+	sleep 2
 done
 
 echo "Running Sure database preparations (create/migrate/seed)..."

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import re
 import sys
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405 - this validator reads a trusted local repository XML file only
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_PATH = ROOT / "sure-aio.xml"
@@ -165,15 +165,42 @@ REQUIRED_TARGETS = {
     "YAHOO_FINANCE_URL",
 }
 
-REQUIRED_CHANGELOG_LINK = "https://github.com/JSONbored/sure-aio/releases"
+GENERATED_CHANGELOG_NOTE = (
+    "Generated from CHANGELOG.md during release preparation. Do not edit manually."
+)
+GENERATED_CHANGELOG_BULLET = f"- {GENERATED_CHANGELOG_NOTE}"
+CHANGELOG_HEADER_PATTERN = re.compile(r"^### \d{4}-\d{2}-\d{2}$")
+LEGACY_CHANGELOG_MARKERS = (
+    "[b]Latest release[/b]",
+    "GitHub Releases",
+    "Full changelog and release notes:",
+)
 ALLOWED_CATEGORY_TOKENS = {
     "Productivity",
     "Tools-Utilities",
 }
 
 
+def validate_changes(changes: str) -> str | None:
+    for marker in LEGACY_CHANGELOG_MARKERS:
+        if marker in changes:
+            return f"sure-aio.xml <Changes> still uses the legacy release-link format: {marker}"
+
+    lines = [line.strip() for line in changes.splitlines() if line.strip()]
+    if len(lines) < 3:
+        return "sure-aio.xml <Changes> must include a date heading, the generated note, and at least one bullet"
+    if not CHANGELOG_HEADER_PATTERN.fullmatch(lines[0]):
+        return "sure-aio.xml <Changes> must start with '### YYYY-MM-DD'"
+    if lines[1] != GENERATED_CHANGELOG_BULLET:
+        return f"sure-aio.xml <Changes> second line should be '{GENERATED_CHANGELOG_BULLET}'"
+    invalid_lines = [line for line in lines[1:] if not line.startswith("- ")]
+    if invalid_lines:
+        return f"sure-aio.xml <Changes> must use bullet lines after the heading; found {invalid_lines[0]!r}"
+    return None
+
+
 def main() -> int:
-    tree = ET.parse(TEMPLATE_PATH)
+    tree = ET.parse(TEMPLATE_PATH)  # nosec B314 - trusted local template file only
     root = tree.getroot()
 
     targets = {
@@ -184,7 +211,10 @@ def main() -> int:
 
     missing = sorted(REQUIRED_TARGETS - targets)
     if missing:
-        print("sure-aio.xml is missing required upstream/runtime targets:", file=sys.stderr)
+        print(
+            "sure-aio.xml is missing required upstream/runtime targets:",
+            file=sys.stderr,
+        )
         for target in missing:
             print(f"  - {target}", file=sys.stderr)
         return 1
@@ -197,7 +227,9 @@ def main() -> int:
     category_tokens = [token for token in category.split(" ") if token]
     unknown_categories = sorted(set(category_tokens) - ALLOWED_CATEGORY_TOKENS)
     if unknown_categories:
-        print("sure-aio.xml contains unknown/unapproved category tokens:", file=sys.stderr)
+        print(
+            "sure-aio.xml contains unknown/unapproved category tokens:", file=sys.stderr
+        )
         for token in unknown_categories:
             print(f"  - {token}", file=sys.stderr)
         print(
@@ -210,14 +242,14 @@ def main() -> int:
     if not changes:
         print("sure-aio.xml is missing a non-empty <Changes> section", file=sys.stderr)
         return 1
-    if REQUIRED_CHANGELOG_LINK not in changes:
-        print(
-            "sure-aio.xml <Changes> does not include the canonical GitHub releases URL",
-            file=sys.stderr,
-        )
+    error = validate_changes(changes)
+    if error:
+        print(error, file=sys.stderr)
         return 1
 
-    print(f"sure-aio.xml parsed successfully and includes {len(REQUIRED_TARGETS)} required targets")
+    print(
+        f"sure-aio.xml parsed successfully and includes {len(REQUIRED_TARGETS)} required targets"
+    )
     return 0
 
 
