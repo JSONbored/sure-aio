@@ -3,13 +3,13 @@ from __future__ import annotations
 import time
 import uuid
 from contextlib import contextmanager
-from pathlib import Path
-from tempfile import TemporaryDirectory
 
 import pytest
 
 from tests.helpers import (
+    container_path_exists,
     docker_available,
+    docker_volume,
     ensure_pytest_image,
     reserve_host_port,
     run_command,
@@ -59,7 +59,7 @@ def assert_no_https_redirect(host_port: int) -> None:
 
 
 @contextmanager
-def container(storage_dir: Path, pgdata_dir: Path, redis_dir: Path):
+def container(storage_volume: str, pgdata_volume: str, redis_volume: str):
     name = f"sure-aio-pytest-{uuid.uuid4().hex[:10]}"
     host_port = reserve_host_port()
     secret = (
@@ -90,11 +90,11 @@ def container(storage_dir: Path, pgdata_dir: Path, redis_dir: Path):
         "-e",
         "RAILS_FORCE_SSL=false",
         "-v",
-        f"{storage_dir}:/rails/storage",
+        f"{storage_volume}:/rails/storage",
         "-v",
-        f"{pgdata_dir}:/var/lib/postgresql/data",
+        f"{pgdata_volume}:/var/lib/postgresql/data",
         "-v",
-        f"{redis_dir}:/var/lib/redis",
+        f"{redis_volume}:/var/lib/redis",
         IMAGE_TAG,
     ]
     run_command(command)
@@ -113,16 +113,18 @@ def build_image() -> None:
 
 def test_happy_path_boot_and_recreate_persists_data() -> None:
     with (
-        TemporaryDirectory(prefix="sure-aio-storage-") as storage_dir,
-        TemporaryDirectory(prefix="sure-aio-pg-") as pgdata_dir,
-        TemporaryDirectory(prefix="sure-aio-redis-") as redis_dir,
+        docker_volume("sure-aio-storage") as storage_volume,
+        docker_volume("sure-aio-pg") as pgdata_volume,
+        docker_volume("sure-aio-redis") as redis_volume,
     ):
-        with container(Path(storage_dir), Path(pgdata_dir), Path(redis_dir)) as (
+        with container(storage_volume, pgdata_volume, redis_volume) as (
             name,
             host_port,
         ):
             wait_for_http(name, host_port)
-            assert Path(pgdata_dir, "PG_VERSION").is_file()  # nosec B101
+            assert container_path_exists(
+                name, "/var/lib/postgresql/data/PG_VERSION"
+            )  # nosec B101
             assert_no_https_redirect(host_port)
             first_logs = logs(name)
             assert "Running Sure database preparations" in first_logs  # nosec B101
@@ -133,12 +135,14 @@ def test_happy_path_boot_and_recreate_persists_data() -> None:
             assert "Completed 404 Not Found" not in first_logs  # nosec B101
             assert 'table: "settings" does not exist' not in first_logs  # nosec B101
 
-        with container(Path(storage_dir), Path(pgdata_dir), Path(redis_dir)) as (
+        with container(storage_volume, pgdata_volume, redis_volume) as (
             name,
             host_port,
         ):
             wait_for_http(name, host_port)
-            assert Path(pgdata_dir, "PG_VERSION").is_file()  # nosec B101
+            assert container_path_exists(
+                name, "/var/lib/postgresql/data/PG_VERSION"
+            )  # nosec B101
             assert_no_https_redirect(host_port)
             second_logs = logs(name)
             assert (
