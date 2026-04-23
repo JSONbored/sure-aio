@@ -16,8 +16,9 @@ Every `main` build publishes:
 
 - `latest`
 - the exact pinned upstream version
-- an explicit packaging line tag like `v0.6.9-aio-v3` (derived from the latest released `v0.6.9-aio.3`)
 - `sha-<commit>`
+
+Release commits also publish the immutable packaging line tag, for example `v0.6.9-aio-v3` derived from `v0.6.9-aio.3`. Ordinary `main` pushes do not overwrite that release tag.
 
 ## Release flow
 

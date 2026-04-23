@@ -444,35 +444,44 @@ jobs:
           raw_version="$(sed -n 's/^ARG UPSTREAM_VERSION=//p' Dockerfile | head -n1)"
           upstream_version="${raw_version%%@*}"
           upstream_digest="$(sed -n 's/^ARG UPSTREAM_IMAGE_DIGEST=//p' Dockerfile | head -n1)"
+          commit_message="$(git log -1 --pretty=%B)"
+          aio_track=""
+          release_package_tag=""
+          version_label="${upstream_version}"
+          wrapper_track="main"
           if [[ -n "${AIO_TRACK_OVERRIDE}" ]]; then
             aio_track="${AIO_TRACK_OVERRIDE}"
+            release_package_tag="${upstream_version}-${aio_track}"
+            version_label="${release_package_tag}"
+            wrapper_track="${aio_track}"
           else
             changelog_version="$(python3 scripts/release.py latest-changelog-version 2>/dev/null || true)"
-            aio_revision=""
             case "${changelog_version}" in
               "${upstream_version}"-aio.*)
                 candidate_revision="${changelog_version##*.}"
-                if [[ "${candidate_revision}" =~ ^[0-9]+$ ]]; then
-                  aio_revision="${candidate_revision}"
+                if [[ "${candidate_revision}" =~ ^[0-9]+$ ]] && printf '%s\n' "${commit_message}" | grep -Fxq "chore(release): ${changelog_version}"; then
+                  aio_track="aio-v${candidate_revision}"
+                  release_package_tag="${upstream_version}-${aio_track}"
+                  version_label="${release_package_tag}"
+                  wrapper_track="${aio_track}"
                 fi
                 ;;
             esac
-            if [[ -n "${aio_revision}" ]]; then
-              aio_track="aio-v${aio_revision}"
-            else
-              aio_track="aio-v1"
-            fi
           fi
 
           {
             echo "upstream_version=${upstream_version}"
             echo "upstream_digest=${upstream_digest}"
-            echo "aio_track=${aio_track}"
+            echo "release_package_tag=${release_package_tag}"
+            echo "version_label=${version_label}"
+            echo "wrapper_track=${wrapper_track}"
             echo "tags<<EOF"
             echo "${image_ghcr}:latest"
             if [[ -n "${upstream_version}" ]]; then
               echo "${image_ghcr}:${upstream_version}"
-              echo "${image_ghcr}:${upstream_version}-${aio_track}"
+              if [[ -n "${release_package_tag}" ]]; then
+                echo "${image_ghcr}:${release_package_tag}"
+              fi
             fi
             echo "${sha_tag_ghcr}"
 
@@ -480,7 +489,9 @@ jobs:
               echo "${image_dockerhub}:latest"
               if [[ -n "${upstream_version}" ]]; then
                 echo "${image_dockerhub}:${upstream_version}"
-                echo "${image_dockerhub}:${upstream_version}-${aio_track}"
+                if [[ -n "${release_package_tag}" ]]; then
+                  echo "${image_dockerhub}:${release_package_tag}"
+                fi
               fi
               echo "${image_dockerhub}:sha-${GITHUB_SHA}"
             fi
@@ -500,14 +511,14 @@ jobs:
           labels: |
             org.opencontainers.image.source=https://github.com/JSONbored/sure-aio
             org.opencontainers.image.title=sure-aio
-            org.opencontainers.image.version=${{ steps.prep.outputs.upstream_version || '' }}
+            org.opencontainers.image.version=${{ steps.prep.outputs.version_label || '' }}
             org.opencontainers.image.description=Unraid-first AIO wrapper image for Sure (web, worker, postgres, redis)
             io.jsonbored.upstream.name=Sure
             io.jsonbored.upstream.version=${{ steps.prep.outputs.upstream_version || '' }}
             io.jsonbored.upstream.digest=${{ steps.prep.outputs.upstream_digest || '' }}
             io.jsonbored.wrapper.name=sure-aio
             io.jsonbored.wrapper.type=unraid-aio
-            io.jsonbored.wrapper.track=${{ steps.prep.outputs.aio_track }}
+            io.jsonbored.wrapper.track=${{ steps.prep.outputs.wrapper_track || '' }}
           load: false
 
   sync-awesome-unraid:
