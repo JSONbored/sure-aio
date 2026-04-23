@@ -21,25 +21,9 @@ Every `main` build publishes:
 
 ## Release flow
 
-1. Trigger **Release / Sure-AIO** from `main` with `action=prepare`.
-2. The workflow computes the next `upstream-aio.N` version and opens a release PR.
+1. Trigger **Prepare Release / Sure-AIO** from `main`.
+2. The workflow computes the next `upstream-aio.N` version, updates `CHANGELOG.md`, syncs the XML `<Changes>` block, and opens a release PR.
 3. Review and merge that PR into `main`.
-4. Trigger **Release / Sure-AIO** from `main` again with `action=publish`.
-5. The workflow reads the merged `CHANGELOG.md` entry, creates the Git tag, and publishes the GitHub Release.
-6. The same publish job automatically dispatches **CI / Sure-AIO** (`workflow_dispatch`) with `publish_image=true` so GHCR package tags (including `upstream-aio-vN`) stay aligned with the new release revision.
-   It now passes an explicit `aio_track_override` derived from the release version (for example `v0.6.9-aio.3` -> `aio-v3`) to prevent tag drift.
-
-## One-dispatch mode
-
-You can run the same workflow with `action=full` for one-dispatch orchestration:
-
-1. Creates/updates the release PR from `CHANGELOG.md` generation.
-2. Enables auto-merge on that PR.
-3. Waits for merge to complete.
-4. Creates the Git tag and publishes the GitHub Release.
-5. Dispatches **CI / Sure-AIO** with `publish_image=true` to publish GHCR tags.
-
-Notes:
-
-- `action=full` defaults `auto_merge_release_pr=true` and will attempt GitHub auto-merge first.
-- If repository auto-merge is disabled, the workflow automatically falls back to direct merge polling and proceeds once required checks/policies allow merge.
+4. Wait for the `CI / Sure-AIO` run on the release commit to finish green. That same `main` push also publishes the updated package tags automatically.
+5. Trigger **Publish Release / Sure-AIO** from `main`.
+6. The workflow verifies CI on the exact release commit, creates the Git tag if needed, and publishes the GitHub Release.
