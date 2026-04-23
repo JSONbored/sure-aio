@@ -25,9 +25,7 @@ split_commits = false
 protect_breaking_commits = true
 tag_pattern = '^v?[0-9].*-aio\\.[0-9]+$'
 sort_commits = "oldest"
-commit_preprocessors = [
-  { pattern = " \\(#\\d+\\)$", replace = "" },
-]
+commit_preprocessors = [{ pattern = " \\(#\\d+\\)$", replace = "" }]
 commit_parsers = [
   { message = "^Merge pull request", skip = true },
   { message = "^chore\\(release\\):", skip = true },
