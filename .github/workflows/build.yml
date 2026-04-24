@@ -154,7 +154,7 @@ jobs:
               CHANGELOG.md|cliff.toml|scripts/*|.trunk/*)
                 tooling_related=true
                 ;;
-              .github/actions/*|.github/workflows/*)
+              .github/actions/*/action.yml|.github/workflows/*)
                 tooling_related=true
                 workflow_related=true
                 ;;

@@ -81,10 +81,12 @@ RUN find /etc/s6-overlay/s6-rc.d -type f \( -name "run" -o -name "up" \) -exec c
 # 4. Expose the App Storage
 VOLUME ["/rails/storage", "/var/lib/postgresql/data", "/var/lib/redis"]
 
+EXPOSE 3000
+
 ENV SKYLIGHT_ENABLED=false
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=300000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
-  CMD curl -f http://localhost:3000/up || exit 1
+  CMD curl -fsS http://localhost:3000/up >/dev/null || exit 1
 
 ENTRYPOINT ["/init"]
