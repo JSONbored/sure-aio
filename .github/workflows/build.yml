@@ -13,6 +13,7 @@ on:
       - scripts/**
       - tests/**
       - .trunk/**
+      - .github/actions/**
       - upstream.toml
       - sure-aio.xml
       - renovate.json
@@ -29,6 +30,7 @@ on:
       - scripts/**
       - tests/**
       - .trunk/**
+      - .github/actions/**
       - upstream.toml
       - sure-aio.xml
       - renovate.json
@@ -41,6 +43,7 @@ env:
   IMAGE_NAME: jsonbored/sure-aio
   PYTHON_VERSION: "3.13"
   TRUNK_ORG_URL_SLUG: aethereal
+  DOCKER_CACHE_SCOPE: sure-aio-image
 
 permissions:
   contents: read
@@ -151,7 +154,7 @@ jobs:
               CHANGELOG.md|cliff.toml|scripts/*|.trunk/*)
                 tooling_related=true
                 ;;
-              .github/workflows/*)
+              .github/actions/*|.github/workflows/*)
                 tooling_related=true
                 workflow_related=true
                 ;;
@@ -216,12 +219,15 @@ jobs:
           import re
           import sys
 
-          workflow_dir = pathlib.Path(".github/workflows")
+          workflow_paths = [
+              *pathlib.Path(".github/workflows").glob("*.yml"),
+              *pathlib.Path(".github/actions").glob("*/action.yml"),
+          ]
           pattern = re.compile(r"^\s*uses:\s*([^@\s]+)@([^\s#]+)")
           sha_pattern = re.compile(r"^[0-9a-f]{40}$")
           failures = []
 
-          for path in sorted(workflow_dir.glob("*.yml")):
+          for path in sorted(workflow_paths):
               for lineno, line in enumerate(path.read_text().splitlines(), start=1):
                   match = pattern.match(line)
                   if not match:
@@ -271,35 +277,13 @@ jobs:
       - name: Install pytest
         run: python -m pip install -r requirements-dev.txt
 
-      - name: Run pytest unit tests
-        id: unit_pytest
-        run: |
-          mkdir -p reports
-          rm -f reports/pytest-unit.xml
-          set +e
-          python -m pytest \
-            tests/unit \
-            tests/template \
-            --junit-xml=reports/pytest-unit.xml \
-            -o junit_family=xunit1
-          status=$?
-          echo "exit_code=${status}" >> "${GITHUB_OUTPUT}"
-          exit 0
-
-      - name: Upload unit test results to Trunk
-        if: ${{ always() && env.TRUNK_API_TOKEN != '' }}
-        continue-on-error: true
-        uses: trunk-io/analytics-uploader@95a0fb8b29e45b6068304261fb518644b426a803 # v2.0.8
-        env:
-          TRUNK_API_TOKEN: ${{ secrets.TRUNK_API_TOKEN }}
+      - name: Run unit and template tests
+        uses: ./.github/actions/run-pytest
         with:
-          junit-paths: reports/pytest-unit.xml
-          org-slug: ${{ env.TRUNK_ORG_URL_SLUG }}
-          token: ${{ env.TRUNK_API_TOKEN }}
-
-      - name: Fail if unit tests failed
-        if: ${{ steps.unit_pytest.outputs.exit_code != '0' }}
-        run: exit 1
+          junit-path: reports/pytest-unit.xml
+          pytest-args: tests/unit tests/template
+          trunk-api-token: ${{ env.TRUNK_API_TOKEN }}
+          trunk-org-slug: ${{ env.TRUNK_ORG_URL_SLUG }}
 
   integration-tests:
     if: ${{ needs.detect-changes.outputs.run_tests_requested == 'true' && (needs.detect-changes.outputs.build_related == 'true' || (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.publish_requested == 'true')) }}
@@ -330,50 +314,28 @@ jobs:
           platforms: linux/amd64
           load: true
           tags: sure-aio:pytest
-          cache-from: type=gha,scope=sure-aio-pytest
-          cache-to: type=gha,mode=max,scope=sure-aio-pytest
+          cache-from: type=gha,scope=${{ env.DOCKER_CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ env.DOCKER_CACHE_SCOPE }}
 
       - name: Install pytest
         run: python -m pip install -r requirements-dev.txt
 
-      - name: Run pytest integration tests
-        id: integration_pytest
+      - name: Run integration tests
         env:
           AIO_PYTEST_USE_PREBUILT_IMAGE: "true"
-        run: |
-          mkdir -p reports
-          rm -f reports/pytest-integration.xml
-          set +e
-          python -m pytest \
-            tests/integration \
-            -m integration \
-            --junit-xml=reports/pytest-integration.xml \
-            -o junit_family=xunit1
-          status=$?
-          echo "exit_code=${status}" >> "${GITHUB_OUTPUT}"
-          exit 0
-
-      - name: Upload integration test results to Trunk
-        if: ${{ always() && env.TRUNK_API_TOKEN != '' }}
-        continue-on-error: true
-        uses: trunk-io/analytics-uploader@95a0fb8b29e45b6068304261fb518644b426a803 # v2.0.8
-        env:
-          TRUNK_API_TOKEN: ${{ secrets.TRUNK_API_TOKEN }}
+        uses: ./.github/actions/run-pytest
         with:
-          junit-paths: reports/pytest-integration.xml
-          org-slug: ${{ env.TRUNK_ORG_URL_SLUG }}
-          token: ${{ env.TRUNK_API_TOKEN }}
+          junit-path: reports/pytest-integration.xml
+          pytest-args: tests/integration -m integration
+          trunk-api-token: ${{ env.TRUNK_API_TOKEN }}
+          trunk-org-slug: ${{ env.TRUNK_ORG_URL_SLUG }}
 
       - name: Dump Docker diagnostics
-        if: ${{ failure() || (steps.integration_pytest.conclusion == 'success' && steps.integration_pytest.outputs.exit_code != '0') }}
+        if: ${{ failure() }}
         run: |
           docker ps -a
           echo
           docker images
-
-      - name: Fail if integration tests failed
-        if: ${{ steps.integration_pytest.outputs.exit_code != '0' }}
-        run: exit 1
 
   publish:
     if: ${{ (needs.detect-changes.outputs.build_related == 'true' || needs.detect-changes.outputs.xml_related == 'true') && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-changes.outputs.publish_requested == 'true' && needs.integration-tests.result == 'success' }}
@@ -506,8 +468,8 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          cache-from: type=gha,scope=sure-aio-publish
-          cache-to: type=gha,mode=max,scope=sure-aio-publish
+          cache-from: type=gha,scope=${{ env.DOCKER_CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ env.DOCKER_CACHE_SCOPE }}
           tags: ${{ steps.prep.outputs.tags }}
           labels: |
             org.opencontainers.image.source=https://github.com/JSONbored/sure-aio
