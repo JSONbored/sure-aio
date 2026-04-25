@@ -176,8 +176,8 @@ LEGACY_CHANGELOG_MARKERS = (
     "Full changelog and release notes:",
 )
 ALLOWED_CATEGORY_TOKENS = {
-    "Productivity",
-    "Tools-Utilities",
+    "Productivity:",
+    "Tools:Utilities",
 }
 
 
