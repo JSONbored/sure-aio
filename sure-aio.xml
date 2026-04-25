@@ -45,7 +45,7 @@
 - Always publish on manual main workflow dispatch&#xD;
 - Let manual publish proceed when smoke test is skipped&#xD;
 - Trigger package publish for aio tag alignment</Changes>
-  <Category>Productivity Tools-Utilities</Category>
+  <Category>Productivity: Tools:Utilities</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/icons/sure.png</Icon>
