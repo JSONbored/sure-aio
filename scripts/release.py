@@ -134,6 +134,35 @@ def find_release_commit(version: str) -> str:
     )
 
 
+def git_is_ancestor(ancestor: str, descendant: str) -> bool:
+    return (
+        git_completed("merge-base", "--is-ancestor", ancestor, descendant).returncode
+        == 0
+    )
+
+
+def find_release_target_commit(version: str) -> str:
+    release_commit = find_release_commit(version)
+    head = git_output("rev-parse", "HEAD").strip()
+
+    if release_commit == head:
+        return release_commit
+
+    if not git_is_ancestor(release_commit, head):
+        raise SystemExit(
+            f"Release commit {release_commit} for {version} is not reachable from HEAD."
+        )
+
+    first_parent_commits = git_output(
+        "rev-list", "--first-parent", "--reverse", "HEAD"
+    ).splitlines()
+    for candidate in first_parent_commits:
+        if git_is_ancestor(release_commit, candidate):
+            return candidate
+
+    return release_commit
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Release helpers for sure-aio.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -166,6 +195,8 @@ def main() -> None:
 
     commit_parser = subparsers.add_parser("find-release-commit")
     commit_parser.add_argument("version")
+    target_parser = subparsers.add_parser("find-release-target-commit")
+    target_parser.add_argument("version")
 
     args = parser.parse_args()
 
@@ -191,6 +222,9 @@ def main() -> None:
         return
     if args.command == "find-release-commit":
         print(find_release_commit(args.version))
+        return
+    if args.command == "find-release-target-commit":
+        print(find_release_target_commit(args.version))
         return
 
     raise SystemExit(f"Unknown command: {args.command}")
