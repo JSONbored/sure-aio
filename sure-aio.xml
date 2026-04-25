@@ -31,20 +31,13 @@
 - [code]/mnt/user/appdata/sure-aio/system[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/redis[/code]</Overview>
-  <Changes>### 2026-04-16&#xD;
+  <Changes>### 2026-04-25&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Harden bundled dependencies and refresh security patches (#50)&#xD;
-- Add one-dispatch full release orchestration (#43)&#xD;
-- Fallback to direct merge when auto-merge is disabled&#xD;
-- Pass explicit aio track override from release&#xD;
-- Harden full release flow and deterministic aio tag publishing&#xD;
-- Trigger registry parity publish&#xD;
-- Restore CA trust signals and automate changelog sync (#46)&#xD;
-- Gate Docker Hub login without direct secrets expressions&#xD;
-- Make workflow-dispatch publish gates deterministic (#48)&#xD;
-- Always publish on manual main workflow dispatch&#xD;
-- Let manual publish proceed when smoke test is skipped&#xD;
-- Trigger package publish for aio tag alignment</Changes>
+- Optimize pytest gating and Trunk uploads (#56)&#xD;
+- Standardize fleet publish and validation flow (#57)&#xD;
+- Centralize trunk config and gate release tags (#58)&#xD;
+- Consolidate pytest workflow steps (#60)&#xD;
+- Pin package tags to release targets (#59)</Changes>
   <Category>Productivity: Tools:Utilities</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>
