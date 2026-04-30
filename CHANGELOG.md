@@ -1,14 +1,16 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
 ## v0.6.9-aio.5 - 2026-04-25
+
 ### CI
+
 - Optimize pytest gating and Trunk uploads (#56)
 - Standardize fleet publish and validation flow (#57)
 - Centralize trunk config and gate release tags (#58)
 - Consolidate pytest workflow steps (#60)
 - Pin package tags to release targets (#59)
-
 
 ## v0.6.9-aio.4 - 2026-04-16
 
