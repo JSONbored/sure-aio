@@ -54,11 +54,11 @@ If you care about the instance, back up all three paths.
 ## Publishing and Releases
 
 - wrapper releases follow the upstream version plus an AIO revision, such as `v0.6.9-aio.1`
-- the repo monitors stable upstream Sure tags and digest drift through [upstream.toml](upstream.toml) and [scripts/check-upstream.py](scripts/check-upstream.py)
+- Stable upstream monitoring, release preparation, registry publishing, and catalog sync are owned by `aio-fleet` from `.aio-fleet.yml`.
 - `main` publishes `latest`, the exact upstream version tag, an explicit AIO packaging line tag, and `sha-<commit>`
-- release notes are generated with `git-cliff`, and the XML `<Changes>` block is synced from `CHANGELOG.md`
+- Changelog generation and XML `<Changes>` sync are run centrally by `aio-fleet` during release preparation.
 
-See [docs/releases.md](docs/releases.md) for the release workflow details.
+See [docs/releases.md](docs/releases.md) for the central release process details.
 
 ## Validation
 
