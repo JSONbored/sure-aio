@@ -12,7 +12,7 @@ Stable upstream version monitoring and upstream image digest monitoring are sepa
 
 ## Published image tags
 
-Every `main` build publishes:
+Every central `aio-fleet` publish for `main` publishes:
 
 - `latest`
 - the exact pinned upstream version
@@ -22,9 +22,8 @@ Release commits also publish the immutable packaging line tag, for example `v0.6
 
 ## Release flow
 
-1. Trigger **Prepare Release / Sure-AIO** from `main`.
-2. The workflow computes the next `upstream-aio.N` version, updates `CHANGELOG.md`, syncs the XML `<Changes>` block, and opens a release PR.
+1. From `aio-fleet`, run `python -m aio_fleet release status --repo sure-aio` to inspect the next release.
+2. Run `python -m aio_fleet release prepare --repo sure-aio` on a release branch, then open a `chore(release): <version>` PR.
 3. Review and merge that PR into `main`.
-4. Wait for the `CI / Sure-AIO` run on the release target commit to finish green. That same `main` push also publishes the updated package tags automatically.
-5. Trigger **Publish Release / Sure-AIO** from `main`.
-6. The workflow verifies CI on the exact release target commit, creates the Git tag if needed, and publishes the GitHub Release.
+4. Run the central `aio-fleet` control check for the release target commit with publish enabled, and require `aio-fleet / required` to pass.
+5. Run `python -m aio_fleet release publish --repo sure-aio` from `aio-fleet` to create the GitHub Release.
