@@ -1,0 +1,29 @@
+schema_version: 1
+repo: sure-aio
+github_repo: JSONbored/sure-aio
+app_slug: sure-aio
+image:
+  name: jsonbored/sure-aio
+  cache_scope: sure-aio-image
+  pytest_tag: sure-aio:pytest
+  publish_platforms: linux/amd64,linux/arm64
+release:
+  name: Sure-AIO
+  profile: upstream-aio-track
+  previous_tag_command: latest-aio-tag
+upstream:
+  name: Sure
+  digest_arg: UPSTREAM_IMAGE_DIGEST
+template:
+  xml_paths:
+  - sure-aio.xml
+  generated: false
+catalog:
+  published: true
+  assets:
+  - source: sure-aio.xml
+    target: sure-aio.xml
+tests:
+  unit: tests/unit tests/template
+  integration: tests/integration -m integration
+  checkout_submodules: false
