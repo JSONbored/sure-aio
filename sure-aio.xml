@@ -31,13 +31,25 @@
 - [code]/mnt/user/appdata/sure-aio/system[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/redis[/code]</Overview>
-  <Changes>### 2026-04-25&#xD;
+  <Changes>### 2026-05-01&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Optimize pytest gating and Trunk uploads (#56)&#xD;
-- Standardize fleet publish and validation flow (#57)&#xD;
-- Centralize trunk config and gate release tags (#58)&#xD;
-- Consolidate pytest workflow steps (#60)&#xD;
-- Pin package tags to release targets (#59)</Changes>
+- Use shared AIO workflows (#62)&#xD;
+- Pin shared validation policy&#xD;
+- Use shared AIO workflows&#xD;
+- Sync workflow path filters&#xD;
+- Sync catalog publication state&#xD;
+- Pin publish helper workflow fix&#xD;
+- Pin Docker Hub primary workflow&#xD;
+- Update Sure to v0.7.0&#xD;
+- Expose manual publish targets&#xD;
+- Sync shared validation and trunk cleanup&#xD;
+- Sync release shim path fallback&#xD;
+- Expose sure v0.7 runtime options&#xD;
+- Expose Sure v0.7 runtime options (#78)&#xD;
+- Sync shared repository boilerplate&#xD;
+- Use shared derived repo validation&#xD;
+- Use shared release helper shim&#xD;
+- Use shared runtime contract helpers</Changes>
   <Category>Productivity: Tools:Utilities</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>

@@ -1,6 +1,44 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## 0.7.0-aio.1 - 2026-05-01
+### CI
+- Use shared AIO workflows (#62)
+- Pin shared validation policy
+- Use shared AIO workflows
+- Sync workflow path filters
+- Sync catalog publication state
+- Pin publish helper workflow fix
+- Pin Docker Hub primary workflow
+
+
+### Dependency Updates
+- Update Sure to v0.7.0
+
+
+### Features
+- Expose manual publish targets
+
+
+### Fixes
+- Sync shared validation and trunk cleanup
+- Sync release shim path fallback
+- Expose sure v0.7 runtime options
+- Expose Sure v0.7 runtime options (#78)
+
+
+### Maintenance
+- Sync shared repository boilerplate
+
+
+### Refactors
+- Use shared derived repo validation
+- Use shared release helper shim
+
+
+### Tests
+- Use shared runtime contract helpers
+
 
 ## v0.6.9-aio.5 - 2026-04-25
 
