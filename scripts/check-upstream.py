@@ -92,6 +92,15 @@ def filter_versions(values: list[str], stable_only: bool) -> list[str]:
     return stable_values
 
 
+def version_tag_candidates(version: str) -> list[str]:
+    candidates = [version]
+    if version.startswith("v"):
+        candidates.append(version[1:])
+    else:
+        candidates.append(f"v{version}")
+    return list(dict.fromkeys(candidates))
+
+
 def github_headers() -> dict[str, str]:
     token = os.environ.get("GITHUB_TOKEN", "").strip()
     if token:
@@ -154,15 +163,25 @@ def try_ghcr_digest_for_tag(image: str, tag: str) -> str | None:
 
 
 def ghcr_digest_for_version(image: str, version: str) -> str:
-    candidates = [version]
-    if version.startswith("v"):
-        candidates.append(version[1:])
+    candidates = version_tag_candidates(version)
     for tag in candidates:
         digest = try_ghcr_digest_for_tag(image, tag)
         if digest:
             return digest
     fail(
-        f"Could not determine digest for GHCR image {image} using version tags: {', '.join(candidates)}"
+        f"Could not determine digest for GHCR image {image} "
+        f"using version tags: {', '.join(candidates)}"
+    )
+
+
+def ghcr_image_tag_for_version(image: str, version: str) -> str:
+    candidates = version_tag_candidates(version)
+    for tag in candidates:
+        if try_ghcr_digest_for_tag(image, tag):
+            return tag
+    fail(
+        f"Could not determine image tag for GHCR image {image} "
+        f"using version tags: {', '.join(candidates)}"
     )
 
 
@@ -274,8 +293,11 @@ def main() -> None:
     stable_only = bool(upstream.get("stable_only", True))
     current_version = read_local_version(upstream)
     current_digest = read_local_digest(upstream)
-    latest_version = latest_github_tag(
+    latest_release_version = latest_github_tag(
         str(upstream.get("repo", "")).strip(), stable_only
+    )
+    latest_version = ghcr_image_tag_for_version(
+        str(upstream.get("image", "")).strip(), latest_release_version
     )
     latest_digest = ghcr_digest_for_version(
         str(upstream.get("image", "")).strip(), latest_version

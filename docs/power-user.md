@@ -61,6 +61,8 @@ For the exact Sure-AIO pgvector behavior, including the default "installed but n
 5. If you use Ollama for embeddings, make sure the embedding model is actually pulled and available. Exposing the vars is not enough if the model is missing.
 6. If you want verbose AI troubleshooting in the container logs, set **[AI] Debug Logging** to `true`.
 7. If your OpenAI-compatible endpoint does not support PDF or vision input, set **[AI] Enable PDF Processing** to `false` so Sure does not try to send PDF workloads to a provider that cannot handle them.
+8. If you use a custom OpenAI-compatible provider, **[AI] Supports Responses API** can force Sure toward the Responses API (`true`) or chat completions (`false`). Leave it blank unless auto-detection is wrong for your provider.
+9. For small-context local models, tune `LLM_CONTEXT_WINDOW`, `LLM_MAX_RESPONSE_TOKENS`, `LLM_MAX_HISTORY_TOKENS`, `LLM_SYSTEM_PROMPT_RESERVE`, and `LLM_MAX_ITEMS_PER_CALL` rather than relying on defaults intended for larger cloud models.
 
 ---
 
@@ -76,14 +78,15 @@ Track LLM inference costs and app usage.
 
 ---
 
-## 4. Offloading Storage to S3 / Cloudflare R2 / Minio
+## 4. Offloading Storage to S3 / Cloudflare R2 / GCS / Minio
 
 Avoid filling your Unraid cache drive by piping PDFs/receipts straight to object storage.
 
 1. Find the **[Storage]** block.
-2. **Provider Strategy:** Change from blank to `amazon`, `cloudflare`, or `generic_s3`.
-3. Provide your `Access Key ID`, `Secret Access Key`, `Region`, and `Bucket Name`.
+2. **Provider Strategy:** Change from blank to `amazon`, `cloudflare`, `generic_s3`, or `google`.
+3. Provide the matching provider credentials and bucket fields.
 4. If using TrueNAS Minio or similar, provide the `Custom Endpoint` (Generic S3 only).
+5. For Google Cloud Storage, set `GCS_PROJECT`, `GCS_BUCKET`, and either `GCS_KEYFILE_JSON` or `GCS_KEYFILE`. Inline `GCS_KEYFILE_JSON` is usually easier in Unraid because it does not require mounting a separate credentials file.
 
 ---
 
@@ -93,11 +96,14 @@ Sure relies on upstream providers for currency exchange rates and stock logos.
 
 - **Free (Default):** If you leave provider overrides blank, upstream Sure defaults to `yahoo_finance` for first-boot friendliness.
 - **Paid API Keys (Optional):** If you prefer Twelve Data, add your API key and change **[API] Exchange Rate Provider** and **[API] Securities Provider** to `twelve_data`.
+- **Multi-provider securities:** Upstream v0.7.0 also supports `SECURITIES_PROVIDERS` as a comma-separated provider list. This takes precedence over the single `SECURITIES_PROVIDER` value when set.
+- **Expanded provider keys:** The template exposes `TIINGO_API_KEY`, `EODHD_API_KEY`, and `ALPHA_VANTAGE_API_KEY` for the new v0.7.0 securities providers. Setting these env vars locks the matching in-app setting to the environment value.
+- **Crypto and mutual funds:** `binance_public` and `mfapi` are available as upstream securities providers. The template exposes `BINANCE_PUBLIC_URL`, `BINANCE_EGRESS_IP`, and `MFAPI_URL` for advanced routing or allowlist display.
 - **Logos:** Provide a **[API] Brandfetch Client ID** to automatically scrape high-res logos for your bank names and merchants.
 - **High-res logos:** Set `BRAND_FETCH_HIGH_RES_LOGOS=true` if you want Sure to prefer larger Brandfetch logo assets where available.
 - **Indexa token path:** If you use Indexa Capital and want a single global token fallback, set `INDEXA_API_TOKEN`.
 - **Important override behavior:** Upstream only locks matching settings UI controls when the related env var is present. Leaving provider/logo env fields blank keeps the UI controls interactive.
-- **Advanced provider tuning:** The template also exposes `TWELVE_DATA_URL`, `YAHOO_FINANCE_URL`, `YAHOO_FINANCE_MAX_RETRIES`, `YAHOO_FINANCE_RETRY_INTERVAL`, and `YAHOO_FINANCE_MIN_REQUEST_INTERVAL` if you need proxying or retry tuning.
+- **Advanced provider tuning:** The template also exposes `TWELVE_DATA_URL`, `TWELVE_DATA_MIN_REQUEST_INTERVAL`, `TWELVE_DATA_MAX_REQUESTS_PER_MINUTE`, `TIINGO_URL`, `TIINGO_MAX_REQUESTS_PER_HOUR`, `EODHD_URL`, `EODHD_MAX_REQUESTS_PER_DAY`, `ALPHA_VANTAGE_URL`, `ALPHA_VANTAGE_MAX_REQUESTS_PER_DAY`, `YAHOO_FINANCE_URL`, `YAHOO_FINANCE_MAX_RETRIES`, `YAHOO_FINANCE_RETRY_INTERVAL`, and `YAHOO_FINANCE_MIN_REQUEST_INTERVAL` if you need proxying or rate-limit tuning.
 
 ---
 
@@ -123,6 +129,7 @@ To enable Single Sign-On (SSO):
 1. Find the **[Email]** block.
 2. Fill out standard credentials: `SMTP Address`, `Port`, `Username`, `Password`.
 3. Provide the `Sender Address` (e.g., `no-reply@finance.yourdomain.com`).
+4. Leave `SMTP_TLS_SKIP_VERIFY=false` unless you are using a trusted private relay with broken certificates. Setting it to `true` disables SMTP certificate verification.
 
 ---
 
@@ -174,6 +181,7 @@ The template now exposes the real upstream storage split instead of pretending a
 2. For Cloudflare R2, use the **[Storage:R2]** fields, including `CLOUDFLARE_ACCOUNT_ID`.
 3. For MinIO or other S3-compatible endpoints, use the **[Storage:Generic S3]** fields.
 4. Only set **Force Path Style** to `true` when your provider actually requires path-style S3 requests.
+5. For Google Cloud Storage, use the **[Storage:GCS]** fields and set **Provider Strategy** to `google`.
 
 ---
 
@@ -223,7 +231,13 @@ The template now exposes the main upstream runtime toggles that were previously 
    - `PLAID_EU_ENV`
 4. **OpenAI compatibility tuning**
    - `OPENAI_REQUEST_TIMEOUT`
+   - `OPENAI_SUPPORTS_RESPONSES_ENDPOINT`
    - `LLM_JSON_MODE`
+   - `LLM_CONTEXT_WINDOW`
+   - `LLM_MAX_RESPONSE_TOKENS`
+   - `LLM_MAX_HISTORY_TOKENS`
+   - `LLM_SYSTEM_PROMPT_RESERVE`
+   - `LLM_MAX_ITEMS_PER_CALL`
    - `CATEGORIZATION_PROVIDER` / `CATEGORIZATION_MODEL`
    - `CHAT_PROVIDER` / `CHAT_MODEL`
 5. **Auth and onboarding behavior**
@@ -233,6 +247,7 @@ The template now exposes the main upstream runtime toggles that were previously 
 6. **Database and SSL edge cases**
    - `POSTGRES_DB`
    - `SSL_CERT_FILE`
+   - `SMTP_TLS_SKIP_VERIFY`
    - `SELF_HOSTING_ENABLED` (legacy alias; keep `SELF_HOSTED=true` as the main switch)
 7. **Runtime/process tuning**
    - `RAILS_MAX_THREADS`
@@ -250,7 +265,7 @@ These are all legitimate upstream runtime knobs, but not all of them belong in a
 
 ## Trial / Subscription Note
 
-Upstream `v0.6.9` is supposed to disable subscription and trial gating in self-hosted mode when `SELF_HOSTED=true`. The 45-day trial logic still exists in the codebase, but upstream guards it behind `app_mode != self_hosted`.
+Upstream `v0.7.0` still disables subscription and trial gating in self-hosted mode when `SELF_HOSTED=true`. The 45-day trial logic still exists in the codebase, but upstream guards it behind `app_mode != self_hosted`.
 
 That means if you see a trial banner or upgrade flow on a self-hosted Sure-AIO install, the likely causes are:
 
