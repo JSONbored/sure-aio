@@ -16,13 +16,13 @@ upstream:
   digest_arg: UPSTREAM_IMAGE_DIGEST
 template:
   xml_paths:
-  - sure-aio.xml
+    - sure-aio.xml
   generated: false
 catalog:
   published: true
   assets:
-  - source: sure-aio.xml
-    target: sure-aio.xml
+    - source: sure-aio.xml
+      target: sure-aio.xml
 tests:
   unit: tests/unit tests/template
   integration: tests/integration -m integration
