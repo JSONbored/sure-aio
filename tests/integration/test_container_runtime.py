@@ -65,6 +65,27 @@ def container(storage_volume: str, pgdata_volume: str, redis_volume: str):
     secret = (
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"  # nosec B105
     )
+    v0_7_runtime_env = {
+        "ALPHA_VANTAGE_MAX_REQUESTS_PER_DAY": "25",
+        "BINANCE_EGRESS_IP": "127.0.0.1",
+        "BINANCE_PUBLIC_URL": "https://data-api.binance.vision",
+        "EODHD_MAX_REQUESTS_PER_DAY": "20",
+        "GCS_BUCKET": "sure-aio-pytest",
+        "GCS_KEYFILE_JSON": '{"type":"service_account","project_id":"sure-aio-pytest"}',
+        "GCS_PROJECT": "sure-aio-pytest",
+        "LLM_CONTEXT_WINDOW": "4096",
+        "LLM_MAX_HISTORY_TOKENS": "2048",
+        "LLM_MAX_ITEMS_PER_CALL": "10",
+        "LLM_MAX_RESPONSE_TOKENS": "512",
+        "LLM_SYSTEM_PROMPT_RESERVE": "256",
+        "MFAPI_URL": "https://api.mfapi.in",
+        "OPENAI_SUPPORTS_RESPONSES_ENDPOINT": "false",
+        "SECURITIES_PROVIDERS": "yahoo_finance,binance_public",
+        "SMTP_TLS_SKIP_VERIFY": "false",
+        "TIINGO_MAX_REQUESTS_PER_HOUR": "500",
+        "TWELVE_DATA_MAX_REQUESTS_PER_MINUTE": "7",
+        "TWELVE_DATA_MIN_REQUEST_INTERVAL": "1.0",
+    }
     command = [
         "docker",
         "run",
@@ -95,8 +116,10 @@ def container(storage_volume: str, pgdata_volume: str, redis_volume: str):
         f"{pgdata_volume}:/var/lib/postgresql/data",
         "-v",
         f"{redis_volume}:/var/lib/redis",
-        IMAGE_TAG,
     ]
+    for key, value in v0_7_runtime_env.items():
+        command.extend(["-e", f"{key}={value}"])
+    command.append(IMAGE_TAG)
     run_command(command)
     try:
         yield name, host_port
