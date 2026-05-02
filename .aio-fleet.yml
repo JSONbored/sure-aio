@@ -15,6 +15,20 @@ upstream:
   name: Sure
   version_key: UPSTREAM_VERSION
   digest_arg: UPSTREAM_IMAGE_DIGEST
+  monitor:
+    - component: aio
+      name: Sure
+      source: github-tags
+      repo: we-promise/sure
+      image: we-promise/sure
+      digest_source: ghcr
+      dockerfile: Dockerfile
+      version_key: UPSTREAM_VERSION
+      version_strip_prefix: v
+      digest_key: UPSTREAM_IMAGE_DIGEST
+      stable_only: true
+      strategy: pr
+      release_notes_url: https://github.com/we-promise/sure/releases
 template:
   xml_paths:
     - sure-aio.xml
