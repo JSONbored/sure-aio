@@ -66,7 +66,7 @@ Required local validation is `aio-fleet` first:
 
 ```bash
 python3 -m venv .venv-local
-.venv-local/bin/pip install -r requirements-dev.txt
+.venv-local/bin/pip install -e "../aio-fleet[app-tests]"
 .venv-local/bin/pytest tests/integration -m integration --junit-xml=reports/pytest-integration.xml -o junit_family=xunit1
 cd ../aio-fleet
 .venv/bin/python -m aio_fleet validate-repo --repo sure-aio --repo-path ../sure-aio
