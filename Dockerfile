@@ -2,7 +2,7 @@
 # checkov:skip=CKV_DOCKER_8: s6-overlay entrypoint must start as root so init scripts can prepare filesystem state before dropping privileges
 
 ARG UPSTREAM_VERSION=0.7.0-hotfix.2
-ARG UPSTREAM_IMAGE_DIGEST=sha256:637322f6268f1674ccf9064fe8f4dca2e5bafac50b9c83da0d309361367bf48e
+ARG UPSTREAM_IMAGE_DIGEST=sha256:10ee972ce59ef6c409e973641ece639be419cb533ed74b388937922bfaa7e1ee
 ARG PGVECTOR_VERSION=0.8.2
 FROM ghcr.io/we-promise/sure:${UPSTREAM_VERSION}@${UPSTREAM_IMAGE_DIGEST}
 
