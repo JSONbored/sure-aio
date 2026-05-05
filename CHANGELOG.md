@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.0-hotfix.2-aio.1 - 2026-05-05
+
+### Build
+
+- Harden apt package installs
+
+### Documentation
+
+- Document central app test dependencies
+
+### Maintenance
+
+- Format fleet manifest and changelog
+- Move shared automation to aio-fleet
+- Declare aio-fleet ownership
+- Bump sure to 0.7.0-hotfix.1
+- Refresh aio-fleet manifest
+- Bump sure to 0.7.0-hotfix.2
+- Refresh sure 0.7.0-hotfix.2 digest
+
+### Refactors
+
+- Remove legacy shared contract tests
+
 ## 0.7.0-aio.1 - 2026-05-01
 
 ### CI
@@ -13,6 +37,7 @@ All notable changes to this project will be documented in this file.
 - Sync catalog publication state
 - Pin publish helper workflow fix
 - Pin Docker Hub primary workflow
+- Pin control-plane workflow foundation
 
 ### Dependency Updates
 
@@ -77,5 +102,113 @@ All notable changes to this project will be documented in this file.
 ### Maintenance
 
 - Trigger package publish for aio tag alignment
+
+## v0.6.9-aio.3 - 2026-04-15
+
+### Fixes
+
+- Stabilize upstream pinning and align AIO package tags (#41)
+
+## v0.6.9-aio.2 - 2026-04-15
+
+### Documentation
+
+- Add sure-aio support thread url (#33)
+
+### Fixes
+
+- Accept github pr suffix on release commits
+- Resolve publish commit lookup in python
+- Allow tagging workflow-updating commits
+- Use dedicated token for tag and release
+- Prefer pat auth for publish
+- Limit changelog generation to last aio tag
+- Persist self-hosted mode through dockerman (#31)
+- Persist self-hosted mode through dockerman (#32)
+- Update README to add new preview image (#37)
+- Finalize CA metadata and upstream env coverage (#38)
+
+## v0.6.9-aio.1 - 2026-04-01
+
+### Dependency Updates
+
+- Update ghcr.io/we-promise/sure docker digest to 3d899b3 (#21)
+
+### Features
+
+- Align sure-aio with upstream v0.6.9 self-hosting surface (#23)
+
+### Fixes
+
+- Make releases manual and gate heavy workflows
+
+## v0.6.8-aio.1 - 2026-03-31
+
+### Dependency Updates
+
+- Update docker/setup-qemu-action action to v4 (#13)
+- Update docker/setup-buildx-action action to v4 (#12)
+- Update docker/login-action action to v4 (#11)
+- Update docker/build-push-action action to v7 (#10)
+- Update non-major infrastructure updates (#9)
+- Update ghcr.io/we-promise/sure docker digest to 12f32c0 (#7)
+- Pin docker/dockerfile docker tag to 4a43a54 (#6)
+
+### Documentation
+
+- Write comprehensive binhex-style README and power user configuration reference guide
+- Exhaustively map power-user markdown guide to encompass all AI, telemetry, storage, SSO, and encryption advanced features
+- Improve README formatting, add deep links to Power User guide sections, and append Star History chart
+
+### Features
+
+- Complete XML redesign based on upstream Sure feature parity (AI, Vectors, SMTP)
+- Complete XML redesign based on upstream Sure feature parity (AI, Vectors, SMTP, OIDC, Langfuse)
+- Exhaustive XML mapping of all upstream env variables including Active Storage, PostHog, encryption salts, and raw external AI configs
+- Finalize enterprise standards for sure-aio (healthchecks, nightly scans, and branding)
+- Standardize package tags and add release automation (#19)
+
+### Fixes
+
+- Change default db hosts from local context to generic IP strings
+- Restructure s6-overlay v3 dependencies so db migrations safely wait for postgres to be healthy before booting the web/worker process
+- Remove duplicate uppercase Sure-AIO.xml file that was orphaned during early generation
+- Update build workflow to point to root context and master branch, remove pre-refactor legacy service scripts
+- Add missing type and contents.d files for background worker services
+- Pin scout and upload actions to full-length SHAs
+- Update build-push-action sha pin to valid v6 hash
+- Enforce lowercase image tags and optimize scout execution
+- Disable load to support multi-platform exports and target scout via registry
+- Dynamically resolve postgres version path to fix fatal binary exec errors
+- Fix missing token resolution and globalize node24 fallback in sync action
+- Enforce strict SYNC_TOKEN and remove unsecured GitHub token fallback
+- Fix default startup and add smoke coverage
+
+### Maintenance
+
+- Standardize README, add FUNDING.yml, and clean up legacy files
+- Add security policy and unraid template sync workflow
+- Implement explicit least privilege on GitHub Actions runner
+- Enforce author identity in automation
+- Revert to verifiable bot identity for non-repudiation
+- Pin GitHub actions to strictly verified full-length SHAs
+- Replace docker-scout with anchore-grype to avoid authentication issues
+- Temporarily remove anchor scan to allow build pipeline completion under strict allowlist
+
+### Other Changes
+
+- Initial commit: Sure-AIO build files and Unraid XML template
+- Generalize postgresql package name for base image compatibility
+- Security & CI: Fix node24 deprecation and package write permissions
+- Feat/security scout renovate (#1)
+- Codex/fix default startup (#5)
+- Codex/consolidate ci workflows (#14)
+- Codex/fix template icons (#15)
+- Fix awesome-unraid sync for protected main
+- Standardize tags and add release automation
+
+### Refactors
+
+- Fully realize simplelogin-aio methodology by injecting and orchestrating PostgreSQL and Redis natively inside the container via s6-overlay, dropping external DB requirements
 
 <!-- generated by git-cliff -->
