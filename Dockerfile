@@ -22,7 +22,9 @@ WORKDIR /rails
 # We use standard PATH binaries for Postgres (it's installed as postgresql)
 # Refresh inherited Debian packages before adding our own runtime dependencies so
 # published security fixes from the upstream base layer land in the wrapper image.
-RUN apt-get update && \
+RUN find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i 's|http://|https://|g' {} + && \
+    printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' > /etc/apt/apt.conf.d/80-retries && \
+    apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade && \
     apt-get install -y --no-install-recommends \
     build-essential="$(apt-cache madison build-essential | awk 'NR==1 {print $3}')" \
