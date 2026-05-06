@@ -6,6 +6,7 @@ ARG UPSTREAM_IMAGE_DIGEST=sha256:10ee972ce59ef6c409e973641ece639be419cb533ed74b3
 ARG PGVECTOR_VERSION=0.8.2
 FROM ghcr.io/we-promise/sure:${UPSTREAM_VERSION}@${UPSTREAM_IMAGE_DIGEST}
 
+ARG UPSTREAM_VERSION
 ARG PGVECTOR_VERSION
 ARG S6_OVERLAY_VERSION=3.1.6.2
 ARG S6_OVERLAY_NOARCH_SHA256=05af2536ec4fb23f087a43ce305f8962512890d7c71572ed88852ab91d1434e3
@@ -17,6 +18,10 @@ ARG TARGETARCH
 USER root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR /rails
+
+# Upstream hotfix images can lag their release tag in this file, but Sure's UI
+# reports the version from it.
+RUN printf '%s\n' "${UPSTREAM_VERSION}" > /rails/.sure-version
 
 # 1. Install prerequisites, s6-overlay, Redis, and pgvector support
 # We use standard PATH binaries for Postgres (it's installed as postgresql)

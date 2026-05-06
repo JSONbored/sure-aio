@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import time
 import uuid
 from contextlib import contextmanager
@@ -7,6 +8,7 @@ from contextlib import contextmanager
 import pytest
 
 from tests.helpers import (
+    REPO_ROOT,
     container_path_exists,
     docker_available,
     docker_volume,
@@ -17,6 +19,13 @@ from tests.helpers import (
 
 IMAGE_TAG = "sure-aio:pytest"
 pytestmark = pytest.mark.integration
+
+
+def pinned_upstream_version() -> str:
+    dockerfile = (REPO_ROOT / "Dockerfile").read_text()
+    match = re.search(r"^ARG UPSTREAM_VERSION=(?P<version>\S+)$", dockerfile, re.M)
+    assert match is not None  # nosec B101
+    return match.group("version")
 
 
 def logs(name: str) -> str:
@@ -177,3 +186,19 @@ def test_happy_path_boot_and_recreate_persists_data() -> None:
             assert (
                 "export: fatal: invalid variable name" not in second_logs
             )  # nosec B101
+
+
+def test_image_reports_pinned_upstream_version() -> None:
+    result = run_command(
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--entrypoint",
+            "cat",
+            IMAGE_TAG,
+            "/rails/.sure-version",
+        ]
+    )
+
+    assert result.stdout.strip() == pinned_upstream_version()  # nosec B101
