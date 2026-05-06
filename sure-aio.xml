@@ -31,18 +31,9 @@
 - [code]/mnt/user/appdata/sure-aio/system[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/redis[/code]</Overview>
-  <Changes>### 2026-05-05&#xD;
+  <Changes>### 2026-05-06&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Harden apt package installs&#xD;
-- Document central app test dependencies&#xD;
-- Format fleet manifest and changelog&#xD;
-- Move shared automation to aio-fleet&#xD;
-- Declare aio-fleet ownership&#xD;
-- Bump sure to 0.7.0-hotfix.1&#xD;
-- Refresh aio-fleet manifest&#xD;
-- Bump sure to 0.7.0-hotfix.2&#xD;
-- Refresh sure 0.7.0-hotfix.2 digest&#xD;
-- Remove legacy shared contract tests</Changes>
+- Align sure version display with upstream tag</Changes>
   <Category>Productivity: Tools:Utilities</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>
