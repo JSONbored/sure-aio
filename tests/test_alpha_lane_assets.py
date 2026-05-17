@@ -49,28 +49,58 @@ def test_alpha_template_has_separate_identity_and_storage() -> None:
         path.startswith("/mnt/user/appdata/sure-aio-alpha/")
         for path in _host_paths(alpha)
     )
+    assert "Testing / Unstable" in alpha.findtext("Overview", "")  # nosec B101
+    assert "stable [code]sure-aio[/code] appdata" in alpha.findtext(  # nosec B101
+        "Overview", ""
+    )
 
 
 def test_alpha_template_declares_import_limit_controls() -> None:
     stable_targets = _config_targets(_xml_root("sure-aio.xml"))
     alpha_targets = _config_targets(_xml_root("sure-aio-alpha.xml"))
+    ndjson = alpha_targets["SURE_IMPORT_MAX_NDJSON_SIZE_MB"]
+    rows = alpha_targets["SURE_IMPORT_MAX_ROWS"]
 
     assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" not in stable_targets  # nosec B101
     assert "SURE_IMPORT_MAX_ROWS" not in stable_targets  # nosec B101
-    assert alpha_targets["SURE_IMPORT_MAX_NDJSON_SIZE_MB"].text == "250"  # nosec B101
-    assert alpha_targets["SURE_IMPORT_MAX_ROWS"].text == "1000000"  # nosec B101
+    assert ndjson.text == "250"  # nosec B101
+    assert ndjson.get("Default") == "250"  # nosec B101
+    assert ndjson.get("Display") == "always"  # nosec B101
+    assert ndjson.get("Required") == "false"  # nosec B101
+    assert ndjson.get("Mask") == "false"  # nosec B101
+    assert "Alpha-only" in ndjson.get("Description", "")  # nosec B101
+    assert rows.text == "1000000"  # nosec B101
+    assert rows.get("Default") == "1000000"  # nosec B101
+    assert rows.get("Display") == "always"  # nosec B101
+    assert rows.get("Required") == "false"  # nosec B101
+    assert rows.get("Mask") == "false"  # nosec B101
+    assert "web, API, and preflight" in rows.get("Description", "")  # nosec B101
     assert alpha_targets["3000"].text == "3001"  # nosec B101
 
 
 def test_alpha_template_exposes_upstream_alpha_webauthn_controls() -> None:
     stable_targets = _config_targets(_xml_root("sure-aio.xml"))
     alpha_targets = _config_targets(_xml_root("sure-aio-alpha.xml"))
+    rp_id = alpha_targets["WEBAUTHN_RP_ID"]
+    origins = alpha_targets["WEBAUTHN_ALLOWED_ORIGINS"]
 
     assert "WEBAUTHN_RP_ID" not in stable_targets  # nosec B101
     assert "WEBAUTHN_ALLOWED_ORIGINS" not in stable_targets  # nosec B101
-    assert alpha_targets["WEBAUTHN_RP_ID"].get("Display") == "advanced"  # nosec B101
-    assert (  # nosec B101
-        alpha_targets["WEBAUTHN_ALLOWED_ORIGINS"].get("Display") == "advanced"
+    assert rp_id.get("Default") == ""  # nosec B101
+    assert rp_id.text in (None, "")  # nosec B101
+    assert rp_id.get("Display") == "advanced"  # nosec B101
+    assert rp_id.get("Required") == "false"  # nosec B101
+    assert rp_id.get("Mask") == "false"  # nosec B101
+    assert "passkey/WebAuthn relying party ID" in rp_id.get(  # nosec B101
+        "Description", ""
+    )
+    assert origins.get("Default") == ""  # nosec B101
+    assert origins.text in (None, "")  # nosec B101
+    assert origins.get("Display") == "advanced"  # nosec B101
+    assert origins.get("Required") == "false"  # nosec B101
+    assert origins.get("Mask") == "false"  # nosec B101
+    assert "comma-separated WebAuthn origins" in origins.get(  # nosec B101
+        "Description", ""
     )
 
 
@@ -88,3 +118,18 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
     assert "SURE_IMPORT_MAX_ROWS" in text  # nosec B101
     assert "SureImport.const_set(:MAX_NDJSON_SIZE" in text  # nosec B101
     assert "import-limits-env" in ledger  # nosec B101
+
+
+def test_alpha_changelog_documents_runtime_differences() -> None:
+    alpha = _xml_root("sure-aio-alpha.xml")
+    changes = alpha.findtext("Changes", "")
+
+    assert "upstream Sure alpha prereleases" in changes  # nosec B101
+    assert "jsonbored/sure-aio-alpha:latest-alpha" in changes  # nosec B101
+    assert "commit SHA tags" in changes  # nosec B101
+    assert "beta/testing" in changes  # nosec B101
+    assert "separate app name" in changes  # nosec B101
+    assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in changes  # nosec B101
+    assert "SURE_IMPORT_MAX_ROWS" in changes  # nosec B101
+    assert "WEBAUTHN_RP_ID" in changes  # nosec B101
+    assert "WEBAUTHN_ALLOWED_ORIGINS" in changes  # nosec B101
