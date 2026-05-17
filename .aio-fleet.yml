@@ -29,15 +29,32 @@ upstream:
       stable_only: true
       strategy: pr
       release_notes_url: https://github.com/we-promise/sure/releases
+    - component: sure-alpha
+      name: Sure Alpha
+      source: github-releases
+      repo: we-promise/sure
+      image: we-promise/sure
+      digest_source: ghcr
+      dockerfile: Dockerfile.alpha
+      version_key: UPSTREAM_VERSION
+      version_strip_prefix: v
+      digest_key: UPSTREAM_IMAGE_DIGEST
+      stable_only: false
+      prerelease_channel: alpha
+      strategy: pr
+      release_notes_url: https://github.com/we-promise/sure/releases
 template:
   xml_paths:
     - sure-aio.xml
+    - sure-aio-alpha.xml
   generated: false
 catalog:
   published: true
   assets:
     - source: sure-aio.xml
       target: sure-aio.xml
+    - source: sure-aio-alpha.xml
+      target: sure-aio-alpha.xml
 tests:
   integration: tests/integration -m integration
   checkout_submodules: false
@@ -222,3 +239,33 @@ validation:
   allowed_category_tokens:
     - "Productivity:"
     - Tools:Utilities
+components:
+  aio:
+    image_name: jsonbored/sure-aio
+    dockerfile: Dockerfile
+    upstream_config: upstream.toml
+    docker_cache_scope: sure-aio-image
+    release_suffix: aio
+    floating_tags:
+      - latest
+    xml_paths:
+      - sure-aio.xml
+  sure-alpha:
+    image_name: jsonbored/sure-aio-alpha
+    dockerfile: Dockerfile.alpha
+    upstream_config: upstream.toml
+    docker_cache_scope: sure-aio-alpha-image
+    release_policy: registry_only
+    floating_tags:
+      - latest-alpha
+    upstream_version_key: UPSTREAM_VERSION
+    xml_paths:
+      - sure-aio-alpha.xml
+    publish_paths:
+      - README.md
+      - rootfs-alpha/**
+      - patches/sure-alpha/**
+      - docs/alpha-lane.md
+      - tests/**
+    pytest_image_tag: sure-aio-alpha:pytest
+    pytest_prebuilt_env: AIO_ALPHA_PYTEST_USE_PREBUILT_IMAGE

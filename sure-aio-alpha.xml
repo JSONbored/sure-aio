@@ -1,0 +1,292 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>sure-aio-alpha</Name>
+  <Repository>jsonbored/sure-aio-alpha:latest-alpha</Repository>
+  <Registry>https://hub.docker.com/r/jsonbored/sure-aio-alpha</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://forums.unraid.net/topic/198074-support-sure-aio-all-in-one-sure-for-unraid/</Support>
+  <Project>https://github.com/JSONbored/sure-aio</Project>
+  <Overview>Sure Alpha is the testing lane for the Sure AIO Unraid package. It tracks upstream [code]we-promise/sure[/code] alpha prereleases and includes alpha-only wrapper patches before they are promoted or upstreamed.&#xD;
+&#xD;
+[b]Testing / Unstable[/b]&#xD;
+This template is meant for testing and local validation, not primary household finance data. Upstream alpha releases may include migrations or behavior changes that are not compatible with stable. Keep backups and do not point this container at your stable [code]sure-aio[/code] appdata.&#xD;
+&#xD;
+[b]Alpha customizations[/b]&#xD;
+- Raises Sure NDJSON import defaults to [code]250MB[/code] and [code]1,000,000[/code] rows.&#xD;
+- Exposes [code]SURE_IMPORT_MAX_NDJSON_SIZE_MB[/code] and [code]SURE_IMPORT_MAX_ROWS[/code] for testing larger TransmogriFi imports.&#xD;
+- Uses a separate image, repository tag, Web UI port, and appdata root from stable.&#xD;
+&#xD;
+[b]Quick Install[/b]&#xD;
+1. In Unraid, install this alpha template separately from stable.&#xD;
+2. Generate a secret with [code]openssl rand -hex 64[/code] and paste it into [code]Secret Key Base[/code].&#xD;
+3. Leave the default alpha appdata paths unless you have a deliberate test directory.&#xD;
+4. Wait for initialization, then open [code]http://SERVER_IP:3001[/code] or your mapped port.&#xD;
+&#xD;
+[b]Data paths (default)[/b]&#xD;
+- [code]/mnt/user/appdata/sure-aio-alpha/system[/code]&#xD;
+- [code]/mnt/user/appdata/sure-aio-alpha/postgres[/code]&#xD;
+- [code]/mnt/user/appdata/sure-aio-alpha/redis[/code]</Overview>
+  <Changes>### 2026-05-17&#xD;
+- Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
+- Add Sure AIO Alpha testing lane with configurable import limits</Changes>
+  <Category>Productivity: Tools:Utilities</Category>
+  <Beta>True</Beta>
+  <WebUI>http://[IP]:[PORT:3000]</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio-alpha.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/icons/sure.png</Icon>
+  <ExtraSearchTerms>finance budgeting personal-finance net-worth money maybe-finance sure plaid bank accounts alpha testing prerelease</ExtraSearchTerms>
+  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/01-dashboard.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/02-account-activity.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/03-budgets.png</Screenshot>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Description/>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>3001</HostPort>
+        <ContainerPort>3000</ContainerPort>
+        <Protocol>tcp</Protocol>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/sure-aio-alpha/system</HostDir>
+      <ContainerDir>/rails/storage</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/appdata/sure-aio-alpha/postgres</HostDir>
+      <ContainerDir>/var/lib/postgresql/data</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/appdata/sure-aio-alpha/redis</HostDir>
+      <ContainerDir>/var/lib/redis</ContainerDir>
+      <Mode>rw</Mode>
+    </Volume>
+  </Data>
+  <!-- Core Required -->
+  <Config Name="Web UI Port" Target="3000" Default="3001" Mode="tcp" Description="The main web interface port." Type="Port" Display="always" Required="true" Mask="false">3001</Config>
+  <Config Name="Secret Key Base" Target="SECRET_KEY_BASE" Default="" Mode="" Description="Critical: Run 'openssl rand -hex 64' in your Unraid terminal and paste the randomized hash here." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="[Internal] Self Hosted Mode" Target="SELF_HOSTED" Default="true" Mode="" Description="Internal wrapper flag required for Sure self-hosted mode. Leave unchanged." Type="Variable" Display="advanced-hide" Required="false" Mask="false">true</Config>
+  <Config Name="[Internal] Legacy Self Hosting Alias" Target="SELF_HOSTING_ENABLED" Default="" Mode="" Description="Legacy upstream alias for self-hosted mode. Usually leave blank because SELF_HOSTED=true is already set by this wrapper." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Alpha] Sure NDJSON Upload Limit MB" Target="SURE_IMPORT_MAX_NDJSON_SIZE_MB" Default="250" Mode="" Description="Alpha-only Sure import NDJSON upload limit in megabytes. Lower it if this test instance has constrained storage or memory." Type="Variable" Display="always" Required="false" Mask="false">250</Config>
+  <Config Name="[Alpha] Sure Import Max Rows" Target="SURE_IMPORT_MAX_ROWS" Default="1000000" Mode="" Description="Alpha-only Sure import row limit used by web, API, and preflight paths." Type="Variable" Display="always" Required="false" Mask="false">1000000</Config>
+  
+  <!-- Internal Volumes -->
+  <Config Name="App Volumes - Rails Storage" Target="/rails/storage" Default="/mnt/user/appdata/sure-aio-alpha/system" Mode="rw" Description="Internal rails file storage." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/sure-aio-alpha/system</Config>
+  <Config Name="App Volumes - Postgres DB" Target="/var/lib/postgresql/data" Default="/mnt/user/appdata/sure-aio-alpha/postgres" Mode="rw" Description="Internal PostgreSQL database storage mapped externally so you don't lose data." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/sure-aio-alpha/postgres</Config>
+  <Config Name="App Volumes - Redis Cache" Target="/var/lib/redis" Default="/mnt/user/appdata/sure-aio-alpha/redis" Mode="rw" Description="Internal Redis memory cache." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/sure-aio-alpha/redis</Config>
+  <Config Name="[SSL] Custom CA Certificate Mount" Target="/certs/custom-ca.pem" Default="" Mode="ro" Description="Optional host path to a PEM CA certificate file for trusting self-signed or internal HTTPS services. Leave blank unless you need private CA support." Type="Path" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: Overrides & Proxy -->
+  <Config Name="App Domain" Target="APP_DOMAIN" Default="" Mode="" Description="The domain your Sure instance is hosted at (used for email links)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="App URL" Target="APP_URL" Default="" Mode="" Description="Optional full external base URL including scheme, such as 'https://finance.example.com'. Useful for advanced SSO flows that need an absolute callback or issuer URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Onboarding State" Target="ONBOARDING_STATE" Default="open" Mode="" Description="Controls user registration. Use 'open', 'closed', or 'invite_only'." Type="Variable" Display="advanced" Required="false" Mask="false">open</Config>
+  <Config Name="Require Invite Code" Target="REQUIRE_INVITE_CODE" Default="" Mode="" Description="Optional global gate for account registration. Set to 'true' to require invite codes for sign-up." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Require Email Confirmation" Target="REQUIRE_EMAIL_CONFIRMATION" Default="true" Mode="" Description="Set to 'false' if you explicitly want to skip email confirmation for new accounts. Leave enabled for the safer default." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+  <Config Name="Assume SSL" Target="RAILS_ASSUME_SSL" Default="false" Mode="" Description="Leave 'false' for direct LAN access. Set to 'true' only when Sure sits behind a SSL-terminating reverse proxy." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="Force SSL Redirects" Target="RAILS_FORCE_SSL" Default="false" Mode="" Description="Leave 'false' for the default Unraid install over plain HTTP. Set to 'true' only if you want direct HTTP requests redirected to HTTPS." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="[SSL] Custom CA File" Target="SSL_CA_FILE" Default="" Mode="" Description="Optional in-container path to a PEM CA certificate file. If you use the provided mount above, set this to '/certs/custom-ca.pem'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[SSL] Override Global CA Bundle" Target="SSL_CERT_FILE" Default="" Mode="" Description="Optional full CA bundle path for advanced Ruby/OpenSSL trust overrides. Usually leave blank and use SSL_CA_FILE instead." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[SSL] Verify Remote Certificates" Target="SSL_VERIFY" Default="true" Mode="" Description="Leave 'true' for production. Set to 'false' only for temporary testing against broken or self-signed HTTPS endpoints." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+  <Config Name="[SSL] Debug Logging" Target="SSL_DEBUG" Default="false" Mode="" Description="Set to 'true' to log detailed outbound SSL trust and certificate diagnostics." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="[Legal] Privacy Policy URL" Target="LEGAL_PRIVACY_URL" Default="" Mode="" Description="Optional external privacy-policy URL shown by the app when provided." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Legal] Terms of Service URL" Target="LEGAL_TERMS_URL" Default="" Mode="" Description="Optional external terms-of-service URL shown by the app when provided." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: External Databases (Override AIO defaults) -->
+  <Config Name="[External DB] DB Host Override" Target="DB_HOST" Default="" Mode="" Description="Optional external PostgreSQL host or container name. Example: '192.168.1.50' or 'postgres-shared' on a custom Docker network." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External DB] DB Port Override" Target="DB_PORT" Default="" Mode="" Description="Optional external PostgreSQL port. Example: '5432'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External DB] DB Name Override" Target="POSTGRES_DB" Default="" Mode="" Description="Optional external PostgreSQL database name. Leave blank to keep Sure's normal default database name." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External DB] DB User Override" Target="POSTGRES_USER" Default="" Mode="" Description="Optional external PostgreSQL username. This user must already exist on your external database." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External DB] DB Password Override" Target="POSTGRES_PASSWORD" Default="" Mode="" Description="Optional password for the external PostgreSQL user above." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[External DB] Redis URL Override" Target="REDIS_URL" Default="" Mode="" Description="Optional external Redis URL. Example: 'redis://192.168.1.50:6379/1' or 'redis://:password@redis-host:6379/1'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External Redis] Sentinel Hosts" Target="REDIS_SENTINEL_HOSTS" Default="" Mode="" Description="Optional Redis Sentinel hosts, comma-separated like 'host1:26379,host2:26379'. Takes precedence over REDIS_URL when set." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[External Redis] Sentinel Master" Target="REDIS_SENTINEL_MASTER" Default="mymaster" Mode="" Description="Redis Sentinel master name." Type="Variable" Display="advanced" Required="false" Mask="false">mymaster</Config>
+  <Config Name="[External Redis] Sentinel Username" Target="REDIS_SENTINEL_USERNAME" Default="default" Mode="" Description="Redis Sentinel username if your Sentinel deployment requires authentication." Type="Variable" Display="advanced" Required="false" Mask="false">default</Config>
+  <Config Name="[External Redis] Sentinel Password" Target="REDIS_PASSWORD" Default="" Mode="" Description="Redis password used for Sentinel-backed Redis deployments." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <!-- Advanced: Encryption & Names -->
+  <Config Name="[System] Product Name" Target="PRODUCT_NAME" Default="" Mode="" Description="Custom product name in UI." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[System] Brand Name" Target="BRAND_NAME" Default="" Mode="" Description="Custom brand name in UI." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[System] Default UI Layout" Target="DEFAULT_UI_LAYOUT" Default="dashboard" Mode="" Description="Choose the initial layout for new sessions. Use 'dashboard' for the standard app or 'intro' for the intro-first experience." Type="Variable" Display="advanced" Required="false" Mask="false">dashboard</Config>
+  <Config Name="[DB Encryption] Primary Key" Target="ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY" Default="" Mode="" Description="Optional explicit Rails encryption primary key. Leave blank unless you deliberately manage separate Active Record encryption keys outside SECRET_KEY_BASE." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[DB Encryption] Deterministic Key" Target="ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY" Default="" Mode="" Description="Optional deterministic encryption key paired with the primary key above. Leave blank unless you already know your Rails encryption key material." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[DB Encryption] Derivation Salt" Target="ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT" Default="" Mode="" Description="Optional key-derivation salt for Rails encryption. Leave blank unless you manage custom encryption keys yourself." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <!-- Advanced: AI & Intelligence -->
+  <Config Name="[AI] OpenAI / Ollama Token" Target="OPENAI_ACCESS_TOKEN" Default="" Mode="" Description="OpenAI-compatible API key. Get OpenAI keys from platform.openai.com/api-keys. If using local Ollama, enter any non-empty placeholder such as 'ollama-local'." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[AI] OpenAI URI Base" Target="OPENAI_URI_BASE" Default="" Mode="" Description="Leave blank for official OpenAI. For local LLMs, enter your endpoint (e.g., 'http://ollama:11434/v1')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Model Name" Target="OPENAI_MODEL" Default="" Mode="" Description="If using Ollama, you MUST define the model here (e.g., 'llama3.1:13b' or 'gemma2:7b')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Categorization Provider" Target="CATEGORIZATION_PROVIDER" Default="" Mode="" Description="Optional provider override used only for transaction categorization. Example: 'openai' or 'ollama'. If blank, Sure uses its normal AI provider behavior." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Categorization Model" Target="CATEGORIZATION_MODEL" Default="" Mode="" Description="Optional model override used only for categorization, such as 'gemma2:7b'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Chat Provider" Target="CHAT_PROVIDER" Default="" Mode="" Description="Optional provider override used only for chat-assistant requests. Example: 'openai' or 'ollama'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Chat Model" Target="CHAT_MODEL" Default="" Mode="" Description="Optional model override used only for chat-assistant requests, such as 'gpt-4.1' or a local Ollama model." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Request Timeout" Target="OPENAI_REQUEST_TIMEOUT" Default="60" Mode="" Description="OpenAI-compatible request timeout in seconds. Raise this only if your provider or local LLM is slow to respond." Type="Variable" Display="advanced" Required="false" Mask="false">60</Config>
+  <Config Name="[AI] JSON Mode Override" Target="LLM_JSON_MODE" Default="" Mode="" Description="Optional structured-output override. Valid values are '', 'strict', 'none', or 'json_object'. Set this only if you need to force Sure's OpenAI JSON behavior globally." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Debug Logging" Target="AI_DEBUG_MODE" Default="false" Mode="" Description="Set to 'true' to enable verbose AI chat debugging in logs." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="[AI] Enable PDF Processing" Target="OPENAI_SUPPORTS_PDF_PROCESSING" Default="true" Mode="" Description="Leave 'true' for OpenAI or vision-capable providers. Set to 'false' only for OpenAI-compatible endpoints that do not support PDF or vision input." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+  <Config Name="[AI] Supports Responses API" Target="OPENAI_SUPPORTS_RESPONSES_ENDPOINT" Default="" Mode="" Description="Optional override for OpenAI-compatible endpoints. Use 'true' to force the Responses API or 'false' to force chat completions. Leave blank for upstream auto-detection." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Context Window" Target="LLM_CONTEXT_WINDOW" Default="" Mode="" Description="Optional total LLM context window in tokens. Lower this for small local models or raise it for larger cloud models." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Max Response Tokens" Target="LLM_MAX_RESPONSE_TOKENS" Default="" Mode="" Description="Optional tokens reserved for each model response. Leave blank for upstream defaults." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Max History Tokens" Target="LLM_MAX_HISTORY_TOKENS" Default="" Mode="" Description="Optional explicit chat history token budget. Leave blank so Sure derives it from context, response, and system-prompt reserves." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] System Prompt Reserve" Target="LLM_SYSTEM_PROMPT_RESERVE" Default="" Mode="" Description="Optional tokens reserved for Sure's system prompt and instructions. Leave blank for upstream defaults." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Max Items Per Tool Call" Target="LLM_MAX_ITEMS_PER_CALL" Default="" Mode="" Description="Optional maximum batch size for AI categorization and merchant-detection calls. Lower this for small local models." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Vector Store Provider" Target="VECTOR_STORE_PROVIDER" Default="" Mode="" Description="Optional document-search backend. Leave blank for the default path. Set to 'pgvector' to use PostgreSQL-based vectors or 'qdrant' for an external Qdrant server." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Embedding Model" Target="EMBEDDING_MODEL" Default="" Mode="" Description="Embedding model name used for document search. Example: 'nomic-embed-text'. This is required when you enable pgvector or qdrant-backed document search." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Embedding Dimensions" Target="EMBEDDING_DIMENSIONS" Default="1024" Mode="" Description="Embedding width for the selected model. Must match the provider output." Type="Variable" Display="advanced" Required="false" Mask="false">1024</Config>
+  <Config Name="[AI] Embedding URI Base" Target="EMBEDDING_URI_BASE" Default="" Mode="" Description="Optional dedicated embeddings endpoint. Example: 'http://ollama:11434/v1'. If blank, Sure falls back to OPENAI_URI_BASE." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Embedding Access Token" Target="EMBEDDING_ACCESS_TOKEN" Default="" Mode="" Description="Optional dedicated embeddings token. If blank, Sure falls back to OPENAI_ACCESS_TOKEN." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[AI] Qdrant URL" Target="QDRANT_URL" Default="" Mode="" Description="Optional external Qdrant endpoint for vector storage. Example: 'http://192.168.1.50:6333'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[AI] Qdrant API Key" Target="QDRANT_API_KEY" Default="" Mode="" Description="Optional Qdrant API key from your Qdrant Cloud or self-hosted auth configuration." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <!-- Advanced: External AI Assistant (OpenClaw / MCP) -->
+  <Config Name="[Ext. AI] Assistant Type" Target="ASSISTANT_TYPE" Default="" Mode="" Description="Set to 'external' to route all chat to an external agent via MCP." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] Assistant URL" Target="EXTERNAL_ASSISTANT_URL" Default="" Mode="" Description="URL for the external agent (e.g. https://your-openclaw/v1/chat/completions)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] Assistant Token" Target="EXTERNAL_ASSISTANT_TOKEN" Default="" Mode="" Description="Auth token expected by your external agent or gateway. Copy it from that service's dashboard or config." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Ext. AI] Agent ID" Target="EXTERNAL_ASSISTANT_AGENT_ID" Default="" Mode="" Description="Optional Agent ID for OpenClaw routing." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] Session Key" Target="EXTERNAL_ASSISTANT_SESSION_KEY" Default="agent:main:main" Mode="" Description="Optional stable session key for remote agent conversation persistence." Type="Variable" Display="advanced" Required="false" Mask="false">agent:main:main</Config>
+  <Config Name="[Ext. AI] Allowed Emails" Target="EXTERNAL_ASSISTANT_ALLOWED_EMAILS" Default="" Mode="" Description="Optional comma-separated allowlist of users permitted to use the external assistant." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] MCP User Email" Target="MCP_USER_EMAIL" Default="" Mode="" Description="Required if using Ext. AI: Email of an existing Sure user." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Ext. AI] MCP API Token" Target="MCP_API_TOKEN" Default="" Mode="" Description="Required if using Ext. AI: Bearer token for agent callbacks to /mcp. Generate one with 'openssl rand -hex 32' in the Unraid terminal." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+
+  <!-- Advanced: Telemetry (Langfuse / Posthog) -->
+  <Config Name="[Telemetry] PostHog Key" Target="POSTHOG_KEY" Default="" Mode="" Description="PostHog project API key from your PostHog project settings." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Telemetry] PostHog Host" Target="POSTHOG_HOST" Default="" Mode="" Description="PostHog host URL. Example: 'https://us.i.posthog.com' or your self-hosted PostHog URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Langfuse Host" Target="LANGFUSE_HOST" Default="" Mode="" Description="Langfuse base URL for LLM observability. Example: 'https://cloud.langfuse.com' or your self-hosted Langfuse URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Langfuse Region" Target="LANGFUSE_REGION" Default="" Mode="" Description="Optional Langfuse region shortcut like 'us' or 'eu'. Use this only if you are not setting a custom Langfuse Host URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Langfuse Public Key" Target="LANGFUSE_PUBLIC_KEY" Default="" Mode="" Description="Langfuse public key from your project settings." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Langfuse Secret Key" Target="LANGFUSE_SECRET_KEY" Default="" Mode="" Description="Langfuse secret key from your project settings." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Telemetry] Sentry DSN" Target="SENTRY_DSN" Default="" Mode="" Description="Optional Sentry DSN if you want upstream exception reporting enabled for this instance." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Telemetry] Skylight Enabled" Target="SKYLIGHT_ENABLED" Default="false" Mode="" Description="Set to 'true' only if you intentionally use Skylight's hosted APM service. Default is 'false' for AIO installs so no external Skylight setup is required." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="[Telemetry] Skylight Auth Token" Target="SKYLIGHT_AUTHENTICATION" Default="" Mode="" Description="Optional Skylight app authentication token. Only used when SKYLIGHT_ENABLED is true and you want to send APM data to your Skylight account." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Telemetry] Logtail API Key" Target="LOGTAIL_API_KEY" Default="" Mode="" Description="Optional Better Stack / Logtail source token from your log source settings." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Telemetry] Logtail Ingest Host" Target="LOGTAIL_INGESTING_HOST" Default="" Mode="" Description="Optional Logtail ingest host used with LOGTAIL_API_KEY." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Telemetry] Rails Log Level" Target="RAILS_LOG_LEVEL" Default="info" Mode="" Description="Application log verbosity. Use 'info' for normal operation or 'debug' for deeper troubleshooting." Type="Variable" Display="advanced" Required="false" Mask="false">info</Config>
+  <Config Name="[Runtime] Rails/Sidekiq Thread Pool" Target="RAILS_MAX_THREADS" Default="" Mode="" Description="Optional worker thread count used by Puma, Sidekiq, and DB pool sizing. Leave blank for upstream default (3)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Runtime] Puma Worker Processes" Target="WEB_CONCURRENCY" Default="" Mode="" Description="Optional Puma process count for the web service. Leave blank for upstream default (1)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Runtime] Sidekiq Web Username" Target="SIDEKIQ_WEB_USERNAME" Default="" Mode="" Description="Optional username for /sidekiq dashboard basic auth. Leave blank to keep upstream default username ('sure')." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Runtime] Sidekiq Web Password" Target="SIDEKIQ_WEB_PASSWORD" Default="" Mode="" Description="Optional password for /sidekiq dashboard basic auth. Leave blank to keep upstream default password ('sure')." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Network] HTTPS Proxy" Target="HTTPS_PROXY" Default="" Mode="" Description="Optional outbound HTTPS proxy URL (for advanced egress controls like Pipelock). Leave blank for normal direct outbound traffic." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Network] HTTP Proxy" Target="HTTP_PROXY" Default="" Mode="" Description="Optional outbound HTTP proxy URL. Leave blank unless your network requires a proxy." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Network] No Proxy Hosts" Target="NO_PROXY" Default="" Mode="" Description="Optional comma-separated hosts/domains that should bypass HTTP(S) proxy routing." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: External Providers -->
+  <Config Name="[API] Exchange Rate Provider" Target="EXCHANGE_RATE_PROVIDER" Default="" Mode="" Description="Optional exchange-rate provider override. If left blank, Sure uses its normal default and UI selection behavior." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Securities Provider" Target="SECURITIES_PROVIDER" Default="" Mode="" Description="Optional securities provider override. If left blank, Sure uses its normal default and UI selection behavior." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Securities Providers" Target="SECURITIES_PROVIDERS" Default="" Mode="" Description="Optional comma-separated securities provider list. Example: 'yahoo_finance,binance_public,twelve_data'. Takes precedence over the single Securities Provider field when set." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Brandfetch Client ID" Target="BRAND_FETCH_CLIENT_ID" Default="" Mode="" Description="Brandfetch client ID from your Brandfetch application or dashboard if you want merchant and bank logos." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[API] Brandfetch High-Res Logos" Target="BRAND_FETCH_HIGH_RES_LOGOS" Default="" Mode="" Description="Optional env override for 120x120 Brandfetch logos. Set to 'true' to force high-res logos, 'false' to force standard size. Leave blank to keep the in-app toggle enabled." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Indexa API Token" Target="INDEXA_API_TOKEN" Default="" Mode="" Description="Optional global API token used by the Indexa Capital provider when account-level credentials are not configured." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[API] Twelve Data Key" Target="TWELVE_DATA_API_KEY" Default="" Mode="" Description="Optional Twelve Data API key from twelvedata.com if you want exchange rates or securities from Twelve Data instead of Yahoo Finance." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[API] Twelve Data URL Override" Target="TWELVE_DATA_URL" Default="" Mode="" Description="Optional custom Twelve Data API base URL. Leave blank unless you are routing Twelve Data through a proxy or alternate endpoint." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Twelve Data Min Request Interval" Target="TWELVE_DATA_MIN_REQUEST_INTERVAL" Default="" Mode="" Description="Optional minimum spacing between Twelve Data requests in seconds. Leave blank for upstream pacing." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Twelve Data Max Requests Per Minute" Target="TWELVE_DATA_MAX_REQUESTS_PER_MINUTE" Default="" Mode="" Description="Optional Twelve Data per-minute credit limit. Lower this if your plan is more restrictive than upstream defaults." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Tiingo API Key" Target="TIINGO_API_KEY" Default="" Mode="" Description="Optional Tiingo API key for securities pricing. Configure provider selection separately if you want Sure to use Tiingo." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[API] Tiingo URL Override" Target="TIINGO_URL" Default="" Mode="" Description="Optional custom Tiingo API base URL. Leave blank for normal public Tiingo access." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Tiingo Max Requests Per Hour" Target="TIINGO_MAX_REQUESTS_PER_HOUR" Default="" Mode="" Description="Optional Tiingo hourly request cap used by Sure's rate limiter. Leave blank for upstream defaults." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] EODHD API Key" Target="EODHD_API_KEY" Default="" Mode="" Description="Optional EODHD API key for securities pricing, especially international ETF coverage. Configure provider selection separately if you want Sure to use EODHD." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[API] EODHD URL Override" Target="EODHD_URL" Default="" Mode="" Description="Optional custom EODHD API base URL. Leave blank for normal public EODHD access." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] EODHD Max Requests Per Day" Target="EODHD_MAX_REQUESTS_PER_DAY" Default="" Mode="" Description="Optional EODHD daily request cap used by Sure's rate limiter. Leave blank for upstream defaults." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Alpha Vantage API Key" Target="ALPHA_VANTAGE_API_KEY" Default="" Mode="" Description="Optional Alpha Vantage API key for securities pricing. Configure provider selection separately if you want Sure to use Alpha Vantage." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[API] Alpha Vantage URL Override" Target="ALPHA_VANTAGE_URL" Default="" Mode="" Description="Optional custom Alpha Vantage API base URL. Leave blank for normal public Alpha Vantage access." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Alpha Vantage Max Requests Per Day" Target="ALPHA_VANTAGE_MAX_REQUESTS_PER_DAY" Default="" Mode="" Description="Optional Alpha Vantage daily request cap used by Sure's rate limiter. Leave blank for upstream defaults." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] MFAPI URL Override" Target="MFAPI_URL" Default="" Mode="" Description="Optional custom MFAPI base URL for mutual-fund data. Leave blank for upstream defaults." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Binance Public URL Override" Target="BINANCE_PUBLIC_URL" Default="" Mode="" Description="Optional custom Binance public market-data base URL. Leave blank for upstream defaults." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Binance Egress IP Hint" Target="BINANCE_EGRESS_IP" Default="" Mode="" Description="Optional public egress IP shown in the Binance setup UI so users know which IP to allowlist." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Yahoo Finance URL Override" Target="YAHOO_FINANCE_URL" Default="" Mode="" Description="Optional custom Yahoo Finance API base URL. Leave blank for normal public Yahoo Finance access." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[API] Yahoo Finance Max Retries" Target="YAHOO_FINANCE_MAX_RETRIES" Default="5" Mode="" Description="Maximum retry attempts for Yahoo Finance requests before Sure gives up." Type="Variable" Display="advanced" Required="false" Mask="false">5</Config>
+  <Config Name="[API] Yahoo Finance Retry Interval" Target="YAHOO_FINANCE_RETRY_INTERVAL" Default="1.0" Mode="" Description="Seconds to wait between Yahoo Finance retry attempts." Type="Variable" Display="advanced" Required="false" Mask="false">1.0</Config>
+  <Config Name="[API] Yahoo Finance Min Request Interval" Target="YAHOO_FINANCE_MIN_REQUEST_INTERVAL" Default="" Mode="" Description="Optional minimum spacing between Yahoo Finance requests in seconds. Leave blank to keep upstream defaults." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  
+  <!-- Advanced: Sync Behavior -->
+  <Config Name="[Sync] Auto Sync Enabled" Target="AUTO_SYNC_ENABLED" Default="1" Mode="" Description="Container-level override for Sure's scheduled sync job. Use '1' to keep it enabled or '0' to disable automatic syncs globally." Type="Variable" Display="advanced" Required="false" Mask="false">1</Config>
+  <Config Name="[Sync] Auto Sync Time" Target="AUTO_SYNC_TIME" Default="02:22" Mode="" Description="Daily auto-sync time in 24-hour HH:MM format." Type="Variable" Display="advanced" Required="false" Mask="false">02:22</Config>
+  <Config Name="[Sync] Auto Sync Timezone" Target="AUTO_SYNC_TIMEZONE" Default="UTC" Mode="" Description="Timezone used with AUTO_SYNC_TIME. Example: 'America/Denver'." Type="Variable" Display="advanced" Required="false" Mask="false">UTC</Config>
+  <Config Name="[Sync] SimpleFIN Include Pending" Target="SIMPLEFIN_INCLUDE_PENDING" Default="1" Mode="" Description="Set to '0' to exclude pending SimpleFIN transactions. If set here, upstream disables the corresponding Sync setting in the Sure UI." Type="Variable" Display="advanced" Required="false" Mask="false">1</Config>
+  <Config Name="[Sync] SimpleFIN Raw Debug Logs" Target="SIMPLEFIN_DEBUG_RAW" Default="" Mode="" Description="Set to 'true' to log raw SimpleFIN payloads for debugging. This can expose sensitive data and create noisy logs." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Sync] SimpleFIN Credit Overpayment Heuristic" Target="SIMPLEFIN_CC_OVERPAYMENT_HEURISTIC" Default="" Mode="" Description="Optional override for SimpleFIN liability overpayment detection. Set to 'false' to disable the heuristic globally." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Sync] Plaid Include Pending" Target="PLAID_INCLUDE_PENDING" Default="1" Mode="" Description="Set to '0' to exclude pending Plaid transactions. If set here, upstream disables the corresponding Sync setting in the Sure UI." Type="Variable" Display="advanced" Required="false" Mask="false">1</Config>
+  <Config Name="[Sync] Lunchflow Include Pending" Target="LUNCHFLOW_INCLUDE_PENDING" Default="" Mode="" Description="Set to 'true' to include pending transactions in Lunchflow sync requests." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Sync] Lunchflow Raw Debug Logs" Target="LUNCHFLOW_DEBUG_RAW" Default="" Mode="" Description="Set to 'true' to log raw Lunchflow payloads for debugging. This can expose sensitive data and create noisy logs." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  
+  <!-- Advanced: Enterprise Auth -->
+  <Config Name="[Auth] Local Login Enabled" Target="AUTH_LOCAL_LOGIN_ENABLED" Default="true" Mode="" Description="Set to 'false' to disable local email/password login and move users toward SSO-only auth." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+  <Config Name="[Auth] Local Admin Override" Target="AUTH_LOCAL_ADMIN_OVERRIDE_ENABLED" Default="false" Mode="" Description="If local login is disabled, set to 'true' to let super admins keep local login as an emergency backdoor." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="[Auth] JIT SSO Mode" Target="AUTH_JIT_MODE" Default="create_and_link" Mode="" Description="SSO behavior for first-time users: 'create_and_link' creates accounts automatically, 'link_only' requires an existing user." Type="Variable" Display="advanced" Required="false" Mask="false">create_and_link</Config>
+  <Config Name="[Auth] Allowed OIDC Domains" Target="ALLOWED_OIDC_DOMAINS" Default="" Mode="" Description="Optional comma-separated email domains allowed for JIT SSO account creation." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Alpha Auth] WebAuthn Relying Party ID" Target="WEBAUTHN_RP_ID" Default="" Mode="" Description="Alpha-only passkey/WebAuthn relying party ID. Usually your registrable domain, such as 'example.com'. Leave blank unless you are testing passkeys or hardware security keys. Changing this after registering credentials can make existing passkeys unusable." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Alpha Auth] WebAuthn Allowed Origins" Target="WEBAUTHN_ALLOWED_ORIGINS" Default="" Mode="" Description="Alpha-only comma-separated WebAuthn origins including scheme and host, such as 'https://finance.example.com'. Leave blank unless you are testing passkeys or hardware security keys." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] Provider Source" Target="AUTH_PROVIDERS_SOURCE" Default="" Mode="" Description="Leave blank for normal YAML/env-backed provider loading. Set to 'db' if you want upstream's database-backed SSO provider admin UI." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Client ID" Target="OIDC_CLIENT_ID" Default="" Mode="" Description="OIDC client ID from your identity provider app registration, such as Authentik, Authelia, Keycloak, or Zitadel." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Client Secret" Target="OIDC_CLIENT_SECRET" Default="" Mode="" Description="OIDC client secret from the same identity provider app registration." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Auth] OIDC Issuer" Target="OIDC_ISSUER" Default="" Mode="" Description="OIDC issuer URL. Example: 'https://auth.example.com/application/o/sure/' or your provider's issuer endpoint." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Redirect URI" Target="OIDC_REDIRECT_URI" Default="" Mode="" Description="OIDC redirect URI registered with your provider. Example: 'https://finance.example.com/auth/openid_connect/callback'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Button Label" Target="OIDC_BUTTON_LABEL" Default="" Mode="" Description="Optional custom sign-in button label for the default OIDC provider." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] OIDC Button Icon" Target="OIDC_BUTTON_ICON" Default="key" Mode="" Description="Optional icon slug for the default OIDC sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">key</Config>
+  <Config Name="[Auth] Google OAuth Client ID" Target="GOOGLE_OAUTH_CLIENT_ID" Default="" Mode="" Description="Optional Google OAuth client ID from console.cloud.google.com if you want a dedicated Google sign-in provider." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] Google OAuth Client Secret" Target="GOOGLE_OAUTH_CLIENT_SECRET" Default="" Mode="" Description="Optional Google OAuth client secret from the same Google OAuth app." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Auth] Google Button Label" Target="GOOGLE_BUTTON_LABEL" Default="Sign in with Google" Mode="" Description="Optional custom label for the Google sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">Sign in with Google</Config>
+  <Config Name="[Auth] Google Button Icon" Target="GOOGLE_BUTTON_ICON" Default="google" Mode="" Description="Optional icon slug for the Google sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">google</Config>
+  <Config Name="[Auth] GitHub OAuth Client ID" Target="GITHUB_CLIENT_ID" Default="" Mode="" Description="Optional GitHub OAuth client ID from your GitHub OAuth App settings if you want a dedicated GitHub sign-in provider." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth] GitHub OAuth Client Secret" Target="GITHUB_CLIENT_SECRET" Default="" Mode="" Description="Optional GitHub OAuth client secret from the same GitHub OAuth App." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Auth] GitHub Button Label" Target="GITHUB_BUTTON_LABEL" Default="Sign in with GitHub" Mode="" Description="Optional custom label for the GitHub sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">Sign in with GitHub</Config>
+  <Config Name="[Auth] GitHub Button Icon" Target="GITHUB_BUTTON_ICON" Default="github" Mode="" Description="Optional icon slug for the GitHub sign-in button." Type="Variable" Display="advanced" Required="false" Mask="false">github</Config>
+  <Config Name="[Auth:Keycloak] Client ID" Target="OIDC_KEYCLOAK_CLIENT_ID" Default="" Mode="" Description="Optional named Keycloak OIDC provider client ID for upstream multi-provider auth.yml mode." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth:Keycloak] Client Secret" Target="OIDC_KEYCLOAK_CLIENT_SECRET" Default="" Mode="" Description="Optional named Keycloak OIDC provider client secret for upstream multi-provider auth.yml mode." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Auth:Keycloak] Issuer" Target="OIDC_KEYCLOAK_ISSUER" Default="" Mode="" Description="Optional named Keycloak OIDC issuer URL for upstream multi-provider auth.yml mode." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth:Keycloak] Redirect URI" Target="OIDC_KEYCLOAK_REDIRECT_URI" Default="" Mode="" Description="Optional named Keycloak OIDC redirect URI for upstream multi-provider auth.yml mode." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth:Authentik] Client ID" Target="OIDC_AUTHENTIK_CLIENT_ID" Default="" Mode="" Description="Optional named Authentik OIDC provider client ID for upstream multi-provider auth.yml mode." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth:Authentik] Client Secret" Target="OIDC_AUTHENTIK_CLIENT_SECRET" Default="" Mode="" Description="Optional named Authentik OIDC provider client secret for upstream multi-provider auth.yml mode." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Auth:Authentik] Issuer" Target="OIDC_AUTHENTIK_ISSUER" Default="" Mode="" Description="Optional named Authentik OIDC issuer URL for upstream multi-provider auth.yml mode." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Auth:Authentik] Redirect URI" Target="OIDC_AUTHENTIK_REDIRECT_URI" Default="" Mode="" Description="Optional named Authentik OIDC redirect URI for upstream multi-provider auth.yml mode." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: Active Storage (S3 / R2 / GCS) -->
+  <Config Name="[Storage] Provider Strategy" Target="ACTIVE_STORAGE_SERVICE" Default="" Mode="" Description="Leave blank for internal disk storage. Change to 'amazon', 'cloudflare', 'generic_s3', or 'google' to move uploads out of the container." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:AWS] Access Key ID" Target="S3_ACCESS_KEY_ID" Default="" Mode="" Description="Amazon S3 access key ID from your AWS IAM user or access-key pair." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:AWS] Secret Access Key" Target="S3_SECRET_ACCESS_KEY" Default="" Mode="" Description="Amazon S3 secret access key paired with the access key ID above." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:AWS] Region" Target="S3_REGION" Default="" Mode="" Description="Amazon S3 region. Defaults to us-east-1 if left blank." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:AWS] Bucket Name" Target="S3_BUCKET" Default="" Mode="" Description="Amazon S3 bucket name." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:R2] Cloudflare Account ID" Target="CLOUDFLARE_ACCOUNT_ID" Default="" Mode="" Description="Cloudflare account ID used to construct the R2 endpoint URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:R2] Access Key ID" Target="CLOUDFLARE_ACCESS_KEY_ID" Default="" Mode="" Description="Cloudflare R2 access key ID from your R2 API token pair." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:R2] Secret Access Key" Target="CLOUDFLARE_SECRET_ACCESS_KEY" Default="" Mode="" Description="Cloudflare R2 secret access key paired with the R2 access key ID above." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:R2] Bucket Name" Target="CLOUDFLARE_BUCKET" Default="" Mode="" Description="Cloudflare R2 bucket name." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:Generic S3] Access Key ID" Target="GENERIC_S3_ACCESS_KEY_ID" Default="" Mode="" Description="Generic S3 or MinIO access key ID from your object-storage service." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:Generic S3] Secret Access Key" Target="GENERIC_S3_SECRET_ACCESS_KEY" Default="" Mode="" Description="Generic S3 or MinIO secret access key paired with the access key ID above." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:Generic S3] Region" Target="GENERIC_S3_REGION" Default="" Mode="" Description="Generic S3 region value expected by your provider." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:Generic S3] Bucket Name" Target="GENERIC_S3_BUCKET" Default="" Mode="" Description="Generic S3 or MinIO bucket name." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:Generic S3] Custom Endpoint" Target="GENERIC_S3_ENDPOINT" Default="" Mode="" Description="Custom MinIO or S3-compatible endpoint URL." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:Generic S3] Force Path Style" Target="GENERIC_S3_FORCE_PATH_STYLE" Default="false" Mode="" Description="Set to 'true' for providers that require path-style S3 requests." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="[Storage:GCS] Project" Target="GCS_PROJECT" Default="" Mode="" Description="Google Cloud project ID used by Active Storage when Provider Strategy is set to 'google'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:GCS] Bucket Name" Target="GCS_BUCKET" Default="" Mode="" Description="Google Cloud Storage bucket name used when Provider Strategy is set to 'google'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Storage:GCS] Keyfile JSON" Target="GCS_KEYFILE_JSON" Default="" Mode="" Description="Raw Google service-account JSON content. Preferred over a keyfile path when using GCS storage." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Storage:GCS] Keyfile Path" Target="GCS_KEYFILE" Default="" Mode="" Description="In-container path to a Google service-account JSON keyfile. Use only if you mount the file separately." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: SMTP -->
+  <Config Name="[Email] SMTP Address" Target="SMTP_ADDRESS" Default="" Mode="" Description="Hostname for your SMTP server. Example: 'smtp.mailgun.org', 'smtp.sendgrid.net', or your mail relay host." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Email] SMTP Port" Target="SMTP_PORT" Default="465" Mode="" Description="Port for your SMTP server. Common values: '465' for implicit TLS or '587' for STARTTLS." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Email] SMTP Username" Target="SMTP_USERNAME" Default="" Mode="" Description="SMTP username from your mail provider or relay." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Email] SMTP Password" Target="SMTP_PASSWORD" Default="" Mode="" Description="SMTP password or app password from your mail provider." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Email] SMTP TLS Enabled" Target="SMTP_TLS_ENABLED" Default="true" Mode="" Description="Leave 'true' for normal secure SMTP. Set to 'false' only if your mail relay expects plain SMTP without TLS." Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+  <Config Name="[Email] SMTP TLS Skip Verify" Target="SMTP_TLS_SKIP_VERIFY" Default="false" Mode="" Description="Leave 'false' for normal certificate validation. Set to 'true' only for a trusted private SMTP relay with broken TLS certificates." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="[Email] Sender Address" Target="EMAIL_SENDER" Default="" Mode="" Description="The email address your app will send mail from (e.g., finance@mydomain.com)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+  <!-- Advanced: Banking Providers -->
+  <Config Name="[Plaid] Client ID" Target="PLAID_CLIENT_ID" Default="" Mode="" Description="Optional Plaid client ID if you want upstream Plaid account linking enabled." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Plaid] Secret" Target="PLAID_SECRET" Default="" Mode="" Description="Optional Plaid secret paired with the client ID above." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Plaid] Environment" Target="PLAID_ENV" Default="" Mode="" Description="Optional Plaid environment such as 'sandbox' or 'production'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Plaid EU] Client ID" Target="PLAID_EU_CLIENT_ID" Default="" Mode="" Description="Optional Plaid Europe client ID if you use the Plaid EU adapter." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Plaid EU] Secret" Target="PLAID_EU_SECRET" Default="" Mode="" Description="Optional Plaid Europe secret paired with the Plaid EU client ID above." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="[Plaid EU] Environment" Target="PLAID_EU_ENV" Default="" Mode="" Description="Optional Plaid Europe environment such as 'sandbox' or 'production'." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+
+</Container>

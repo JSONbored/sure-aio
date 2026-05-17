@@ -45,15 +45,24 @@ def docker_image_exists(image_tag: str) -> bool:
     return result.returncode == 0
 
 
-def ensure_pytest_image(image_tag: str) -> None:
-    if os.environ.get("AIO_PYTEST_USE_PREBUILT_IMAGE") == "true":
+def ensure_pytest_image(
+    image_tag: str,
+    *,
+    dockerfile: str = "Dockerfile",
+    prebuilt_env: str = "AIO_PYTEST_USE_PREBUILT_IMAGE",
+) -> None:
+    if os.environ.get(prebuilt_env) == "true":
         if not docker_image_exists(image_tag):
             raise AssertionError(
                 f"Expected prebuilt pytest image {image_tag} to be loaded before the test run."
             )
         return
 
-    run_command(["docker", "build", "--platform", "linux/amd64", "-t", image_tag, "."])
+    command = ["docker", "build", "--platform", "linux/amd64", "-t", image_tag]
+    if dockerfile != "Dockerfile":
+        command.extend(["-f", dockerfile])
+    command.append(".")
+    run_command(command)
 
 
 def reserve_host_port() -> int:

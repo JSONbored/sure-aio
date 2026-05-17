@@ -15,6 +15,12 @@ An Unraid-first, single-container deployment of [Sure](https://github.com/we-pro
 - `SKYLIGHT_ENABLED=false` by default so AIO users are not forced into external APM setup
 - Unraid CA template at [sure-aio.xml](sure-aio.xml)
 
+## Alpha Testing Lane
+
+This repo also carries `sure-aio-alpha`, a separate testing package managed by `aio-fleet` from the same source repo. It tracks upstream Sure alpha prereleases, publishes `jsonbored/sure-aio-alpha:latest-alpha`, and uses [sure-aio-alpha.xml](sure-aio-alpha.xml) with separate appdata paths and default host port `3001`.
+
+Alpha is intentionally not the stable package. It is where wrapper-only experiments live first, including the current configurable Sure import limits for larger TransmogriFi NDJSON testing. See [docs/alpha-lane.md](docs/alpha-lane.md) before pointing it at important data.
+
 ## Beginner Install
 
 1. Install the Unraid template.
