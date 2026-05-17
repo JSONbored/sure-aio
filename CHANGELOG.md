@@ -2,11 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.7.0-hotfix.2-aio.2 - 2026-05-06
+## 0.7.0-hotfix.3-aio.1 - 2026-05-17
 
-### Fixes
+### Maintenance
 
-- Align sure version display with upstream tag
+- Bump sure to 0.7.0-hotfix.3 (#95)
 
 ## 0.7.0-hotfix.2-aio.1 - 2026-05-05
 
