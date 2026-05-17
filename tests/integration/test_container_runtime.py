@@ -21,6 +21,9 @@ from tests.helpers import (
 IMAGE_TAG = "sure-aio:pytest"
 ALPHA_IMAGE_TAG = "sure-aio-alpha:pytest"
 pytestmark = pytest.mark.integration
+SECRET_KEY_BASE = (
+    "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"  # nosec B105
+)
 
 
 def pinned_upstream_version(dockerfile_name: str = "Dockerfile") -> str:
@@ -69,6 +72,26 @@ def assert_no_https_redirect(host_port: int) -> None:
     assert "location: https://" not in result.stdout.lower()  # nosec B101
 
 
+def rails_runner_output(container_name: str, code: str) -> str:
+    result = docker_exec(container_name, f"bin/rails runner {code!r}")
+    lines = result.stdout.strip().splitlines()
+    return lines[-1] if lines else ""
+
+
+def assert_alpha_import_and_webauthn_config(
+    container_name: str,
+    expected: str,
+) -> None:
+    result = rails_runner_output(
+        container_name,
+        "config = Rails.application.config.x.webauthn; "
+        "puts [SureImport::MAX_NDJSON_SIZE, SureImport.max_ndjson_size, "
+        "SureImport.max_row_count, SureImport.allocate.max_row_count, "
+        'config.rp_id, config.allowed_origins.join("|")].join(":")',
+    )
+    assert result == expected  # nosec B101
+
+
 @contextmanager
 def container(
     storage_volume: str,
@@ -81,9 +104,6 @@ def container(
 ):
     name = f"{name_prefix}-{uuid.uuid4().hex[:10]}"
     host_port = reserve_host_port()
-    secret = (
-        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"  # nosec B105
-    )
     v0_7_runtime_env = {
         "ALPHA_VANTAGE_MAX_REQUESTS_PER_DAY": "25",
         "BINANCE_EGRESS_IP": "127.0.0.1",
@@ -116,7 +136,7 @@ def container(
         "-p",
         f"{host_port}:3000",
         "-e",
-        f"SECRET_KEY_BASE={secret}",
+        f"SECRET_KEY_BASE={SECRET_KEY_BASE}",
         "-e",
         "SELF_HOSTED=true",
         "-e",
@@ -226,7 +246,9 @@ def test_image_reports_pinned_upstream_version(build_image) -> None:
     assert result.stdout.strip() == pinned_upstream_version()  # nosec B101
 
 
-def test_alpha_image_reports_version_and_import_limits(build_alpha_image) -> None:
+def test_alpha_image_boots_with_version_import_limits_and_webauthn_env(
+    build_alpha_image,
+) -> None:
     with (
         docker_volume("sure-aio-alpha-storage") as storage_volume,
         docker_volume("sure-aio-alpha-pg") as pgdata_volume,
@@ -241,6 +263,10 @@ def test_alpha_image_reports_version_and_import_limits(build_alpha_image) -> Non
             extra_env={
                 "SURE_IMPORT_MAX_NDJSON_SIZE_MB": "250",
                 "SURE_IMPORT_MAX_ROWS": "1000000",
+                "WEBAUTHN_RP_ID": "finance.example.com",
+                "WEBAUTHN_ALLOWED_ORIGINS": (
+                    "https://finance.example.com,https://sure.example.net"
+                ),
             },
         ) as (
             name,
@@ -249,10 +275,113 @@ def test_alpha_image_reports_version_and_import_limits(build_alpha_image) -> Non
             wait_for_http(name, host_port)
             version = docker_exec(name, "cat /rails/.sure-version").stdout.strip()
             assert version == pinned_upstream_version("Dockerfile.alpha")  # nosec B101
-            result = docker_exec(
+            assert_alpha_import_and_webauthn_config(
                 name,
-                "bin/rails runner 'puts [SureImport::MAX_NDJSON_SIZE, SureImport.max_ndjson_size, SureImport.max_row_count].join(\":\" )'",
+                (
+                    "262144000:262144000:1000000:1000000:"
+                    "finance.example.com:"
+                    "https://finance.example.com|https://sure.example.net"
+                ),
             )
-            assert result.stdout.strip().splitlines()[-1] == (  # nosec B101
-                "262144000:262144000:1000000"
+
+
+def test_alpha_import_limit_defaults_are_runtime_defaults(build_alpha_image) -> None:
+    with (
+        docker_volume("sure-aio-alpha-default-storage") as storage_volume,
+        docker_volume("sure-aio-alpha-default-pg") as pgdata_volume,
+        docker_volume("sure-aio-alpha-default-redis") as redis_volume,
+    ):
+        with container(
+            storage_volume,
+            pgdata_volume,
+            redis_volume,
+            image_tag=ALPHA_IMAGE_TAG,
+            name_prefix="sure-aio-alpha-default-pytest",
+        ) as (name, host_port):
+            wait_for_http(name, host_port)
+            assert_alpha_import_and_webauthn_config(
+                name,
+                "262144000:262144000:1000000:1000000:localhost:"
+                "http://localhost:3000",
+            )
+
+
+def test_alpha_import_limit_env_overrides_are_applied(build_alpha_image) -> None:
+    with (
+        docker_volume("sure-aio-alpha-custom-storage") as storage_volume,
+        docker_volume("sure-aio-alpha-custom-pg") as pgdata_volume,
+        docker_volume("sure-aio-alpha-custom-redis") as redis_volume,
+    ):
+        with container(
+            storage_volume,
+            pgdata_volume,
+            redis_volume,
+            image_tag=ALPHA_IMAGE_TAG,
+            name_prefix="sure-aio-alpha-custom-pytest",
+            extra_env={
+                "SURE_IMPORT_MAX_NDJSON_SIZE_MB": "12",
+                "SURE_IMPORT_MAX_ROWS": "3456",
+            },
+        ) as (name, host_port):
+            wait_for_http(name, host_port)
+            assert_alpha_import_and_webauthn_config(
+                name,
+                "12582912:12582912:3456:3456:localhost:http://localhost:3000",
+            )
+
+
+def test_alpha_import_limit_invalid_env_falls_back_to_defaults(
+    build_alpha_image,
+) -> None:
+    with (
+        docker_volume("sure-aio-alpha-invalid-storage") as storage_volume,
+        docker_volume("sure-aio-alpha-invalid-pg") as pgdata_volume,
+        docker_volume("sure-aio-alpha-invalid-redis") as redis_volume,
+    ):
+        with container(
+            storage_volume,
+            pgdata_volume,
+            redis_volume,
+            image_tag=ALPHA_IMAGE_TAG,
+            name_prefix="sure-aio-alpha-invalid-pytest",
+            extra_env={
+                "SURE_IMPORT_MAX_NDJSON_SIZE_MB": "0",
+                "SURE_IMPORT_MAX_ROWS": "not-a-number",
+            },
+        ) as (name, host_port):
+            wait_for_http(name, host_port)
+            assert_alpha_import_and_webauthn_config(
+                name,
+                "262144000:262144000:1000000:1000000:localhost:"
+                "http://localhost:3000",
+            )
+
+
+def test_alpha_webauthn_env_is_parsed_by_upstream_initializer(
+    build_alpha_image,
+) -> None:
+    with (
+        docker_volume("sure-aio-alpha-webauthn-storage") as storage_volume,
+        docker_volume("sure-aio-alpha-webauthn-pg") as pgdata_volume,
+        docker_volume("sure-aio-alpha-webauthn-redis") as redis_volume,
+    ):
+        with container(
+            storage_volume,
+            pgdata_volume,
+            redis_volume,
+            image_tag=ALPHA_IMAGE_TAG,
+            name_prefix="sure-aio-alpha-webauthn-pytest",
+            extra_env={
+                "WEBAUTHN_RP_ID": "https://finance.example.com:443/settings",
+                "WEBAUTHN_ALLOWED_ORIGINS": (
+                    "https://finance.example.com/, https://sure.example.net"
+                ),
+            },
+        ) as (name, host_port):
+            wait_for_http(name, host_port)
+            assert_alpha_import_and_webauthn_config(
+                name,
+                "262144000:262144000:1000000:1000000:"
+                "finance.example.com:"
+                "https://finance.example.com|https://sure.example.net",
             )

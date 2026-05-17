@@ -13,6 +13,8 @@ The alpha Unraid template exposes upstream alpha-only self-hosting controls when
 
 These are not wrapper patches. They belong to upstream Sure's passkey/WebAuthn MFA alpha work and are shown in the alpha template only until the feature stabilizes.
 
+The alpha XML changelog must call out exposed upstream alpha controls separately from wrapper patches so users can tell what came from Sure and what came from AIO.
+
 ## Patch Ledger
 
 ### import-limits-env
@@ -30,3 +32,9 @@ These are not wrapper patches. They belong to upstream Sure's passkey/WebAuthn M
 - Prefer environment-driven Rails initializers over direct source patches because they survive daily alpha image bumps better.
 - Use `patches/sure-alpha/` only when an initializer cannot hook the behavior cleanly.
 - If an upstream alpha bump breaks an overlay, validation should fail before the alpha image is published.
+
+## Validation Expectations
+
+- XML tests must keep stable `sure-aio` free of alpha-only variables.
+- XML tests must verify the beta marker, separate image/template identity, separate appdata paths, import controls, WebAuthn controls, and alpha changelog text.
+- Runtime tests must boot the alpha image and verify `/up`, `/rails/.sure-version`, import limit defaults/overrides/fallback behavior, and WebAuthn environment parsing inside Rails.
