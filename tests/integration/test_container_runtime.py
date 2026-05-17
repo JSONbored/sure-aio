@@ -10,6 +10,7 @@ import pytest
 from tests.helpers import (
     REPO_ROOT,
     container_path_exists,
+    docker_exec,
     docker_available,
     docker_volume,
     ensure_pytest_image,
@@ -18,11 +19,12 @@ from tests.helpers import (
 )
 
 IMAGE_TAG = "sure-aio:pytest"
+ALPHA_IMAGE_TAG = "sure-aio-alpha:pytest"
 pytestmark = pytest.mark.integration
 
 
-def pinned_upstream_version() -> str:
-    dockerfile = (REPO_ROOT / "Dockerfile").read_text()
+def pinned_upstream_version(dockerfile_name: str = "Dockerfile") -> str:
+    dockerfile = (REPO_ROOT / dockerfile_name).read_text()
     match = re.search(r"^ARG UPSTREAM_VERSION=(?P<version>\S+)$", dockerfile, re.M)
     assert match is not None  # nosec B101
     return match.group("version")
@@ -68,8 +70,16 @@ def assert_no_https_redirect(host_port: int) -> None:
 
 
 @contextmanager
-def container(storage_volume: str, pgdata_volume: str, redis_volume: str):
-    name = f"sure-aio-pytest-{uuid.uuid4().hex[:10]}"
+def container(
+    storage_volume: str,
+    pgdata_volume: str,
+    redis_volume: str,
+    *,
+    image_tag: str = IMAGE_TAG,
+    name_prefix: str = "sure-aio-pytest",
+    extra_env: dict[str, str] | None = None,
+):
+    name = f"{name_prefix}-{uuid.uuid4().hex[:10]}"
     host_port = reserve_host_port()
     secret = (
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"  # nosec B105
@@ -126,9 +136,10 @@ def container(storage_volume: str, pgdata_volume: str, redis_volume: str):
         "-v",
         f"{redis_volume}:/var/lib/redis",
     ]
-    for key, value in v0_7_runtime_env.items():
+    runtime_env = {**v0_7_runtime_env, **(extra_env or {})}
+    for key, value in runtime_env.items():
         command.extend(["-e", f"{key}={value}"])
-    command.append(IMAGE_TAG)
+    command.append(image_tag)
     run_command(command)
     try:
         yield name, host_port
@@ -136,14 +147,25 @@ def container(storage_volume: str, pgdata_volume: str, redis_volume: str):
         run_command(["docker", "rm", "-f", name], check=False)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def build_image() -> None:
     if not docker_available():
         pytest.skip("Docker is unavailable; integration tests require Docker/OrbStack.")
     ensure_pytest_image(IMAGE_TAG)
 
 
-def test_happy_path_boot_and_recreate_persists_data() -> None:
+@pytest.fixture(scope="session")
+def build_alpha_image() -> None:
+    if not docker_available():
+        pytest.skip("Docker is unavailable; integration tests require Docker/OrbStack.")
+    ensure_pytest_image(
+        ALPHA_IMAGE_TAG,
+        dockerfile="Dockerfile.alpha",
+        prebuilt_env="AIO_ALPHA_PYTEST_USE_PREBUILT_IMAGE",
+    )
+
+
+def test_happy_path_boot_and_recreate_persists_data(build_image) -> None:
     with (
         docker_volume("sure-aio-storage") as storage_volume,
         docker_volume("sure-aio-pg") as pgdata_volume,
@@ -188,7 +210,7 @@ def test_happy_path_boot_and_recreate_persists_data() -> None:
             )  # nosec B101
 
 
-def test_image_reports_pinned_upstream_version() -> None:
+def test_image_reports_pinned_upstream_version(build_image) -> None:
     result = run_command(
         [
             "docker",
@@ -202,3 +224,35 @@ def test_image_reports_pinned_upstream_version() -> None:
     )
 
     assert result.stdout.strip() == pinned_upstream_version()  # nosec B101
+
+
+def test_alpha_image_reports_version_and_import_limits(build_alpha_image) -> None:
+    with (
+        docker_volume("sure-aio-alpha-storage") as storage_volume,
+        docker_volume("sure-aio-alpha-pg") as pgdata_volume,
+        docker_volume("sure-aio-alpha-redis") as redis_volume,
+    ):
+        with container(
+            storage_volume,
+            pgdata_volume,
+            redis_volume,
+            image_tag=ALPHA_IMAGE_TAG,
+            name_prefix="sure-aio-alpha-pytest",
+            extra_env={
+                "SURE_IMPORT_MAX_NDJSON_SIZE_MB": "250",
+                "SURE_IMPORT_MAX_ROWS": "1000000",
+            },
+        ) as (
+            name,
+            host_port,
+        ):
+            wait_for_http(name, host_port)
+            version = docker_exec(name, "cat /rails/.sure-version").stdout.strip()
+            assert version == pinned_upstream_version("Dockerfile.alpha")  # nosec B101
+            result = docker_exec(
+                name,
+                "bin/rails runner 'puts [SureImport::MAX_NDJSON_SIZE, SureImport.max_ndjson_size, SureImport.max_row_count].join(\":\" )'",
+            )
+            assert result.stdout.strip().splitlines()[-1] == (  # nosec B101
+                "262144000:262144000:1000000"
+            )
