@@ -7,3 +7,6 @@ markers = [
   "extended_integration: opt-in extended runtime and configuration matrix tests",
 ]
 addopts = ["-ra", "--strict-markers"]
+
+[tool.isort]
+profile = "black"

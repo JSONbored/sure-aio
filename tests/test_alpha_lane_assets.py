@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # nosec B405
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,8 +35,13 @@ def test_alpha_template_has_separate_identity_and_storage() -> None:
     assert (  # nosec B101
         alpha.findtext("Repository") == "jsonbored/sure-aio-alpha:latest-alpha"
     )
-    assert alpha.findtext("Registry") == "https://hub.docker.com/r/jsonbored/sure-aio-alpha"  # nosec B101
-    assert alpha.findtext("TemplateURL", "").endswith("/sure-aio-alpha.xml")  # nosec B101
+    assert (  # nosec B101
+        alpha.findtext("Registry")
+        == "https://hub.docker.com/r/jsonbored/sure-aio-alpha"
+    )
+    assert alpha.findtext("TemplateURL", "").endswith(  # nosec B101
+        "/sure-aio-alpha.xml"
+    )
     assert stable.findtext("Beta") is None  # nosec B101
     assert alpha.findtext("Beta") == "True"  # nosec B101
     assert _host_paths(stable).isdisjoint(_host_paths(alpha))  # nosec B101
@@ -64,14 +69,15 @@ def test_alpha_template_exposes_upstream_alpha_webauthn_controls() -> None:
     assert "WEBAUTHN_RP_ID" not in stable_targets  # nosec B101
     assert "WEBAUTHN_ALLOWED_ORIGINS" not in stable_targets  # nosec B101
     assert alpha_targets["WEBAUTHN_RP_ID"].get("Display") == "advanced"  # nosec B101
-    assert alpha_targets["WEBAUTHN_ALLOWED_ORIGINS"].get("Display") == "advanced"  # nosec B101
+    assert (  # nosec B101
+        alpha_targets["WEBAUTHN_ALLOWED_ORIGINS"].get("Display") == "advanced"
+    )
 
 
 def test_alpha_overlay_is_documented_and_copied() -> None:
     dockerfile = (ROOT / "Dockerfile.alpha").read_text()
     initializer = (
-        ROOT
-        / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_limits.rb"
+        ROOT / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_limits.rb"
     )
     ledger = (ROOT / "docs/alpha-lane.md").read_text()
 

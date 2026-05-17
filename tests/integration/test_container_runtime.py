@@ -10,8 +10,8 @@ import pytest
 from tests.helpers import (
     REPO_ROOT,
     container_path_exists,
-    docker_exec,
     docker_available,
+    docker_exec,
     docker_volume,
     ensure_pytest_image,
     reserve_host_port,
