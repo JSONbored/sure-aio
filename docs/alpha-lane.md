@@ -24,7 +24,7 @@ The alpha XML changelog must call out exposed upstream alpha controls separately
 - Status: active alpha-only overlay.
 - Overlay: `rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_limits.rb`.
 - Defaults: `SURE_IMPORT_MAX_NDJSON_SIZE_MB=250`, `SURE_IMPORT_MAX_ROWS=1000000`.
-- Why: TransmogriFi local testing needs larger Sure NDJSON imports than upstream's current `10MB` upload limit and `100000` row/import limit.
+- Why: local alpha testing needs larger Sure NDJSON imports than upstream's current `10MB` upload limit and `100000` row/import limit.
 - Upstream issue/PR: none yet.
 - Promotion/removal path: keep alpha-only until the behavior is accepted upstream or we deliberately decide the raised/configurable limits are safe for stable Unraid users.
 
