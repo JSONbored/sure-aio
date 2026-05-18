@@ -16,7 +16,7 @@ This template is meant for testing and local validation, not primary household f
 &#xD;
 [b]Alpha customizations[/b]&#xD;
 - Raises Sure NDJSON import defaults to [code]250MB[/code] and [code]1,000,000[/code] rows.&#xD;
-- Exposes [code]SURE_IMPORT_MAX_NDJSON_SIZE_MB[/code] and [code]SURE_IMPORT_MAX_ROWS[/code] for testing larger TransmogriFi imports.&#xD;
+- Exposes [code]SURE_IMPORT_MAX_NDJSON_SIZE_MB[/code] and [code]SURE_IMPORT_MAX_ROWS[/code] for larger alpha import testing.&#xD;
 - Uses a separate alpha tag namespace, Web UI port, and appdata root from stable.&#xD;
 &#xD;
 [b]Quick Install[/b]&#xD;

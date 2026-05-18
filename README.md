@@ -19,7 +19,7 @@ An Unraid-first, single-container deployment of [Sure](https://github.com/we-pro
 
 This repo also carries `sure-aio-alpha`, a separate testing package managed by `aio-fleet` from the same source repo. It tracks upstream Sure alpha prereleases, publishes `jsonbored/sure-aio:latest-alpha`, and uses [sure-aio-alpha.xml](sure-aio-alpha.xml) with separate appdata paths and default host port `3001`.
 
-Alpha is intentionally not the stable package. It is where wrapper-only experiments live first, including the current configurable Sure import limits for larger TransmogriFi NDJSON testing. Alpha images publish under the same [Docker Hub](https://hub.docker.com/r/jsonbored/sure-aio) and [GHCR](https://github.com/users/JSONbored/packages/container/package/sure-aio) package as stable, but only through alpha tags and GitHub prereleases tagged as `sure-alpha/<version>`. See [docs/alpha-lane.md](docs/alpha-lane.md) before pointing it at important data.
+Alpha is intentionally not the stable package. It is where wrapper-only experiments live first, including the current configurable Sure import limits for larger NDJSON/import testing. Alpha images publish under the same [Docker Hub](https://hub.docker.com/r/jsonbored/sure-aio) and [GHCR](https://github.com/users/JSONbored/packages/container/package/sure-aio) package as stable, but only through alpha tags and GitHub prereleases tagged as `sure-alpha/<version>`. See [docs/alpha-lane.md](docs/alpha-lane.md) before pointing it at important data.
 
 ## Beginner Install
 
