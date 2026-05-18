@@ -1,10 +1,10 @@
 # Sure AIO Alpha Lane
 
-`sure-aio-alpha` is the testing lane for Sure prereleases and small wrapper-only experiments. It is separately installable from stable `sure-aio`, publishes as `jsonbored/sure-aio-alpha`, and uses separate Unraid appdata paths.
+`sure-aio-alpha` is the testing lane for Sure prereleases and small wrapper-only experiments. It is separately installable from stable `sure-aio`, publishes to the shared `jsonbored/sure-aio` image repo with alpha-only tags, and uses separate Unraid appdata paths.
 
 Alpha updates track upstream `we-promise/sure` alpha prereleases through `aio-fleet`. Routine alpha bumps publish images, update the alpha template, and create/update GitHub prereleases under the `sure-alpha/` tag namespace without creating stable Sure AIO release debt.
 
-Release history for this lane lives in `CHANGELOG.alpha.md`. Image tags include `latest-alpha`, the upstream alpha version, the alpha AIO revision tag, and `sha-<commit>`.
+Release history for this lane lives in `CHANGELOG.alpha.md`. Image tags include `latest-alpha`, the upstream alpha version, the alpha AIO revision tag, and `sha-alpha-<commit>`.
 
 ## Upstream Alpha Template Surface
 
@@ -38,5 +38,5 @@ The alpha XML changelog must call out exposed upstream alpha controls separately
 ## Validation Expectations
 
 - XML tests must keep stable `sure-aio` free of alpha-only variables.
-- XML tests must verify the beta marker, separate image/template identity, separate appdata paths, import controls, WebAuthn controls, and alpha changelog text.
+- XML tests must verify the beta marker, separate tag/template identity, separate appdata paths, import controls, WebAuthn controls, and alpha changelog text.
 - Runtime tests must boot the alpha image and verify `/up`, `/rails/.sure-version`, import limit defaults/overrides/fallback behavior, and WebAuthn environment parsing inside Rails.
