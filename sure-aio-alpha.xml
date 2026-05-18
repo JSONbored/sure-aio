@@ -32,7 +32,7 @@ This template is meant for testing and local validation, not primary household f
   <Changes>### 2026-05-17&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
 - Add Sure AIO Alpha testing lane tracking upstream Sure alpha prereleases.&#xD;
-- Publish alpha images under the shared [code]jsonbored/sure-aio[/code] image repo as [code]latest-alpha[/code], upstream alpha version tags, alpha AIO revision tags such as [code]0.7.1-alpha.7-aio.2[/code], and [code]sha-alpha-&lt;commit&gt;[/code] tags.&#xD;
+- Publish alpha images under the shared [code]jsonbored/sure-aio[/code] image repo as [code]latest-alpha[/code], upstream alpha version tags, alpha AIO revision tags such as [code]0.7.1-alpha.7-aio.3[/code], and [code]sha-alpha-&lt;commit&gt;[/code] tags.&#xD;
 - Mark the template as beta/testing with a separate app name, default Web UI port, and appdata root from stable [code]sure-aio[/code].&#xD;
 - Add alpha-only import limit controls: [code]SURE_IMPORT_MAX_NDJSON_SIZE_MB[/code] defaults to [code]250[/code], and [code]SURE_IMPORT_MAX_ROWS[/code] defaults to [code]1000000[/code].&#xD;
 - Expose upstream alpha passkey/WebAuthn controls: [code]WEBAUTHN_RP_ID[/code] and [code]WEBAUTHN_ALLOWED_ORIGINS[/code].</Changes>
