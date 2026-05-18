@@ -272,6 +272,7 @@ components:
       - sure-aio-alpha.xml
     publish_paths:
       - README.md
+      - pyproject.toml
       - rootfs-alpha/**
       - patches/sure-alpha/**
       - docs/alpha-lane.md
