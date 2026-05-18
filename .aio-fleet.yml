@@ -264,7 +264,6 @@ components:
     release_suffix: aio
     registry_revision_arg: AIO_REVISION
     github_release_latest: false
-    github_release_title_prefix: Sure AIO Alpha
     floating_tags:
       - latest-alpha
     sha_tag_prefix: sha-alpha-
