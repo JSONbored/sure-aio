@@ -4,6 +4,14 @@ Alpha releases are testing builds for `sure-aio-alpha`. They track upstream Sure
 alpha prereleases and may include wrapper-only experiments before those changes
 are upstreamed or promoted to stable.
 
+## 0.7.1-alpha.7-aio.2 - 2026-05-18
+
+### Build
+
+- Reissue the current Sure alpha package with a new AIO revision after fleet release-history isolation fixes.
+- Keep runtime behavior aligned with `0.7.1-alpha.7-aio.1`: upstream Sure alpha 0.7.1-alpha.7, the alpha-only import-limit overlay, and the alpha WebAuthn template controls.
+- Keep stable `sure-aio` unchanged; this release history applies only to `sure-aio-alpha`.
+
 ## 0.7.1-alpha.7-aio.1 - 2026-05-18
 
 ### Build
