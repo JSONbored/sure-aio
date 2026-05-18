@@ -33,11 +33,10 @@ def test_alpha_template_has_separate_identity_and_storage() -> None:
     assert stable.findtext("Name") == "sure-aio"  # nosec B101
     assert alpha.findtext("Name") == "sure-aio-alpha"  # nosec B101
     assert (  # nosec B101
-        alpha.findtext("Repository") == "jsonbored/sure-aio-alpha:latest-alpha"
+        alpha.findtext("Repository") == "jsonbored/sure-aio:latest-alpha"
     )
     assert (  # nosec B101
-        alpha.findtext("Registry")
-        == "https://hub.docker.com/r/jsonbored/sure-aio-alpha"
+        alpha.findtext("Registry") == "https://hub.docker.com/r/jsonbored/sure-aio"
     )
     assert alpha.findtext("TemplateURL", "").endswith(  # nosec B101
         "/sure-aio-alpha.xml"
@@ -123,7 +122,7 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
 def test_alpha_dockerfile_declares_revision_and_repo_metadata() -> None:
     alpha = (ROOT / "Dockerfile.alpha").read_text()
 
-    assert "ARG AIO_REVISION=1" in alpha  # nosec B101
+    assert "ARG AIO_REVISION=2" in alpha  # nosec B101
     assert (  # nosec B101
         'org.opencontainers.image.source="https://github.com/JSONbored/sure-aio"'
         in alpha
@@ -135,9 +134,9 @@ def test_alpha_release_history_is_separate_from_stable_changelog() -> None:
     alpha_changelog = (ROOT / "CHANGELOG.alpha.md").read_text()
     stable_changelog = (ROOT / "CHANGELOG.md").read_text()
 
-    assert "0.7.1-alpha.7-aio.1" in alpha_changelog  # nosec B101
+    assert "0.7.1-alpha.7-aio.2" in alpha_changelog  # nosec B101
     assert "docs/alpha-lane.md" in alpha_changelog  # nosec B101
-    assert "0.7.1-alpha.7-aio.1" not in stable_changelog  # nosec B101
+    assert "0.7.1-alpha.7-aio.2" not in stable_changelog  # nosec B101
 
 
 def test_alpha_changelog_documents_runtime_differences() -> None:
@@ -145,9 +144,10 @@ def test_alpha_changelog_documents_runtime_differences() -> None:
     changes = alpha.findtext("Changes", "")
 
     assert "upstream Sure alpha prereleases" in changes  # nosec B101
-    assert "jsonbored/sure-aio-alpha:latest-alpha" in changes  # nosec B101
-    assert "0.7.1-alpha.7-aio.1" in changes  # nosec B101
-    assert "commit SHA tags" in changes  # nosec B101
+    assert "jsonbored/sure-aio" in changes  # nosec B101
+    assert "latest-alpha" in changes  # nosec B101
+    assert "0.7.1-alpha.7-aio.2" in changes  # nosec B101
+    assert "sha-alpha-<commit>" in changes  # nosec B101
     assert "beta/testing" in changes  # nosec B101
     assert "separate app name" in changes  # nosec B101
     assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in changes  # nosec B101

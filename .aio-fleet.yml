@@ -252,7 +252,7 @@ components:
     xml_paths:
       - sure-aio.xml
   sure-alpha:
-    image_name: jsonbored/sure-aio-alpha
+    image_name: jsonbored/sure-aio
     dockerfile: Dockerfile.alpha
     upstream_config: upstream.toml
     docker_cache_scope: sure-aio-alpha-image
@@ -267,6 +267,10 @@ components:
     github_release_title_prefix: Sure AIO Alpha
     floating_tags:
       - latest-alpha
+    sha_tag_prefix: sha-alpha-
+    preserve_tags:
+      - jsonbored/sure-aio:latest
+      - ghcr.io/jsonbored/sure-aio:latest
     upstream_version_key: UPSTREAM_VERSION
     xml_paths:
       - sure-aio-alpha.xml

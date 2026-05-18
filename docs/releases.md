@@ -20,6 +20,11 @@ Every central `aio-fleet` publish for `main` publishes:
 
 Release commits also publish the immutable packaging line tag, for example `v0.6.9-aio-v3` derived from `v0.6.9-aio.3`. Ordinary `main` pushes do not overwrite that release tag.
 
+The alpha lane shares the same `jsonbored/sure-aio` image repo, but uses only
+alpha tags: `latest-alpha`, the upstream alpha version, the alpha AIO revision
+tag, and `sha-alpha-<commit>`. Alpha prereleases use the `sure-alpha/` Git tag
+namespace and do not move stable `latest`.
+
 ## Release flow
 
 1. From `aio-fleet`, run `python -m aio_fleet release status --repo sure-aio` to inspect the next release.

@@ -17,9 +17,9 @@ An Unraid-first, single-container deployment of [Sure](https://github.com/we-pro
 
 ## Alpha Testing Lane
 
-This repo also carries `sure-aio-alpha`, a separate testing package managed by `aio-fleet` from the same source repo. It tracks upstream Sure alpha prereleases, publishes `jsonbored/sure-aio-alpha:latest-alpha`, and uses [sure-aio-alpha.xml](sure-aio-alpha.xml) with separate appdata paths and default host port `3001`.
+This repo also carries `sure-aio-alpha`, a separate testing package managed by `aio-fleet` from the same source repo. It tracks upstream Sure alpha prereleases, publishes `jsonbored/sure-aio:latest-alpha`, and uses [sure-aio-alpha.xml](sure-aio-alpha.xml) with separate appdata paths and default host port `3001`.
 
-Alpha is intentionally not the stable package. It is where wrapper-only experiments live first, including the current configurable Sure import limits for larger TransmogriFi NDJSON testing. Alpha images publish under [Docker Hub](https://hub.docker.com/r/jsonbored/sure-aio-alpha), [GHCR](https://github.com/users/JSONbored/packages/container/package/sure-aio-alpha), and GitHub prereleases tagged as `sure-alpha/<version>`. See [docs/alpha-lane.md](docs/alpha-lane.md) before pointing it at important data.
+Alpha is intentionally not the stable package. It is where wrapper-only experiments live first, including the current configurable Sure import limits for larger TransmogriFi NDJSON testing. Alpha images publish under the same [Docker Hub](https://hub.docker.com/r/jsonbored/sure-aio) and [GHCR](https://github.com/users/JSONbored/packages/container/package/sure-aio) package as stable, but only through alpha tags and GitHub prereleases tagged as `sure-alpha/<version>`. See [docs/alpha-lane.md](docs/alpha-lane.md) before pointing it at important data.
 
 ## Beginner Install
 
@@ -62,7 +62,7 @@ If you care about the instance, back up all three paths.
 - wrapper releases follow the upstream version plus an AIO revision, such as `v0.6.9-aio.1`
 - Stable upstream monitoring, release preparation, registry publishing, and catalog sync are owned by `aio-fleet` from `.aio-fleet.yml`.
 - `main` publishes `latest`, the exact upstream version tag, an explicit AIO packaging line tag, and `sha-<commit>`
-- Alpha publishes to the separate `jsonbored/sure-aio-alpha` image with `latest-alpha`, the upstream alpha version, an explicit AIO revision tag such as `0.7.1-alpha.7-aio.1`, and `sha-<commit>`.
+- Alpha publishes to the shared `jsonbored/sure-aio` image repo with `latest-alpha`, the upstream alpha version, an explicit AIO revision tag such as `0.7.1-alpha.7-aio.2`, and `sha-alpha-<commit>`.
 - Alpha release history lives in [CHANGELOG.alpha.md](CHANGELOG.alpha.md) and GitHub prereleases under the `sure-alpha/` tag namespace so stable release history stays clean.
 - Changelog generation and XML `<Changes>` sync are run centrally by `aio-fleet` during release preparation.
 
