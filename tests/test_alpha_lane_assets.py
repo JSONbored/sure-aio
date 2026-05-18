@@ -155,3 +155,21 @@ def test_alpha_changelog_documents_runtime_differences() -> None:
     assert "SURE_IMPORT_MAX_ROWS" in changes  # nosec B101
     assert "WEBAUTHN_RP_ID" in changes  # nosec B101
     assert "WEBAUTHN_ALLOWED_ORIGINS" in changes  # nosec B101
+
+
+def test_alpha_docs_use_dedicated_package_and_trimmed_tags() -> None:
+    docs = "\n".join(
+        [
+            (ROOT / "README.md").read_text(),
+            (ROOT / "docs/alpha-lane.md").read_text(),
+            (ROOT / "docs/releases.md").read_text(),
+        ]
+    )
+
+    assert "jsonbored/sure-aio-alpha" in docs  # nosec B101
+    assert "latest-alpha" in docs  # nosec B101
+    assert "0.7.1-alpha.7-aio.5" in docs  # nosec B101
+    assert "publishes to the shared `jsonbored/sure-aio`" not in docs  # nosec B101
+    assert "shares the same `jsonbored/sure-aio` image repo" not in docs  # nosec B101
+    assert "sha-alpha-<commit>" not in docs  # nosec B101
+    assert "the upstream alpha version tag" not in docs  # nosec B101

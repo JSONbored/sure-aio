@@ -1,10 +1,10 @@
 # Sure AIO Alpha Lane
 
-`sure-aio-alpha` is the testing lane for Sure prereleases and small wrapper-only experiments. It is separately installable from stable `sure-aio`, publishes to the shared `jsonbored/sure-aio` image repo with alpha-only tags, and uses separate Unraid appdata paths.
+`sure-aio-alpha` is the testing lane for Sure prereleases and small wrapper-only experiments. It is separately installable from stable `sure-aio`, publishes to the dedicated `jsonbored/sure-aio-alpha` Docker Hub and GHCR packages, and uses separate Unraid appdata paths.
 
 Alpha updates track upstream `we-promise/sure` alpha prereleases through `aio-fleet`. Routine alpha bumps publish images, update the alpha template, and create/update GitHub prereleases under the `sure-alpha/` tag namespace without creating stable Sure AIO release debt.
 
-Release history for this lane lives in `CHANGELOG.alpha.md`. Image tags include `latest-alpha`, the upstream alpha version, the alpha AIO revision tag, and `sha-alpha-<commit>`.
+Release history for this lane lives in `CHANGELOG.alpha.md`. Image tags are intentionally limited to `latest-alpha` and the explicit alpha AIO revision tag, such as `0.7.1-alpha.7-aio.5`.
 
 ## Upstream Alpha Template Surface
 

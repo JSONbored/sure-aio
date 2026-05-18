@@ -20,10 +20,11 @@ Every central `aio-fleet` publish for `main` publishes:
 
 Release commits also publish the immutable packaging line tag, for example `v0.6.9-aio-v3` derived from `v0.6.9-aio.3`. Ordinary `main` pushes do not overwrite that release tag.
 
-The alpha lane shares the same `jsonbored/sure-aio` image repo, but uses only
-alpha tags: `latest-alpha`, the upstream alpha version, the alpha AIO revision
-tag, and `sha-alpha-<commit>`. Alpha prereleases use the `sure-alpha/` Git tag
-namespace and do not move stable `latest`.
+The alpha lane publishes to dedicated Docker Hub and GHCR packages named
+`jsonbored/sure-aio-alpha`. It intentionally publishes only `latest-alpha` and
+the explicit alpha AIO revision tag, such as `0.7.1-alpha.7-aio.5`. Alpha
+prereleases use the `sure-alpha/` Git tag namespace and do not move stable
+`latest`.
 
 ## Release flow
 
