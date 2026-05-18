@@ -245,6 +245,7 @@ components:
     dockerfile: Dockerfile
     upstream_config: upstream.toml
     docker_cache_scope: sure-aio-image
+    oci_description: Stable Unraid-first Sure AIO image
     release_suffix: aio
     floating_tags:
       - latest
@@ -255,7 +256,15 @@ components:
     dockerfile: Dockerfile.alpha
     upstream_config: upstream.toml
     docker_cache_scope: sure-aio-alpha-image
+    oci_description: Unstable Unraid-first Sure AIO alpha testing image
     release_policy: registry_only
+    release_history: github_prerelease
+    release_changelog: CHANGELOG.alpha.md
+    release_tag_prefix: sure-alpha/
+    release_suffix: aio
+    registry_revision_arg: AIO_REVISION
+    github_release_latest: false
+    github_release_title_prefix: Sure AIO Alpha
     floating_tags:
       - latest-alpha
     upstream_version_key: UPSTREAM_VERSION
