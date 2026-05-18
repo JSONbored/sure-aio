@@ -14,6 +14,10 @@ ARG S6_OVERLAY_AARCH64_SHA256=3fc0bae418a0e3811b3deeadfca9cc2f0869fb2f4787ab8a53
 ARG S6_OVERLAY_X86_64_SHA256=95081f11c56e5a351e9ccab4e70c2b1c3d7d056d82b72502b942762112c03d1c
 ARG TARGETARCH
 
+LABEL org.opencontainers.image.source="https://github.com/JSONbored/sure-aio" \
+      org.opencontainers.image.title="Sure AIO" \
+      org.opencontainers.image.description="Stable Unraid-first Sure AIO image"
+
 # hadolint ignore=DL3002
 USER root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
