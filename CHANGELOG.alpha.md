@@ -6,6 +6,14 @@ are upstreamed or promoted to stable. Alpha uses the shared `jsonbored/sure-aio`
 image repo with alpha-only tags; the old `jsonbored/sure-aio-alpha` image repo
 is retired.
 
+## 0.7.1-alpha.7-aio.4 - 2026-05-18
+
+### Build
+
+- Reissue the current Sure alpha package with registry tags and GitHub prerelease history aligned after `0.7.1-alpha.7-aio.3` was created while the alpha Dockerfile still declared AIO revision 2.
+- Keep runtime behavior aligned with the prior alpha lane builds: upstream Sure alpha 0.7.1-alpha.7, the alpha-only import-limit overlay, shared `jsonbored/sure-aio:*alpha*` tags, and alpha WebAuthn template controls.
+- Keep stable `sure-aio` unchanged; this release history applies only to `sure-aio-alpha`.
+
 ## 0.7.1-alpha.7-aio.3 - 2026-05-18
 
 ### Build
