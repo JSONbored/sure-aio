@@ -6,6 +6,15 @@ are upstreamed or promoted to stable. Alpha uses the dedicated
 `jsonbored/sure-aio-alpha` image repo so testing tags stay out of the stable
 `jsonbored/sure-aio` package.
 
+## 0.7.1-alpha.7-aio.7 - 2026-05-19
+
+### Alpha Customizations
+
+- Add a self-hosted admin reset task for clearing one selected user's family financial/import data before a fresh import while preserving user/auth records.
+- Keep the reset task dry-run by default and require `CONFIRM_RESET_FINANCIAL_DATA=yes` for destructive use.
+- Keep reset controls out of the Unraid template/env surface; run the task explicitly inside the Rails container.
+- Keep stable `sure-aio` unchanged; this release history applies only to `sure-aio-alpha`.
+
 ## 0.7.1-alpha.7-aio.6 - 2026-05-18
 
 ### Alpha Customizations

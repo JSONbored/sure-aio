@@ -122,6 +122,19 @@ def assert_alpha_import_preflight_blocks_dirty_target(container_name: str) -> No
     assert (transfers, rejected_transfers, holdings) == ("1", "1", "1")  # nosec B101
 
 
+def assert_alpha_admin_reset_task_available(container_name: str) -> None:
+    result = rails_runner_output(
+        container_name,
+        "require 'rake'; Rails.application.load_tasks; "
+        "puts [defined?(Family::FinancialDataReset).present?, "
+        "Rake::Task.task_defined?('sure:admin:reset_financial_data'), "
+        "Family::FinancialDataReset::COUNT_KEYS.include?(:imports), "
+        "Family::FinancialDataReset::COUNT_KEYS.include?(:merchants)].join(':')",
+    )
+
+    assert result == "true:true:true:true"  # nosec B101
+
+
 @contextmanager
 def container(
     storage_volume: str,
@@ -314,6 +327,7 @@ def test_alpha_image_boots_with_version_import_limits_and_webauthn_env(
                 ),
             )
             assert_alpha_import_preflight_blocks_dirty_target(name)
+            assert_alpha_admin_reset_task_available(name)
 
 
 def test_alpha_import_limit_defaults_are_runtime_defaults(build_alpha_image) -> None:

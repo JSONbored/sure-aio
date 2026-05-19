@@ -62,7 +62,7 @@ If you care about the instance, back up all three paths.
 - wrapper releases follow the upstream version plus an AIO revision, such as `v0.6.9-aio.1`
 - Stable upstream monitoring, release preparation, registry publishing, and catalog sync are owned by `aio-fleet` from `.aio-fleet.yml`.
 - `main` publishes `latest`, the exact upstream version tag, an explicit AIO packaging line tag, and `sha-<commit>`
-- Alpha publishes to the dedicated `jsonbored/sure-aio-alpha` image repo with only `latest-alpha` and an explicit AIO revision tag such as `0.7.1-alpha.7-aio.6`.
+- Alpha publishes to the dedicated `jsonbored/sure-aio-alpha` image repo with only `latest-alpha` and an explicit AIO revision tag such as `0.7.1-alpha.7-aio.7`.
 - Alpha release history lives in [CHANGELOG.alpha.md](CHANGELOG.alpha.md) and GitHub prereleases under the `sure-alpha/` tag namespace so stable release history stays clean.
 - Changelog generation and XML `<Changes>` sync are run centrally by `aio-fleet` during release preparation.
 
