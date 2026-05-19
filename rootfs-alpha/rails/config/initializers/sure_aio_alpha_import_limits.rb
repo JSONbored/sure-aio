@@ -3,25 +3,29 @@
 module SureAioAlphaImportLimits
   DEFAULT_NDJSON_SIZE_MB = 250
   DEFAULT_MAX_ROWS = 1_000_000
+  MAX_NDJSON_SIZE_MB = 250
+  MAX_ROWS = 1_000_000
 
   module_function
 
-  def positive_integer_env(name, default)
+  def capped_positive_integer_env(name, default, maximum)
     value = ENV.fetch(name, "").to_s.strip
     return default if value.empty?
 
     integer = Integer(value, 10)
-    integer.positive? ? integer : default
+    return default unless integer.positive?
+
+    [integer, maximum].min
   rescue ArgumentError
     default
   end
 
   def max_ndjson_size
-    positive_integer_env("SURE_IMPORT_MAX_NDJSON_SIZE_MB", DEFAULT_NDJSON_SIZE_MB).megabytes
+    capped_positive_integer_env("SURE_IMPORT_MAX_NDJSON_SIZE_MB", DEFAULT_NDJSON_SIZE_MB, MAX_NDJSON_SIZE_MB).megabytes
   end
 
   def max_row_count
-    positive_integer_env("SURE_IMPORT_MAX_ROWS", DEFAULT_MAX_ROWS)
+    capped_positive_integer_env("SURE_IMPORT_MAX_ROWS", DEFAULT_MAX_ROWS, MAX_ROWS)
   end
 
   def apply!

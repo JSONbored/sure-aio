@@ -25,6 +25,8 @@ USER root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR /rails
 
+COPY docker/assert-sure-bundle-versions.rb /tmp/assert-sure-bundle-versions.rb
+
 # Upstream hotfix images can lag their release tag in this file, but Sure's UI
 # reports the version from it.
 RUN printf '%s\n' "${UPSTREAM_VERSION}" > /rails/.sure-version
@@ -47,10 +49,8 @@ RUN find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i
     postgresql-server-dev-17="$(apt-cache madison postgresql-server-dev-17 | awk 'NR==1 {print $3}')" \
     redis-server="$(apt-cache madison redis-server | awk 'NR==1 {print $3}')" \
     xz-utils="$(apt-cache madison xz-utils | awk 'NR==1 {print $3}')" && \
-    bundle config set frozen false && \
-    bundle update --conservative rack rack-session addressable rexml && \
-    bundle clean --force && \
-    bundle config set frozen true && \
+    bundle check && \
+    ruby /tmp/assert-sure-bundle-versions.rb && \
     git clone --branch "v${PGVECTOR_VERSION}" --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
     make -C /tmp/pgvector OPTFLAGS="" && \
     make -C /tmp/pgvector install && \

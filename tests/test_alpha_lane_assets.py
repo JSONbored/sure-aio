@@ -78,6 +78,69 @@ def test_alpha_template_declares_import_limit_controls() -> None:
     assert alpha_targets["3000"].text == "3001"  # nosec B101
 
 
+def test_stable_and_alpha_mask_secret_bearing_network_fields() -> None:
+    for template in ("sure-aio.xml", "sure-aio-alpha.xml"):
+        targets = _config_targets(_xml_root(template))
+
+        assert targets["HTTPS_PROXY"].get("Mask") == "true"  # nosec B101
+        assert targets["HTTP_PROXY"].get("Mask") == "true"  # nosec B101
+        assert targets["NO_PROXY"].get("Mask") == "false"  # nosec B101
+        assert targets["REDIS_URL"].get("Mask") == "true"  # nosec B101
+        assert targets["REDIS_SENTINEL_HOSTS"].get("Mask") == "false"  # nosec B101
+        assert (
+            targets["EXTERNAL_ASSISTANT_SESSION_KEY"].get("Default") == ""
+        )  # nosec B101
+        assert targets["EXTERNAL_ASSISTANT_SESSION_KEY"].text in (
+            None,
+            "",
+        )  # nosec B101
+        assert "isolated per-chat" in targets[  # nosec B101
+            "EXTERNAL_ASSISTANT_SESSION_KEY"
+        ].get("Description", "")
+
+
+def test_dockerfiles_do_not_mutate_upstream_bundle_resolution() -> None:
+    bundle_assertion = (ROOT / "docker/assert-sure-bundle-versions.rb").read_text()
+
+    for dockerfile in ("Dockerfile", "Dockerfile.alpha"):
+        text = (ROOT / dockerfile).read_text()
+
+        assert "bundle update" not in text  # nosec B101
+        assert "bundle config set frozen false" not in text  # nosec B101
+        assert "bundle check" in text  # nosec B101
+        assert "COPY docker/assert-sure-bundle-versions.rb" in text  # nosec B101
+        assert "ruby /tmp/assert-sure-bundle-versions.rb" in text  # nosec B101
+    assert '"rack" => "3.2.6"' in bundle_assertion  # nosec B101
+    assert '"rack-session" => "2.1.2"' in bundle_assertion  # nosec B101
+    assert '"addressable" => "2.8.7"' in bundle_assertion  # nosec B101
+    assert '"rexml" => "3.4.2"' in bundle_assertion  # nosec B101
+    assert "unexpected upstream gem versions" in bundle_assertion  # nosec B101
+
+
+def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
+    web_run = (ROOT / "rootfs/etc/s6-overlay/s6-rc.d/web/run").read_text()
+    external_session = (
+        ROOT
+        / "rootfs/rails/config/initializers/sure_aio_external_assistant_session_key.rb"
+    ).read_text()
+
+    assert (  # nosec B101
+        ROOT / "rootfs/etc/s6-overlay/s6-rc.d/web/dependencies.d/postgres"
+    ).exists()
+    init_db_dir = ROOT / "rootfs/etc/s6-overlay/s6-rc.d/init-db"
+    assert not any(path.is_file() for path in init_db_dir.rglob("*"))  # nosec B101
+    assert not (ROOT / "rootfs/usr/local/bin/init-db.sh").exists()  # nosec B101
+    assert 'PGPASSWORD="${POSTGRES_PASSWORD}" psql' in web_run  # nosec B101
+    assert '-d "${POSTGRES_DB}"' in web_run  # nosec B101
+    assert "bundle exec rails db:prepare" in web_run  # nosec B101
+    assert "SureAioExternalAssistantSessionKey" in external_session  # nosec B101
+    assert (
+        'ENV["EXTERNAL_ASSISTANT_SESSION_KEY"].to_s.strip' in external_session
+    )  # nosec B101
+    assert "sure-chat:" in external_session  # nosec B101
+    assert "chat&.id" in external_session  # nosec B101
+
+
 def test_alpha_template_exposes_upstream_alpha_webauthn_controls() -> None:
     stable_targets = _config_targets(_xml_root("sure-aio.xml"))
     alpha_targets = _config_targets(_xml_root("sure-aio-alpha.xml"))
@@ -191,10 +254,15 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
     failure_view_text = failure_view.read_text()
     assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in import_limits_text  # nosec B101
     assert "SURE_IMPORT_MAX_ROWS" in import_limits_text  # nosec B101
+    assert "MAX_NDJSON_SIZE_MB = 250" in import_limits_text  # nosec B101
+    assert "MAX_ROWS = 1_000_000" in import_limits_text  # nosec B101
+    assert "capped_positive_integer_env" in import_limits_text  # nosec B101
     assert "SureImport.const_set(:MAX_NDJSON_SIZE" in import_limits_text  # nosec B101
     assert "SureImport::Preflight" in import_preflight_text  # nosec B101
     assert "PreflightError" in import_preflight_text  # nosec B101
     assert "preflight_failed" in import_preflight_text  # nosec B101
+    assert "invalid_accountable" in import_preflight_text  # nosec B101
+    assert "!accountable.is_a?(Hash)" in import_preflight_text  # nosec B101
     assert (  # nosec B101
         "invalid_rows_count: @rows_count - @valid_rows_count" in import_preflight_text
     )

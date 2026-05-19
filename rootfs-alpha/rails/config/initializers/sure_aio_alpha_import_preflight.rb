@@ -258,7 +258,17 @@ module SureAioAlphaImportPreflight
             next
           end
 
-          subtype = data.dig("accountable", "subtype").presence || data["subtype"].presence
+          accountable = data["accountable"]
+          if data.key?("accountable") && accountable.present? && !accountable.is_a?(Hash)
+            add_error(
+              :invalid_accountable,
+              "Line #{record[:line_number]} Account accountable must be a JSON object when provided."
+            )
+            next
+          end
+
+          subtype = accountable.is_a?(Hash) ? accountable["subtype"].presence : nil
+          subtype ||= data["subtype"].presence
           next if subtype.blank?
 
           accountable_class = accountable_type.constantize

@@ -12,6 +12,22 @@ cd /rails
 
 export DB_HOST DB_PORT POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB REDIS_URL
 
+echo "Waiting for authenticated PostgreSQL access to ${POSTGRES_DB}..."
+attempts=0
+until PGPASSWORD="${POSTGRES_PASSWORD}" psql \
+  -h "${DB_HOST}" \
+  -p "${DB_PORT}" \
+  -U "${POSTGRES_USER}" \
+  -d "${POSTGRES_DB}" \
+  -Atqc "SELECT 1" >/dev/null 2>&1; do
+  attempts=$((attempts + 1))
+  if [ "${attempts}" -ge 150 ]; then
+    echo "PostgreSQL did not become ready for ${POSTGRES_USER}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}" >&2
+    exit 1
+  fi
+  sleep 2
+done
+
 echo "Running Sure database preparations (create/migrate/seed)..."
 bundle exec rails db:prepare
 
