@@ -22,7 +22,7 @@ Release commits also publish the immutable packaging line tag, for example `v0.6
 
 The alpha lane publishes to dedicated Docker Hub and GHCR packages named
 `jsonbored/sure-aio-alpha`. It intentionally publishes only `latest-alpha` and
-the explicit alpha AIO revision tag, such as `0.7.1-alpha.7-aio.7`. Alpha
+the explicit alpha AIO revision tag, such as `0.7.1-alpha.7-aio.8`. Alpha
 prereleases use the `sure-alpha/` Git tag namespace and do not move stable
 `latest`.
 

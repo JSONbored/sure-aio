@@ -18,7 +18,7 @@ This template is meant for testing and local validation, not primary household f
 - Raises Sure NDJSON import defaults to [code]250MB[/code] and [code]1,000,000[/code] rows.&#xD;
 - Exposes [code]SURE_IMPORT_MAX_NDJSON_SIZE_MB[/code] and [code]SURE_IMPORT_MAX_ROWS[/code] for larger alpha import testing.&#xD;
 - Runs strict SureImport preflight before publish so blocked imports show specific errors during alpha testing.&#xD;
-- Adds a self-hosted admin reset task for clearing one selected family workspace before a fresh Sure NDJSON import.&#xD;
+- Adds a self-hosted admin reset UI/task for clearing one selected family workspace before a fresh Sure NDJSON import.&#xD;
 - Adds temporary split-line and transfer route-parity import support for Enhanced NDJSON proof packages.&#xD;
 - Uses a separate alpha tag namespace, Web UI port, and appdata root from stable.&#xD;
 &#xD;
@@ -35,14 +35,14 @@ This template is meant for testing and local validation, not primary household f
   <Changes>### 2026-05-19&#xD;
 - Generated from CHANGELOG.alpha.md during release preparation. Do not edit manually.&#xD;
 - Add Sure AIO Alpha testing lane tracking upstream Sure alpha prereleases.&#xD;
-- Publish alpha images under the dedicated [code]jsonbored/sure-aio-alpha[/code] image repo as [code]latest-alpha[/code] and explicit alpha AIO revision tags such as [code]0.7.1-alpha.7-aio.7[/code].&#xD;
+- Publish alpha images under the dedicated [code]jsonbored/sure-aio-alpha[/code] image repo as [code]latest-alpha[/code] and explicit alpha AIO revision tags such as [code]0.7.1-alpha.7-aio.8[/code].&#xD;
 - Mark the template as beta/testing with a separate app name, default Web UI port, and appdata root from stable [code]sure-aio[/code].&#xD;
 - Add alpha-only import limit controls: [code]SURE_IMPORT_MAX_NDJSON_SIZE_MB[/code] defaults to [code]250[/code], and [code]SURE_IMPORT_MAX_ROWS[/code] defaults to [code]1000000[/code].&#xD;
 - Add strict alpha-only SureImport preflight/failure diagnostics for dirty taxonomy, missing fields, unsupported records, invalid accountables, duplicate valuations, and missing references.&#xD;
-- Add a dry-run-by-default self-hosted admin reset task for clearing one selected user's family financial/import data while preserving user/auth records.&#xD;
+- Add a self-hosted admin reset UI under Settings -> Self-Hosting -> Danger Zone plus a dry-run-by-default Rails task for clearing one selected user's family financial/import data while preserving user/auth records.&#xD;
 - Keep dirty-target merge out of the Unraid template/env surface; this alpha remains strict by default.&#xD;
-- Keep admin reset out of the Unraid template/env surface; run it explicitly inside the Rails container.&#xD;
-- Expose upstream alpha passkey/WebAuthn controls: [code]WEBAUTHN_RP_ID[/code] and [code]WEBAUTHN_ALLOWED_ORIGINS[/code].</Changes>
+- Keep admin reset out of the Unraid template/env surface; use the app UI or run the explicit Rails task inside the container.&#xD;
+- Expose upstream alpha passkey/WebAuthn controls: [code]WEBAUTHN_RP_ID[/code] and [code]WEBAUTHN_ALLOWED_ORIGINS[/code]. These configure browser trust only; users add passkeys from Settings -> Security after enabling authenticator-app 2FA.</Changes>
   <Category>Productivity: Tools:Utilities</Category>
   <Beta>True</Beta>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
@@ -236,8 +236,8 @@ This template is meant for testing and local validation, not primary household f
   <Config Name="[Auth] Local Admin Override" Target="AUTH_LOCAL_ADMIN_OVERRIDE_ENABLED" Default="false" Mode="" Description="If local login is disabled, set to 'true' to let super admins keep local login as an emergency backdoor." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
   <Config Name="[Auth] JIT SSO Mode" Target="AUTH_JIT_MODE" Default="create_and_link" Mode="" Description="SSO behavior for first-time users: 'create_and_link' creates accounts automatically, 'link_only' requires an existing user." Type="Variable" Display="advanced" Required="false" Mask="false">create_and_link</Config>
   <Config Name="[Auth] Allowed OIDC Domains" Target="ALLOWED_OIDC_DOMAINS" Default="" Mode="" Description="Optional comma-separated email domains allowed for JIT SSO account creation." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Alpha Auth] WebAuthn Relying Party ID" Target="WEBAUTHN_RP_ID" Default="" Mode="" Description="Alpha-only passkey/WebAuthn relying party ID. Usually your registrable domain, such as 'example.com'. Leave blank unless you are testing passkeys or hardware security keys. Changing this after registering credentials can make existing passkeys unusable." Type="Variable" Display="advanced" Required="false" Mask="false"/>
-  <Config Name="[Alpha Auth] WebAuthn Allowed Origins" Target="WEBAUTHN_ALLOWED_ORIGINS" Default="" Mode="" Description="Alpha-only comma-separated WebAuthn origins including scheme and host, such as 'https://finance.example.com'. Leave blank unless you are testing passkeys or hardware security keys." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Alpha Auth] WebAuthn Relying Party ID" Target="WEBAUTHN_RP_ID" Default="" Mode="" Description="Alpha-only passkey/WebAuthn relying party ID. Usually your registrable domain, such as 'example.com'. This only configures browser trust; add passkeys inside Sure from Settings > Security after enabling authenticator-app 2FA. Changing this after registering credentials can make existing passkeys unusable." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="[Alpha Auth] WebAuthn Allowed Origins" Target="WEBAUTHN_ALLOWED_ORIGINS" Default="" Mode="" Description="Alpha-only comma-separated WebAuthn origins including scheme and host, such as 'https://finance.example.com'. This only configures browser trust; add passkeys inside Sure from Settings > Security after enabling authenticator-app 2FA." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Auth] Provider Source" Target="AUTH_PROVIDERS_SOURCE" Default="" Mode="" Description="Leave blank for normal YAML/env-backed provider loading. Set to 'db' if you want upstream's database-backed SSO provider admin UI." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Auth] OIDC Client ID" Target="OIDC_CLIENT_ID" Default="" Mode="" Description="OIDC client ID from your identity provider app registration, such as Authentik, Authelia, Keycloak, or Zitadel." Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="[Auth] OIDC Client Secret" Target="OIDC_CLIENT_SECRET" Default="" Mode="" Description="OIDC client secret from the same identity provider app registration." Type="Variable" Display="advanced" Required="false" Mask="true"/>

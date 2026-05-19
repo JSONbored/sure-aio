@@ -94,6 +94,9 @@ def test_alpha_template_exposes_upstream_alpha_webauthn_controls() -> None:
     assert "passkey/WebAuthn relying party ID" in rp_id.get(  # nosec B101
         "Description", ""
     )
+    assert "browser trust" in rp_id.get("Description", "")  # nosec B101
+    assert "Settings > Security" in rp_id.get("Description", "")  # nosec B101
+    assert "authenticator-app 2FA" in rp_id.get("Description", "")  # nosec B101
     assert origins.get("Default") == ""  # nosec B101
     assert origins.text in (None, "")  # nosec B101
     assert origins.get("Display") == "advanced"  # nosec B101
@@ -102,6 +105,9 @@ def test_alpha_template_exposes_upstream_alpha_webauthn_controls() -> None:
     assert "comma-separated WebAuthn origins" in origins.get(  # nosec B101
         "Description", ""
     )
+    assert "browser trust" in origins.get("Description", "")  # nosec B101
+    assert "Settings > Security" in origins.get("Description", "")  # nosec B101
+    assert "authenticator-app 2FA" in origins.get("Description", "")  # nosec B101
 
 
 def test_alpha_template_does_not_expose_dirty_merge_controls() -> None:
@@ -127,7 +133,8 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
         ROOT / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_limits.rb"
     )
     import_preflight = (
-        ROOT / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_preflight.rb"
+        ROOT
+        / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_preflight.rb"
     )
     route_parity = (
         ROOT
@@ -135,6 +142,25 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
     )
     admin_reset_model = (
         ROOT / "rootfs-alpha/rails/app/models/family/financial_data_reset.rb"
+    )
+    admin_reset_job = ROOT / "rootfs-alpha/rails/app/jobs/family_reset_job.rb"
+    admin_reset_ui = (
+        ROOT / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_admin_reset_ui.rb"
+    )
+    admin_reset_danger_view = (
+        ROOT
+        / "rootfs-alpha/rails/app/views/settings/hostings/_danger_zone_settings.html.erb"
+    )
+    admin_reset_preview_view = (
+        ROOT
+        / "rootfs-alpha/rails/app/views/settings/hostings/financial_data_reset.html.erb"
+    )
+    admin_reset_complete_view = (
+        ROOT
+        / "rootfs-alpha/rails/app/views/settings/hostings/financial_data_reset_complete.html.erb"
+    )
+    webauthn_security_view = (
+        ROOT / "rootfs-alpha/rails/app/views/settings/securities/show.html.erb"
     )
     admin_reset_task = ROOT / "rootfs-alpha/rails/lib/tasks/sure_admin.rake"
     failure_view = ROOT / "rootfs-alpha/rails/app/views/imports/_failure.html.erb"
@@ -145,11 +171,22 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
     assert import_preflight.exists()  # nosec B101
     assert route_parity.exists()  # nosec B101
     assert admin_reset_model.exists()  # nosec B101
+    assert admin_reset_job.exists()  # nosec B101
+    assert admin_reset_ui.exists()  # nosec B101
+    assert admin_reset_danger_view.exists()  # nosec B101
+    assert admin_reset_preview_view.exists()  # nosec B101
+    assert admin_reset_complete_view.exists()  # nosec B101
+    assert webauthn_security_view.exists()  # nosec B101
     assert admin_reset_task.exists()  # nosec B101
     assert failure_view.exists()  # nosec B101
     import_limits_text = import_limits.read_text()
     import_preflight_text = import_preflight.read_text()
     admin_reset_model_text = admin_reset_model.read_text()
+    admin_reset_job_text = admin_reset_job.read_text()
+    admin_reset_ui_text = admin_reset_ui.read_text()
+    admin_reset_danger_view_text = admin_reset_danger_view.read_text()
+    admin_reset_preview_view_text = admin_reset_preview_view.read_text()
+    webauthn_security_view_text = webauthn_security_view.read_text()
     admin_reset_task_text = admin_reset_task.read_text()
     failure_view_text = failure_view.read_text()
     assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in import_limits_text  # nosec B101
@@ -163,19 +200,32 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
     )
     assert "Family::FinancialDataReset" in admin_reset_model_text  # nosec B101
     assert "CONFIRM_RESET_FINANCIAL_DATA=yes" in admin_reset_model_text  # nosec B101
-    assert "task reset_financial_data: :environment" in admin_reset_task_text  # nosec B101
+    assert "Family::FinancialDataReset.new(" in admin_reset_job_text  # nosec B101
+    assert "financial_data_reset" in admin_reset_ui_text  # nosec B101
+    assert "destroy_financial_data_reset" in admin_reset_ui_text  # nosec B101
+    assert "ensure_financial_data_reset_admin" in admin_reset_ui_text  # nosec B101
+    assert "review_financial_data_reset" in admin_reset_danger_view_text  # nosec B101
+    assert (  # nosec B101
+        "financial-data-reset-confirmation-help" in admin_reset_preview_view_text
+    )
+    assert "webauthn_mfa_required_title" in webauthn_security_view_text  # nosec B101
+    assert (  # nosec B101
+        "task reset_financial_data: :environment" in admin_reset_task_text
+    )
     assert "USER_EMAIL is required" in admin_reset_task_text  # nosec B101
     assert "import.error" in failure_view_text  # nosec B101
     assert "import-limits-env" in ledger  # nosec B101
     assert "import-preflight-strict" in ledger  # nosec B101
     assert "route-parity-importer" in ledger  # nosec B101
     assert "admin-financial-reset" in ledger  # nosec B101
+    assert "Settings -> Self-Hosting -> Danger Zone" in ledger  # nosec B101
+    assert "browser trust" in ledger  # nosec B101
 
 
 def test_alpha_dockerfile_declares_revision_and_repo_metadata() -> None:
     alpha = (ROOT / "Dockerfile.alpha").read_text()
 
-    assert "ARG AIO_REVISION=7" in alpha  # nosec B101
+    assert "ARG AIO_REVISION=8" in alpha  # nosec B101
     assert (  # nosec B101
         'org.opencontainers.image.source="https://github.com/JSONbored/sure-aio"'
         in alpha
@@ -187,9 +237,9 @@ def test_alpha_release_history_is_separate_from_stable_changelog() -> None:
     alpha_changelog = (ROOT / "CHANGELOG.alpha.md").read_text()
     stable_changelog = (ROOT / "CHANGELOG.md").read_text()
 
-    assert "0.7.1-alpha.7-aio.7" in alpha_changelog  # nosec B101
+    assert "0.7.1-alpha.7-aio.8" in alpha_changelog  # nosec B101
     assert "docs/alpha-lane.md" in alpha_changelog  # nosec B101
-    assert "0.7.1-alpha.7-aio.7" not in stable_changelog  # nosec B101
+    assert "0.7.1-alpha.7-aio.8" not in stable_changelog  # nosec B101
 
 
 def test_alpha_changelog_documents_runtime_differences() -> None:
@@ -199,18 +249,21 @@ def test_alpha_changelog_documents_runtime_differences() -> None:
     assert "upstream Sure alpha prereleases" in changes  # nosec B101
     assert "jsonbored/sure-aio-alpha" in changes  # nosec B101
     assert "latest-alpha" in changes  # nosec B101
-    assert "0.7.1-alpha.7-aio.7" in changes  # nosec B101
+    assert "0.7.1-alpha.7-aio.8" in changes  # nosec B101
     assert "sha-alpha-<commit>" not in changes  # nosec B101
     assert "beta/testing" in changes  # nosec B101
     assert "separate app name" in changes  # nosec B101
     assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in changes  # nosec B101
     assert "SURE_IMPORT_MAX_ROWS" in changes  # nosec B101
     assert "SureImport preflight/failure diagnostics" in changes  # nosec B101
-    assert "admin reset task" in changes  # nosec B101
+    assert "admin reset UI" in changes  # nosec B101
+    assert "Rails task" in changes  # nosec B101
     assert "dirty-target merge out of the Unraid template/env" in changes  # nosec B101
     assert "admin reset out of the Unraid template/env" in changes  # nosec B101
     assert "WEBAUTHN_RP_ID" in changes  # nosec B101
     assert "WEBAUTHN_ALLOWED_ORIGINS" in changes  # nosec B101
+    assert "browser trust" in changes  # nosec B101
+    assert "Settings -> Security" in changes  # nosec B101
 
 
 def test_alpha_docs_use_dedicated_package_and_trimmed_tags() -> None:
@@ -224,7 +277,9 @@ def test_alpha_docs_use_dedicated_package_and_trimmed_tags() -> None:
 
     assert "jsonbored/sure-aio-alpha" in docs  # nosec B101
     assert "latest-alpha" in docs  # nosec B101
-    assert "0.7.1-alpha.7-aio.7" in docs  # nosec B101
+    assert "0.7.1-alpha.7-aio.8" in docs  # nosec B101
+    assert "self-hosted admin reset UI/task" in docs  # nosec B101
+    assert "authenticator-app 2FA" in docs  # nosec B101
     assert "publishes to the shared `jsonbored/sure-aio`" not in docs  # nosec B101
     assert "shares the same `jsonbored/sure-aio` image repo" not in docs  # nosec B101
     assert "sha-alpha-<commit>" not in docs  # nosec B101

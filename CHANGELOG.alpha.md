@@ -6,6 +6,15 @@ are upstreamed or promoted to stable. Alpha uses the dedicated
 `jsonbored/sure-aio-alpha` image repo so testing tags stay out of the stable
 `jsonbored/sure-aio` package.
 
+## 0.7.1-alpha.7-aio.8 - 2026-05-19
+
+### Alpha Customizations
+
+- Add the self-hosted admin financial reset UI under Settings -> Self-Hosting -> Danger Zone, backed by the same dry-run/destructive reset service as the Rails task.
+- Keep admin reset out of the Unraid template/env surface; operators review scope and counts in the app UI or run the explicit Rails task.
+- Clarify that WebAuthn env vars only configure browser trust, and passkeys are added inside Sure from Settings -> Security after authenticator-app 2FA is enabled.
+- Keep stable `sure-aio` unchanged; this release history applies only to `sure-aio-alpha`.
+
 ## 0.7.1-alpha.7-aio.7 - 2026-05-19
 
 ### Alpha Customizations
