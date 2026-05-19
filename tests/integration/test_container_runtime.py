@@ -92,6 +92,36 @@ def assert_alpha_import_and_webauthn_config(
     assert result == expected  # nosec B101
 
 
+def assert_alpha_import_preflight_blocks_dirty_target(container_name: str) -> None:
+    result = rails_runner_output(
+        container_name,
+        "association = Struct.new(:names) { def pluck(_column); names; end }; "
+        "family = Struct.new(:categories, :tags, :merchants).new("
+        "association.new(['Groceries']), association.new([]), association.new([])); "
+        "content = ["
+        "{ type: 'Category', data: { id: 'cat-1', name: 'Groceries' } }, "
+        "{ type: 'MysteryType', data: { id: 'bad-1' } }"
+        "].map(&:to_json).join(10.chr); "
+        "result = SureImport::Preflight.new(family: family, content: content).call; "
+        "counts = SureImport.dry_run_totals_from_line_type_counts("
+        "{ 'Transfer' => 1, 'RejectedTransfer' => 1, 'Holding' => 1 }); "
+        "puts [result.valid?, result.errors.map { |error| error[:code] }.join('|'), "
+        "result.error_message.include?('Groceries'), counts[:transfers], "
+        "counts[:rejected_transfers], counts[:holdings]].join(':')",
+    )
+
+    valid, codes, collision_message, transfers, rejected_transfers, holdings = (
+        result.split(":")
+    )
+    assert valid == "false"  # nosec B101
+    assert set(codes.split("|")) == {  # nosec B101
+        "existing_taxonomy_collision",
+        "unsupported_record_type",
+    }
+    assert collision_message == "true"  # nosec B101
+    assert (transfers, rejected_transfers, holdings) == ("1", "1", "1")  # nosec B101
+
+
 @contextmanager
 def container(
     storage_volume: str,
@@ -283,6 +313,7 @@ def test_alpha_image_boots_with_version_import_limits_and_webauthn_env(
                     "https://finance.example.com|https://sure.example.net"
                 ),
             )
+            assert_alpha_import_preflight_blocks_dirty_target(name)
 
 
 def test_alpha_import_limit_defaults_are_runtime_defaults(build_alpha_image) -> None:

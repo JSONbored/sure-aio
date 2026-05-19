@@ -6,6 +6,15 @@ are upstreamed or promoted to stable. Alpha uses the dedicated
 `jsonbored/sure-aio-alpha` image repo so testing tags stay out of the stable
 `jsonbored/sure-aio` package.
 
+## 0.7.1-alpha.7-aio.6 - 2026-05-18
+
+### Alpha Customizations
+
+- Add a strict alpha-only SureImport preflight overlay so bad Sure NDJSON fails before publish/enqueue with specific blocking errors instead of the generic failure path.
+- Show the persisted `import.error` details on the SureImport failure page so operators can see the actual preflight/import error list.
+- Keep the dirty-target merge option out of Unraid template/env controls; alpha certification remains strict unless upstream/API support explicitly proves merge mode.
+- Keep stable `sure-aio` unchanged; this release history applies only to `sure-aio-alpha`.
+
 ## 0.7.1-alpha.7-aio.5 - 2026-05-18
 
 ### Build
