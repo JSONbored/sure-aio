@@ -40,7 +40,7 @@ To handle chat entirely inside an external AI agent rather than the basic Sure U
 3. **Assistant URL:** e.g., `http://192.168.1.X:18789/v1/chat/completions` (OpenClaw completions endpoint).
 4. **Assistant Token:** Your gateway token.
 5. **Agent ID:** Optional if your provider exposes multiple agents.
-6. **Session Key:** Optional stable conversation key for providers that keep remote session state.
+6. **Session Key:** Leave blank for isolated per-chat remote state. Set it only if you intentionally want all routed chats to share the same remote agent session.
 7. **Allowed Emails:** Optional comma-separated allowlist to restrict who can use the external assistant.
 8. **MCP User Email:** The email of the Sure user the agent will act as.
 9. **MCP API Token:** Create a secure password. The external agent uses this to securely callback into Sure to read transaction data.
