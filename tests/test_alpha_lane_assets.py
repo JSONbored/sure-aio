@@ -124,7 +124,8 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
         ROOT / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_limits.rb"
     )
     import_preflight = (
-        ROOT / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_preflight.rb"
+        ROOT
+        / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_preflight.rb"
     )
     route_parity = (
         ROOT
