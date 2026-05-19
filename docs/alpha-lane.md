@@ -4,7 +4,7 @@
 
 Alpha updates track upstream `we-promise/sure` alpha prereleases through `aio-fleet`. Routine alpha bumps publish images, update the alpha template, and create/update GitHub prereleases under the `sure-alpha/` tag namespace without creating stable Sure AIO release debt.
 
-Release history for this lane lives in `CHANGELOG.alpha.md`. Image tags are intentionally limited to `latest-alpha` and the explicit alpha AIO revision tag, such as `0.7.1-alpha.7-aio.5`.
+Release history for this lane lives in `CHANGELOG.alpha.md`. Image tags are intentionally limited to `latest-alpha` and the explicit alpha AIO revision tag, such as `0.7.1-alpha.7-aio.6`.
 
 ## Upstream Alpha Template Surface
 
@@ -28,6 +28,24 @@ The alpha XML changelog must call out exposed upstream alpha controls separately
 - Upstream issue/PR: none yet.
 - Promotion/removal path: keep alpha-only until the behavior is accepted upstream or we deliberately decide the raised/configurable limits are safe for stable Unraid users.
 
+### import-preflight-strict
+
+- Status: active alpha-only overlay.
+- Overlay: `rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_preflight.rb` and `rootfs-alpha/rails/app/views/imports/_failure.html.erb`.
+- Defaults: strict clean-target validation before `SureImport#publish_later` and `SureImport#publish`.
+- Why: alpha certification needs specific operator-visible failures for dirty taxonomy, missing required fields, unsupported record types, bad accountables, duplicate valuation rows, and missing references instead of the generic failure screen.
+- Template/env surface: none. Dirty-target merge is not an Unraid variable and should remain explicit upstream/API behavior when separately proven.
+- Upstream issue/PR: PR 1785 may need reconciliation because it also touches `SureImport` and import sessions.
+- Promotion/removal path: remove this overlay once the pinned upstream alpha image includes equivalent model/API/UI preflight behavior.
+
+### route-parity-importer
+
+- Status: active alpha-only overlay.
+- Overlay: `rootfs-alpha/rails/config/initializers/sure_aio_alpha_route_parity_importer.rb`.
+- Why: Enhanced route proof packages can include split lines and linked transfers before the pinned upstream alpha importer has that exact proof behavior.
+- Template/env surface: none.
+- Promotion/removal path: remove once the pinned upstream alpha image includes equivalent split-line and transfer ID mapping behavior.
+
 ## Governance
 
 - Every alpha customization must be named here and covered by validation.
@@ -39,4 +57,4 @@ The alpha XML changelog must call out exposed upstream alpha controls separately
 
 - XML tests must keep stable `sure-aio` free of alpha-only variables.
 - XML tests must verify the beta marker, separate tag/template identity, separate appdata paths, import controls, WebAuthn controls, and alpha changelog text.
-- Runtime tests must boot the alpha image and verify `/up`, `/rails/.sure-version`, import limit defaults/overrides/fallback behavior, and WebAuthn environment parsing inside Rails.
+- Runtime tests must boot the alpha image and verify `/up`, `/rails/.sure-version`, import limit defaults/overrides/fallback behavior, WebAuthn environment parsing, and strict SureImport preflight behavior inside Rails.

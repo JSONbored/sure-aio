@@ -104,26 +104,63 @@ def test_alpha_template_exposes_upstream_alpha_webauthn_controls() -> None:
     )
 
 
+def test_alpha_template_does_not_expose_dirty_merge_controls() -> None:
+    stable_targets = _config_targets(_xml_root("sure-aio.xml"))
+    alpha_targets = _config_targets(_xml_root("sure-aio-alpha.xml"))
+
+    forbidden_targets = {
+        "MERGE_EXISTING_TAXONOMY",
+        "SURE_IMPORT_MERGE_EXISTING_TAXONOMY",
+        "SURE_IMPORT_MERGE_EXISTING_TAXONOMY_DEFAULT",
+    }
+
+    assert forbidden_targets.isdisjoint(stable_targets)  # nosec B101
+    assert forbidden_targets.isdisjoint(alpha_targets)  # nosec B101
+
+
 def test_alpha_overlay_is_documented_and_copied() -> None:
     dockerfile = (ROOT / "Dockerfile.alpha").read_text()
-    initializer = (
+    import_limits = (
         ROOT / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_limits.rb"
     )
+    import_preflight = (
+        ROOT
+        / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_import_preflight.rb"
+    )
+    route_parity = (
+        ROOT
+        / "rootfs-alpha/rails/config/initializers/sure_aio_alpha_route_parity_importer.rb"
+    )
+    failure_view = ROOT / "rootfs-alpha/rails/app/views/imports/_failure.html.erb"
     ledger = (ROOT / "docs/alpha-lane.md").read_text()
 
     assert "COPY rootfs-alpha/ /" in dockerfile  # nosec B101
-    assert initializer.exists()  # nosec B101
-    text = initializer.read_text()
-    assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in text  # nosec B101
-    assert "SURE_IMPORT_MAX_ROWS" in text  # nosec B101
-    assert "SureImport.const_set(:MAX_NDJSON_SIZE" in text  # nosec B101
+    assert import_limits.exists()  # nosec B101
+    assert import_preflight.exists()  # nosec B101
+    assert route_parity.exists()  # nosec B101
+    assert failure_view.exists()  # nosec B101
+    import_limits_text = import_limits.read_text()
+    import_preflight_text = import_preflight.read_text()
+    failure_view_text = failure_view.read_text()
+    assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in import_limits_text  # nosec B101
+    assert "SURE_IMPORT_MAX_ROWS" in import_limits_text  # nosec B101
+    assert "SureImport.const_set(:MAX_NDJSON_SIZE" in import_limits_text  # nosec B101
+    assert "SureImport::Preflight" in import_preflight_text  # nosec B101
+    assert "PreflightError" in import_preflight_text  # nosec B101
+    assert "preflight_failed" in import_preflight_text  # nosec B101
+    assert (  # nosec B101
+        "invalid_rows_count: @rows_count - @valid_rows_count" in import_preflight_text
+    )
+    assert "import.error" in failure_view_text  # nosec B101
     assert "import-limits-env" in ledger  # nosec B101
+    assert "import-preflight-strict" in ledger  # nosec B101
+    assert "route-parity-importer" in ledger  # nosec B101
 
 
 def test_alpha_dockerfile_declares_revision_and_repo_metadata() -> None:
     alpha = (ROOT / "Dockerfile.alpha").read_text()
 
-    assert "ARG AIO_REVISION=5" in alpha  # nosec B101
+    assert "ARG AIO_REVISION=6" in alpha  # nosec B101
     assert (  # nosec B101
         'org.opencontainers.image.source="https://github.com/JSONbored/sure-aio"'
         in alpha
@@ -135,9 +172,9 @@ def test_alpha_release_history_is_separate_from_stable_changelog() -> None:
     alpha_changelog = (ROOT / "CHANGELOG.alpha.md").read_text()
     stable_changelog = (ROOT / "CHANGELOG.md").read_text()
 
-    assert "0.7.1-alpha.7-aio.5" in alpha_changelog  # nosec B101
+    assert "0.7.1-alpha.7-aio.6" in alpha_changelog  # nosec B101
     assert "docs/alpha-lane.md" in alpha_changelog  # nosec B101
-    assert "0.7.1-alpha.7-aio.5" not in stable_changelog  # nosec B101
+    assert "0.7.1-alpha.7-aio.6" not in stable_changelog  # nosec B101
 
 
 def test_alpha_changelog_documents_runtime_differences() -> None:
@@ -147,12 +184,14 @@ def test_alpha_changelog_documents_runtime_differences() -> None:
     assert "upstream Sure alpha prereleases" in changes  # nosec B101
     assert "jsonbored/sure-aio-alpha" in changes  # nosec B101
     assert "latest-alpha" in changes  # nosec B101
-    assert "0.7.1-alpha.7-aio.5" in changes  # nosec B101
+    assert "0.7.1-alpha.7-aio.6" in changes  # nosec B101
     assert "sha-alpha-<commit>" not in changes  # nosec B101
     assert "beta/testing" in changes  # nosec B101
     assert "separate app name" in changes  # nosec B101
     assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in changes  # nosec B101
     assert "SURE_IMPORT_MAX_ROWS" in changes  # nosec B101
+    assert "SureImport preflight/failure diagnostics" in changes  # nosec B101
+    assert "dirty-target merge out of the Unraid template/env" in changes  # nosec B101
     assert "WEBAUTHN_RP_ID" in changes  # nosec B101
     assert "WEBAUTHN_ALLOWED_ORIGINS" in changes  # nosec B101
 
@@ -168,7 +207,7 @@ def test_alpha_docs_use_dedicated_package_and_trimmed_tags() -> None:
 
     assert "jsonbored/sure-aio-alpha" in docs  # nosec B101
     assert "latest-alpha" in docs  # nosec B101
-    assert "0.7.1-alpha.7-aio.5" in docs  # nosec B101
+    assert "0.7.1-alpha.7-aio.6" in docs  # nosec B101
     assert "publishes to the shared `jsonbored/sure-aio`" not in docs  # nosec B101
     assert "shares the same `jsonbored/sure-aio` image repo" not in docs  # nosec B101
     assert "sha-alpha-<commit>" not in docs  # nosec B101
