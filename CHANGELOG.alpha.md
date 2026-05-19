@@ -6,6 +6,19 @@ are upstreamed or promoted to stable. Alpha uses the dedicated
 `jsonbored/sure-aio-alpha` image repo so testing tags stay out of the stable
 `jsonbored/sure-aio` package.
 
+## 0.7.1-alpha.9-aio.1 - 2026-05-19
+
+### Build
+- Track upstream Sure Alpha 0.7.1-alpha.9.
+- Publish Docker Hub and GHCR tags with the configured component revision tag.
+
+### Component Customizations
+- Preserve the Sure AIO alpha import-limit overlay documented in `docs/alpha-lane.md`.
+- Preserve the strict SureImport preflight/failure overlay until the pinned upstream alpha includes equivalent behavior.
+- Preserve the route-parity importer overlay for Enhanced NDJSON split/transfer proof packages until upstream carries it.
+- Keep `SURE_IMPORT_MAX_NDJSON_SIZE_MB` and `SURE_IMPORT_MAX_ROWS` alpha-only.
+- Do not add dirty-target taxonomy merge as a Unraid template or environment control.
+- Keep alpha passkey/WebAuthn template controls separate from stable.
 ## 0.7.1-alpha.7-aio.8 - 2026-05-19
 
 ### Alpha Customizations
