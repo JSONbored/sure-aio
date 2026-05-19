@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.0-hotfix.3-aio.2 - 2026-05-19
+
+### Fixes
+
+- Harden Sure runtime, template secret masking, and release paths.
+- Derive external assistant session keys when operators leave the shared key blank.
+- Tighten first-boot database readiness so Rails waits for authenticated PostgreSQL access.
+
 ## 0.7.0-hotfix.3-aio.1 - 2026-05-17
 
 ### Maintenance
