@@ -225,7 +225,7 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
 def test_alpha_dockerfile_declares_revision_and_repo_metadata() -> None:
     alpha = (ROOT / "Dockerfile.alpha").read_text()
 
-    assert "ARG AIO_REVISION=8" in alpha  # nosec B101
+    assert "ARG AIO_REVISION=1" in alpha  # nosec B101
     assert (  # nosec B101
         'org.opencontainers.image.source="https://github.com/JSONbored/sure-aio"'
         in alpha
@@ -237,9 +237,9 @@ def test_alpha_release_history_is_separate_from_stable_changelog() -> None:
     alpha_changelog = (ROOT / "CHANGELOG.alpha.md").read_text()
     stable_changelog = (ROOT / "CHANGELOG.md").read_text()
 
-    assert "0.7.1-alpha.7-aio.8" in alpha_changelog  # nosec B101
+    assert "0.7.1-alpha.9-aio.1" in alpha_changelog  # nosec B101
     assert "docs/alpha-lane.md" in alpha_changelog  # nosec B101
-    assert "0.7.1-alpha.7-aio.8" not in stable_changelog  # nosec B101
+    assert "0.7.1-alpha.9-aio.1" not in stable_changelog  # nosec B101
 
 
 def test_alpha_changelog_documents_runtime_differences() -> None:
