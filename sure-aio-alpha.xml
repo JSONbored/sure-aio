@@ -34,15 +34,10 @@ This template is meant for testing and local validation, not primary household f
 - [code]/mnt/user/appdata/sure-aio-alpha/redis[/code]</Overview>
   <Changes>### 2026-05-19&#xD;
 - Generated from CHANGELOG.alpha.md during release preparation. Do not edit manually.&#xD;
-- Add Sure AIO Alpha testing lane tracking upstream Sure alpha prereleases.&#xD;
-- Publish alpha images under the dedicated [code]jsonbored/sure-aio-alpha[/code] image repo as [code]latest-alpha[/code] and explicit alpha AIO revision tags such as [code]0.7.1-alpha.7-aio.8[/code].&#xD;
-- Mark the template as beta/testing with a separate app name, default Web UI port, and appdata root from stable [code]sure-aio[/code].&#xD;
-- Add alpha-only import limit controls: [code]SURE_IMPORT_MAX_NDJSON_SIZE_MB[/code] defaults to [code]250[/code], and [code]SURE_IMPORT_MAX_ROWS[/code] defaults to [code]1000000[/code].&#xD;
-- Add strict alpha-only SureImport preflight/failure diagnostics for dirty taxonomy, missing fields, unsupported records, invalid accountables, duplicate valuations, and missing references.&#xD;
-- Add a self-hosted admin reset UI under Settings -> Self-Hosting -> Danger Zone plus a dry-run-by-default Rails task for clearing one selected user's family financial/import data while preserving user/auth records.&#xD;
-- Keep dirty-target merge out of the Unraid template/env surface; this alpha remains strict by default.&#xD;
-- Keep admin reset out of the Unraid template/env surface; use the app UI or run the explicit Rails task inside the container.&#xD;
-- Expose upstream alpha passkey/WebAuthn controls: [code]WEBAUTHN_RP_ID[/code] and [code]WEBAUTHN_ALLOWED_ORIGINS[/code]. These configure browser trust only; users add passkeys from Settings -> Security after enabling authenticator-app 2FA.</Changes>
+- Harden Sure runtime, alpha import preflight, template secret masking, and release paths.&#xD;
+- Enforce capped alpha import limits and structured malformed Account preflight errors.&#xD;
+- Derive external assistant session keys when operators leave the shared key blank.&#xD;
+- Tighten first-boot database readiness so Rails waits for authenticated PostgreSQL access.</Changes>
   <Category>Productivity: Tools:Utilities</Category>
   <Beta>True</Beta>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>

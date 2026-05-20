@@ -6,6 +6,15 @@ are upstreamed or promoted to stable. Alpha uses the dedicated
 `jsonbored/sure-aio-alpha` image repo so testing tags stay out of the stable
 `jsonbored/sure-aio` package.
 
+## 0.7.1-alpha.9-aio.2 - 2026-05-19
+
+### Fixes
+
+- Harden Sure runtime, alpha import preflight, template secret masking, and release paths.
+- Enforce capped alpha import limits and structured malformed Account preflight errors.
+- Derive external assistant session keys when operators leave the shared key blank.
+- Tighten first-boot database readiness so Rails waits for authenticated PostgreSQL access.
+
 ## 0.7.1-alpha.9-aio.1 - 2026-05-19
 
 ### Build

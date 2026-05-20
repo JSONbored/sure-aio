@@ -293,7 +293,7 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
 def test_alpha_dockerfile_declares_revision_and_repo_metadata() -> None:
     alpha = (ROOT / "Dockerfile.alpha").read_text()
 
-    assert "ARG AIO_REVISION=1" in alpha  # nosec B101
+    assert "ARG AIO_REVISION=2" in alpha  # nosec B101
     assert (  # nosec B101
         'org.opencontainers.image.source="https://github.com/JSONbored/sure-aio"'
         in alpha
@@ -312,26 +312,24 @@ def test_alpha_release_history_is_separate_from_stable_changelog() -> None:
 
 def test_alpha_changelog_documents_runtime_differences() -> None:
     alpha = _xml_root("sure-aio-alpha.xml")
+    overview = alpha.findtext("Overview", "")
     changes = alpha.findtext("Changes", "")
 
-    assert "upstream Sure alpha prereleases" in changes  # nosec B101
-    assert "jsonbored/sure-aio-alpha" in changes  # nosec B101
-    assert "latest-alpha" in changes  # nosec B101
-    assert "0.7.1-alpha.7-aio.8" in changes  # nosec B101
+    assert "upstream" in overview  # nosec B101
+    assert "alpha prereleases" in overview  # nosec B101
+    assert (  # nosec B101
+        alpha.findtext("Repository", "") == "jsonbored/sure-aio-alpha:latest-alpha"
+    )
     assert "sha-alpha-<commit>" not in changes  # nosec B101
-    assert "beta/testing" in changes  # nosec B101
-    assert "separate app name" in changes  # nosec B101
-    assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in changes  # nosec B101
-    assert "SURE_IMPORT_MAX_ROWS" in changes  # nosec B101
-    assert "SureImport preflight/failure diagnostics" in changes  # nosec B101
-    assert "admin reset UI" in changes  # nosec B101
-    assert "Rails task" in changes  # nosec B101
-    assert "dirty-target merge out of the Unraid template/env" in changes  # nosec B101
-    assert "admin reset out of the Unraid template/env" in changes  # nosec B101
-    assert "WEBAUTHN_RP_ID" in changes  # nosec B101
-    assert "WEBAUTHN_ALLOWED_ORIGINS" in changes  # nosec B101
-    assert "browser trust" in changes  # nosec B101
-    assert "Settings -> Security" in changes  # nosec B101
+    assert "Testing / Unstable" in overview  # nosec B101
+    assert "separate alpha tag namespace" in overview  # nosec B101
+    assert "SURE_IMPORT_MAX_NDJSON_SIZE_MB" in overview  # nosec B101
+    assert "SURE_IMPORT_MAX_ROWS" in overview  # nosec B101
+    assert "strict SureImport preflight" in overview  # nosec B101
+    assert "admin reset UI/task" in overview  # nosec B101
+    assert "Harden Sure runtime" in changes  # nosec B101
+    assert "malformed Account preflight errors" in changes  # nosec B101
+    assert "authenticated PostgreSQL access" in changes  # nosec B101
 
 
 def test_alpha_docs_use_dedicated_package_and_trimmed_tags() -> None:
