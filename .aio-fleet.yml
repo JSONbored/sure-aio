@@ -266,12 +266,13 @@ components:
     github_release_latest: false
     release_customization_notes:
       - Preserve the Sure AIO alpha import-limit overlay documented in `docs/alpha-lane.md`.
-      - Preserve the strict SureImport preflight/failure overlay until the pinned upstream alpha includes equivalent behavior.
-      - Preserve the route-parity importer overlay for Enhanced NDJSON split/transfer proof packages until upstream carries it.
-      - Preserve the self-hosted admin financial reset task overlay until the pinned upstream alpha includes equivalent behavior.
+      - Preserve the strict SureImport preflight/failure overlay until the pinned
+        upstream alpha includes equivalent behavior.
+      - Preserve the route-parity importer overlay for Enhanced NDJSON split/transfer
+        proof packages until upstream carries it.
       - Keep `SURE_IMPORT_MAX_NDJSON_SIZE_MB` and `SURE_IMPORT_MAX_ROWS` alpha-only.
-      - Do not add dirty-target taxonomy merge as a Unraid template or environment control.
-      - Do not add the admin reset task as a Unraid template or environment control.
+      - Do not add dirty-target taxonomy merge as a Unraid template or environment
+        control.
       - Keep alpha passkey/WebAuthn template controls separate from stable.
     floating_tags:
       - latest-alpha
@@ -289,6 +290,45 @@ components:
       - rootfs-alpha/**
       - patches/sure-alpha/**
       - docs/alpha-lane.md
+      - docs/releases.md
       - tests/**
     pytest_image_tag: sure-aio-alpha:pytest
     pytest_prebuilt_env: AIO_ALPHA_PYTEST_USE_PREBUILT_IMAGE
+    validation:
+      required_targets:
+        - SURE_IMPORT_MAX_NDJSON_SIZE_MB
+        - SURE_IMPORT_MAX_ROWS
+        - WEBAUTHN_RP_ID
+        - WEBAUTHN_ALLOWED_ORIGINS
+      required_field_values:
+        Name: sure-aio-alpha
+        Repository: jsonbored/sure-aio-alpha:latest-alpha
+        Beta: "True"
+      required_text_snippets:
+        - Testing / Unstable
+        - Alpha-only
+        - /mnt/user/appdata/sure-aio-alpha
+        - latest-alpha
+      forbidden_text_snippets:
+        - <Name>sure-aio</Name>
+        - <Repository>jsonbored/sure-aio:latest</Repository>
+        - /mnt/user/appdata/sure-aio/system
+        - /mnt/user/appdata/sure-aio/postgres
+        - /mnt/user/appdata/sure-aio/redis
+      config_target_requirements:
+        SURE_IMPORT_MAX_NDJSON_SIZE_MB:
+          name_contains: "[Alpha]"
+          description_contains: Alpha-only
+          default: "250"
+          value: "250"
+        SURE_IMPORT_MAX_ROWS:
+          name_contains: "[Alpha]"
+          description_contains: Alpha-only
+          default: "1000000"
+          value: "1000000"
+        WEBAUTHN_RP_ID:
+          name_contains: "[Alpha Auth]"
+          description_contains: Alpha-only
+        WEBAUTHN_ALLOWED_ORIGINS:
+          name_contains: "[Alpha Auth]"
+          description_contains: Alpha-only
