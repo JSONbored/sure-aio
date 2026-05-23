@@ -55,6 +55,39 @@ def test_alpha_template_has_separate_identity_and_storage() -> None:
     )
 
 
+def test_stable_and_alpha_ca_metadata_is_complete() -> None:
+    stable = _xml_root("sure-aio.xml")
+    alpha = _xml_root("sure-aio-alpha.xml")
+
+    assert stable.findtext("Category") == "Productivity Tools:Utilities"  # nosec B101
+    assert alpha.findtext("Category") == "Productivity Tools:Utilities"  # nosec B101
+    assert (
+        stable.findtext("ReadMe") == "https://github.com/JSONbored/sure-aio#readme"
+    )  # nosec B101
+    assert alpha.findtext("ReadMe") == (  # nosec B101
+        "https://github.com/JSONbored/sure-aio#alpha-testing-lane"
+    )
+
+    for root in (stable, alpha):
+        assert root.findtext("Requires")  # nosec B101
+        assert root.findtext("DonateText") == (  # nosec B101
+            "Support JSONbored on GitHub Sponsors."
+        )
+        assert root.findtext("DonateLink") == (  # nosec B101
+            "https://github.com/sponsors/JSONbored"
+        )
+        assert len(root.findall("Screenshot")) == 3  # nosec B101
+
+    assert all(  # nosec B101
+        "/screenshots/sure-aio/" in screenshot.text
+        for screenshot in stable.findall("Screenshot")
+    )
+    assert all(  # nosec B101
+        "/screenshots/sure-aio-alpha/" in screenshot.text
+        for screenshot in alpha.findall("Screenshot")
+    )
+
+
 def test_alpha_template_declares_import_limit_controls() -> None:
     stable_targets = _config_targets(_xml_root("sure-aio.xml"))
     alpha_targets = _config_targets(_xml_root("sure-aio-alpha.xml"))

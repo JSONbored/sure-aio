@@ -36,11 +36,13 @@
 - Harden Sure runtime, template secret masking, and release paths.&#xD;
 - Derive external assistant session keys when operators leave the shared key blank.&#xD;
 - Tighten first-boot database readiness so Rails waits for authenticated PostgreSQL access.</Changes>
-  <Category>Productivity: Tools:Utilities</Category>
+  <Category>Productivity Tools:Utilities</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>
+  <ReadMe>https://github.com/JSONbored/sure-aio#readme</ReadMe>
   <Icon>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/icons/sure.png</Icon>
   <ExtraSearchTerms>finance budgeting personal-finance net-worth money maybe-finance sure plaid bank accounts</ExtraSearchTerms>
+  <Requires>Generate and keep a strong [code]SECRET_KEY_BASE[/code] before first boot, and back up Rails storage, PostgreSQL, and Redis appdata before upgrades. Use external PostgreSQL, Redis, storage, SMTP, or provider settings only when you intentionally move beyond the bundled AIO defaults.</Requires>
   <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/01-dashboard.png</Screenshot>
   <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/02-account-activity.png</Screenshot>
   <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/03-budgets.png</Screenshot>
@@ -48,8 +50,8 @@
   <PostArgs/>
   <CPUset/>
   <DateInstalled/>
-  <DonateText/>
-  <DonateLink/>
+  <DonateText>Support JSONbored on GitHub Sponsors.</DonateText>
+  <DonateLink>https://github.com/sponsors/JSONbored</DonateLink>
   <Description/>
   <Networking>
     <Mode>bridge</Mode>
