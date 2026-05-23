@@ -38,21 +38,23 @@ This template is meant for testing and local validation, not primary household f
 - Enforce capped alpha import limits and structured malformed Account preflight errors.&#xD;
 - Derive external assistant session keys when operators leave the shared key blank.&#xD;
 - Tighten first-boot database readiness so Rails waits for authenticated PostgreSQL access.</Changes>
-  <Category>Productivity: Tools:Utilities</Category>
+  <Category>Productivity Tools:Utilities</Category>
   <Beta>True</Beta>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio-alpha.xml</TemplateURL>
+  <ReadMe>https://github.com/JSONbored/sure-aio#alpha-testing-lane</ReadMe>
   <Icon>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/icons/sure.png</Icon>
   <ExtraSearchTerms>finance budgeting personal-finance net-worth money maybe-finance sure plaid bank accounts alpha testing prerelease</ExtraSearchTerms>
-  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/01-dashboard.png</Screenshot>
-  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/02-account-activity.png</Screenshot>
-  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio/03-budgets.png</Screenshot>
+  <Requires>Testing lane only. Do not point this template at stable [code]sure-aio[/code] appdata, keep backups, and expect upstream alpha migrations or behavior changes. Generate a strong [code]SECRET_KEY_BASE[/code] before first boot.</Requires>
+  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio-alpha/01-login.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio-alpha/02-account-activity.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/screenshots/sure-aio-alpha/03-budgets.png</Screenshot>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
   <DateInstalled/>
-  <DonateText/>
-  <DonateLink/>
+  <DonateText>Support JSONbored on GitHub Sponsors.</DonateText>
+  <DonateLink>https://github.com/sponsors/JSONbored</DonateLink>
   <Description/>
   <Networking>
     <Mode>bridge</Mode>
