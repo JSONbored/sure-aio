@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.0-hotfix.3-aio.3 - 2026-05-26
+
+### Documentation
+
+- Normalize CA metadata
+
+### Maintenance
+
+- Reconcile app manifest
+
+- Bump sure alpha to 0.7.1-alpha.10
+
+- Bump sure alpha to 0.7.1-alpha.11
+
 ## 0.7.0-hotfix.3-aio.2 - 2026-05-19
 
 ### Fixes

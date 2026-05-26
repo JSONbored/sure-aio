@@ -31,11 +31,12 @@
 - [code]/mnt/user/appdata/sure-aio/system[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/redis[/code]</Overview>
-  <Changes>### 2026-05-19&#xD;
+  <Changes>### 2026-05-26&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Harden Sure runtime, template secret masking, and release paths.&#xD;
-- Derive external assistant session keys when operators leave the shared key blank.&#xD;
-- Tighten first-boot database readiness so Rails waits for authenticated PostgreSQL access.</Changes>
+- Normalize CA metadata&#xD;
+- Reconcile app manifest&#xD;
+- Bump sure alpha to 0.7.1-alpha.10&#xD;
+- Bump sure alpha to 0.7.1-alpha.11</Changes>
   <Category>Productivity Tools:Utilities</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>
