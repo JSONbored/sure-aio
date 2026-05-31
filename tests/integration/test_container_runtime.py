@@ -78,6 +78,72 @@ def rails_runner_output(container_name: str, code: str) -> str:
     return lines[-1] if lines else ""
 
 
+def login_form_token(host_port: int, cookie_path: str) -> str:
+    result = run_command(
+        [
+            "curl",
+            "-fsS",
+            "-c",
+            cookie_path,
+            "-b",
+            cookie_path,
+            "-H",
+            "Host: sure.domain.com",
+            "-H",
+            "X-Forwarded-Host: sure.domain.com",
+            "-H",
+            "X-Forwarded-Port: 443",
+            "-H",
+            "X-Forwarded-Proto: https",
+            "-H",
+            "X-Forwarded-Ssl: on",
+            f"http://127.0.0.1:{host_port}/sessions/new",
+        ]
+    )
+    match = re.search(r'name="authenticity_token" value="([^"]+)"', result.stdout)
+    assert match is not None  # nosec B101
+    return match.group(1)
+
+
+def post_login_with_null_origin(host_port: int, cookie_path: str, token: str):
+    return run_command(
+        [
+            "curl",
+            "-sS",
+            "-D",
+            "-",
+            "-o",
+            "-",
+            "-c",
+            cookie_path,
+            "-b",
+            cookie_path,
+            "-H",
+            "Host: sure.domain.com",
+            "-H",
+            "X-Forwarded-Host: sure.domain.com",
+            "-H",
+            "X-Forwarded-Port: 443",
+            "-H",
+            "X-Forwarded-Proto: https",
+            "-H",
+            "X-Forwarded-Ssl: on",
+            "-H",
+            "Origin: null",
+            "-H",
+            "Content-Type: application/x-www-form-urlencoded",
+            "--data-urlencode",
+            f"authenticity_token={token}",
+            "--data-urlencode",
+            "email=missing@example.com",
+            "--data-urlencode",
+            "password=bad-password",
+            f"http://127.0.0.1:{host_port}/sessions",
+        ],
+        check=False,
+    )
+
+
 def assert_alpha_import_and_webauthn_config(
     container_name: str,
     expected: str,
@@ -301,6 +367,61 @@ def test_image_reports_pinned_upstream_version(build_image) -> None:
     )
 
     assert result.stdout.strip() == pinned_upstream_version()  # nosec B101
+
+
+def test_proxy_null_origin_escape_hatch_keeps_token_csrf_validation(
+    build_image,
+    tmp_path,
+) -> None:
+    proxy_env = {
+        "APP_DOMAIN": "sure.domain.com",
+        "APP_URL": "https://sure.domain.com",
+        "RAILS_ASSUME_SSL": "true",
+        "RAILS_FORCE_SSL": "false",
+        "SURE_REFERRER_POLICY": "strict-origin-when-cross-origin",
+    }
+
+    with (
+        docker_volume("sure-aio-origin-default-storage") as storage_volume,
+        docker_volume("sure-aio-origin-default-pg") as pgdata_volume,
+        docker_volume("sure-aio-origin-default-redis") as redis_volume,
+    ):
+        with container(
+            storage_volume,
+            pgdata_volume,
+            redis_volume,
+            extra_env=proxy_env,
+        ) as (name, host_port):
+            wait_for_http(name, host_port)
+            cookie_path = str(tmp_path / f"{name}.cookies")
+            token = login_form_token(host_port, cookie_path)
+            result = post_login_with_null_origin(host_port, cookie_path, token)
+
+            assert "HTTP/1.1 422" in result.stdout  # nosec B101
+            assert "The change you wanted was rejected" in result.stdout  # nosec B101
+            assert "InvalidAuthenticityToken" in logs(name)  # nosec B101
+
+    with (
+        docker_volume("sure-aio-origin-disabled-storage") as storage_volume,
+        docker_volume("sure-aio-origin-disabled-pg") as pgdata_volume,
+        docker_volume("sure-aio-origin-disabled-redis") as redis_volume,
+    ):
+        with container(
+            storage_volume,
+            pgdata_volume,
+            redis_volume,
+            extra_env={**proxy_env, "SURE_CSRF_ORIGIN_CHECK": "false"},
+        ) as (name, host_port):
+            wait_for_http(name, host_port)
+            cookie_path = str(tmp_path / f"{name}.cookies")
+            token = login_form_token(host_port, cookie_path)
+            result = post_login_with_null_origin(host_port, cookie_path, token)
+
+            assert "HTTP/1.1 422" in result.stdout  # nosec B101
+            assert (
+                "The change you wanted was rejected" not in result.stdout
+            )  # nosec B101
+            assert "InvalidAuthenticityToken" not in logs(name)  # nosec B101
 
 
 def test_alpha_image_boots_with_version_import_limits_and_webauthn_env(
