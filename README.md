@@ -55,6 +55,7 @@ If you care about the instance, back up all three paths.
 - the bundled PostgreSQL and Redis services keep first boot simple, but more advanced deployments may still prefer external infrastructure
 - `SECRET_KEY_BASE` is required; do not rotate it casually on a live deployment
 - `RAILS_ASSUME_SSL` and `RAILS_FORCE_SSL` should stay `false` unless you are intentionally fronting the app with a correct HTTPS-terminating reverse proxy
+- `SURE_REFERRER_POLICY` defaults to `strict-origin-when-cross-origin`; do not set it to `no-referrer` behind a reverse proxy because Rails login origin checks can reject `Origin: null` POSTs
 - pgvector and qdrant-backed document search are advanced paths, not beginner defaults
 
 ## Publishing and Releases

@@ -118,6 +118,16 @@ def test_stable_and_alpha_mask_secret_bearing_network_fields() -> None:
         assert targets["HTTPS_PROXY"].get("Mask") == "true"  # nosec B101
         assert targets["HTTP_PROXY"].get("Mask") == "true"  # nosec B101
         assert targets["NO_PROXY"].get("Mask") == "false"  # nosec B101
+        assert (  # nosec B101
+            targets["SURE_REFERRER_POLICY"].get("Default")
+            == "strict-origin-when-cross-origin"
+        )
+        assert targets["SURE_REFERRER_POLICY"].text == (  # nosec B101
+            "strict-origin-when-cross-origin"
+        )
+        assert "Origin: null" in targets["SURE_REFERRER_POLICY"].get(  # nosec B101
+            "Description", ""
+        )
         assert targets["REDIS_URL"].get("Mask") == "true"  # nosec B101
         assert targets["REDIS_SENTINEL_HOSTS"].get("Mask") == "false"  # nosec B101
         assert (
@@ -156,6 +166,9 @@ def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
         ROOT
         / "rootfs/rails/config/initializers/sure_aio_external_assistant_session_key.rb"
     ).read_text()
+    referrer_policy = (
+        ROOT / "rootfs/rails/config/initializers/sure_aio_referrer_policy.rb"
+    ).read_text()
 
     assert (  # nosec B101
         ROOT / "rootfs/etc/s6-overlay/s6-rc.d/web/dependencies.d/postgres"
@@ -172,6 +185,9 @@ def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
     )  # nosec B101
     assert "sure-chat:" in external_session  # nosec B101
     assert "chat&.id" in external_session  # nosec B101
+    assert 'ENV["SURE_REFERRER_POLICY"].to_s.strip' in referrer_policy  # nosec B101
+    assert "strict-origin-when-cross-origin" in referrer_policy  # nosec B101
+    assert 'default_headers["Referrer-Policy"]' in referrer_policy  # nosec B101
 
 
 def test_alpha_template_exposes_upstream_alpha_webauthn_controls() -> None:
