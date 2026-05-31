@@ -159,6 +159,7 @@ If you later place Sure behind Nginx Proxy Manager, Traefik, Caddy, Cloudflare T
 3. Set `APP_DOMAIN` to the hostname you actually use for email links and callbacks
 4. If advanced auth or metadata generation expects a full URL, also set `APP_URL` to the full external base URL
 5. Keep `SURE_REFERRER_POLICY=strict-origin-when-cross-origin`
+6. Leave `SURE_CSRF_ORIGIN_CHECK=true` unless your browser/proxy path still sends `Origin: null`
 
 Rails rejects login POSTs when the browser sends `Origin: null`. The most common proxy-side cause is a response header such as `Referrer-Policy: no-referrer`. Sure-AIO now defaults the Rails response header to `strict-origin-when-cross-origin`, which keeps Rails origin checks working behind HTTPS proxies without exposing full cross-site paths.
 
@@ -173,6 +174,8 @@ traefik.http.middlewares.sure-aio-headers.headers.customresponseheaders.Referrer
 ```
 
 If you use Cloudflare in front of Traefik, also check Cloudflare Transform Rules, Workers, Zaraz, or security/privacy tooling for a `Referrer-Policy: no-referrer` override. The forwarded headers in a healthy HTTPS proxy path should include `X-Forwarded-Proto: https`; that part is separate from the browser `Origin` header Rails uses for CSRF origin checks.
+
+If login still fails with `The change you wanted was rejected` and the Rails log still says the browser returned a `null` origin after the referrer policy is visible, set `SURE_CSRF_ORIGIN_CHECK=false`. This is an advanced compatibility escape hatch for proxy/privacy stacks that produce opaque browser origins. It disables Rails' origin comparison only; Rails still requires the normal authenticity token on form POSTs.
 
 ### Private CA / Self-Signed HTTPS Support
 

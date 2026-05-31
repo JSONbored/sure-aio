@@ -128,6 +128,14 @@ def test_stable_and_alpha_mask_secret_bearing_network_fields() -> None:
         assert "Origin: null" in targets["SURE_REFERRER_POLICY"].get(  # nosec B101
             "Description", ""
         )
+        assert targets["SURE_CSRF_ORIGIN_CHECK"].get("Default") == "true"  # nosec B101
+        assert targets["SURE_CSRF_ORIGIN_CHECK"].text == "true"  # nosec B101
+        assert "Origin: null" in targets["SURE_CSRF_ORIGIN_CHECK"].get(  # nosec B101
+            "Description", ""
+        )
+        assert "CSRF token validation remains enabled" in targets[  # nosec B101
+            "SURE_CSRF_ORIGIN_CHECK"
+        ].get("Description", "")
         assert targets["REDIS_URL"].get("Mask") == "true"  # nosec B101
         assert targets["REDIS_SENTINEL_HOSTS"].get("Mask") == "false"  # nosec B101
         assert (
@@ -169,6 +177,9 @@ def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
     referrer_policy = (
         ROOT / "rootfs/rails/config/initializers/sure_aio_referrer_policy.rb"
     ).read_text()
+    csrf_origin_check = (
+        ROOT / "rootfs/rails/config/initializers/sure_aio_csrf_origin_check.rb"
+    ).read_text()
 
     assert (  # nosec B101
         ROOT / "rootfs/etc/s6-overlay/s6-rc.d/web/dependencies.d/postgres"
@@ -188,6 +199,11 @@ def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
     assert 'ENV["SURE_REFERRER_POLICY"].to_s.strip' in referrer_policy  # nosec B101
     assert "strict-origin-when-cross-origin" in referrer_policy  # nosec B101
     assert 'default_headers["Referrer-Policy"]' in referrer_policy  # nosec B101
+    assert (
+        'ENV.fetch("SURE_CSRF_ORIGIN_CHECK", "true")' in csrf_origin_check
+    )  # nosec B101
+    assert "forgery_protection_origin_check = false" in csrf_origin_check  # nosec B101
+    assert "Rails CSRF token" in csrf_origin_check  # nosec B101
 
 
 def test_alpha_template_exposes_upstream_alpha_webauthn_controls() -> None:
