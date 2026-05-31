@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.1-aio.1 - 2026-05-31
+
+### Fixes
+
+- Preserve Rails origin checks behind reverse proxies
+
+- Add null-origin support for Sure 0.7.1
+
 ## 0.7.0-hotfix.3-aio.4 - 2026-05-31
 
 ### Fixes
