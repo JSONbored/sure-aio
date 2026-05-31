@@ -31,12 +31,9 @@
 - [code]/mnt/user/appdata/sure-aio/system[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio/redis[/code]</Overview>
-  <Changes>### 2026-05-26&#xD;
+  <Changes>### 2026-05-31&#xD;
 - Generated from CHANGELOG.md during release preparation. Do not edit manually.&#xD;
-- Normalize CA metadata&#xD;
-- Reconcile app manifest&#xD;
-- Bump sure alpha to 0.7.1-alpha.10&#xD;
-- Bump sure alpha to 0.7.1-alpha.11</Changes>
+- Preserve Rails origin checks behind reverse proxies</Changes>
   <Category>Productivity Tools:Utilities</Category>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/JSONbored/awesome-unraid/main/sure-aio.xml</TemplateURL>

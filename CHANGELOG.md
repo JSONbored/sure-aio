@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.0-hotfix.3-aio.4 - 2026-05-31
+
+### Fixes
+
+- Preserve Rails origin checks behind reverse proxies
+
 ## 0.7.0-hotfix.3-aio.3 - 2026-05-26
 
 ### Documentation
