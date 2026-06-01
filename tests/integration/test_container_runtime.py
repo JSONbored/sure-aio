@@ -144,6 +144,31 @@ def post_login_with_null_origin(host_port: int, cookie_path: str, token: str):
     )
 
 
+def get_service_worker(host_port: int):
+    return run_command(
+        [
+            "curl",
+            "-sS",
+            "-D",
+            "-",
+            "-o",
+            "-",
+            "-H",
+            "Host: sure.domain.com",
+            "-H",
+            "X-Forwarded-Host: sure.domain.com",
+            "-H",
+            "X-Forwarded-Port: 443",
+            "-H",
+            "X-Forwarded-Proto: https",
+            "-H",
+            "X-Forwarded-Ssl: on",
+            f"http://127.0.0.1:{host_port}/service-worker",
+        ],
+        check=False,
+    )
+
+
 def assert_alpha_import_and_webauthn_config(
     container_name: str,
     expected: str,
@@ -422,6 +447,42 @@ def test_proxy_null_origin_escape_hatch_keeps_token_csrf_validation(
                 "The change you wanted was rejected" not in result.stdout
             )  # nosec B101
             assert "InvalidAuthenticityToken" not in logs(name)  # nosec B101
+
+
+def test_proxy_service_worker_does_not_trigger_cross_origin_js_guard(
+    build_image,
+) -> None:
+    proxy_env = {
+        "APP_DOMAIN": "sure.domain.com",
+        "APP_URL": "https://sure.domain.com",
+        "RAILS_ASSUME_SSL": "true",
+        "RAILS_FORCE_SSL": "false",
+        "SURE_CSRF_ORIGIN_CHECK": "false",
+        "SURE_REFERRER_POLICY": "strict-origin-when-cross-origin",
+    }
+
+    with (
+        docker_volume("sure-aio-service-worker-storage") as storage_volume,
+        docker_volume("sure-aio-service-worker-pg") as pgdata_volume,
+        docker_volume("sure-aio-service-worker-redis") as redis_volume,
+    ):
+        with container(
+            storage_volume,
+            pgdata_volume,
+            redis_volume,
+            extra_env=proxy_env,
+        ) as (name, host_port):
+            wait_for_http(name, host_port)
+            result = get_service_worker(host_port)
+
+            assert "HTTP/1.1 200" in result.stdout  # nosec B101
+            assert (
+                "content-type: application/javascript" in result.stdout.lower()
+            )  # nosec B101
+            assert "CACHE_VERSION" in result.stdout  # nosec B101
+            assert "ActionController::InvalidCrossOriginRequest" not in logs(
+                name
+            )  # nosec B101
 
 
 def test_alpha_image_boots_with_version_import_limits_and_webauthn_env(
