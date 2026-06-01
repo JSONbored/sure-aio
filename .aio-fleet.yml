@@ -55,10 +55,27 @@ catalog:
       target: sure-aio.xml
     - source: sure-aio-alpha.xml
       target: sure-aio-alpha.xml
+    - source: screenshots/sure-aio/01-dashboard.png
+      target: screenshots/sure-aio/01-dashboard.png
+    - source: screenshots/sure-aio/02-account-activity.png
+      target: screenshots/sure-aio/02-account-activity.png
+    - source: screenshots/sure-aio/03-budgets.png
+      target: screenshots/sure-aio/03-budgets.png
+    - source: screenshots/sure-aio-alpha/01-login.png
+      target: screenshots/sure-aio-alpha/01-login.png
+    - source: screenshots/sure-aio-alpha/02-account-activity.png
+      target: screenshots/sure-aio-alpha/02-account-activity.png
+    - source: screenshots/sure-aio-alpha/03-budgets.png
+      target: screenshots/sure-aio-alpha/03-budgets.png
 tests:
   integration: tests/integration -m integration
   checkout_submodules: false
 validation:
+  required_text_fields:
+    - ReadMe
+    - Requires
+    - DonateText
+    - DonateLink
   required_targets:
     - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
     - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
@@ -236,8 +253,8 @@ validation:
     - YAHOO_FINANCE_MIN_REQUEST_INTERVAL
     - YAHOO_FINANCE_RETRY_INTERVAL
     - YAHOO_FINANCE_URL
-  allowed_category_tokens:
-    - "Productivity:"
+  exact_category_tokens:
+    - Productivity
     - Tools:Utilities
 components:
   aio:
