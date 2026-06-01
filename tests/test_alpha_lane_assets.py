@@ -180,6 +180,9 @@ def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
     csrf_origin_check = (
         ROOT / "rootfs/rails/config/initializers/sure_aio_csrf_origin_check.rb"
     ).read_text()
+    service_worker_forgery = (
+        ROOT / "rootfs/rails/config/initializers/sure_aio_pwa_service_worker_forgery.rb"
+    ).read_text()
 
     assert (  # nosec B101
         ROOT / "rootfs/etc/s6-overlay/s6-rc.d/web/dependencies.d/postgres"
@@ -204,6 +207,9 @@ def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
     )  # nosec B101
     assert "forgery_protection_origin_check = false" in csrf_origin_check  # nosec B101
     assert "Rails CSRF token" in csrf_origin_check  # nosec B101
+    assert "PwaController" in service_worker_forgery  # nosec B101
+    assert "verify_same_origin_request" in service_worker_forgery  # nosec B101
+    assert 'action_name == "service_worker"' in service_worker_forgery  # nosec B101
 
 
 def test_alpha_template_exposes_upstream_alpha_webauthn_controls() -> None:
