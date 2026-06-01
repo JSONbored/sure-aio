@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.1-aio.2 - 2026-06-01
+
+### Fixes
+
+- Allow service worker behind reverse proxies
+
 ## 0.7.1-aio.1 - 2026-05-31
 
 ### Fixes
