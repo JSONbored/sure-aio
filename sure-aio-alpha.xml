@@ -32,12 +32,11 @@ This template is meant for testing and local validation, not primary household f
 - [code]/mnt/user/appdata/sure-aio-alpha/system[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio-alpha/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio-alpha/redis[/code]</Overview>
-  <Changes>### 2026-05-19&#xD;
+  <Changes>### 2026-06-01&#xD;
 - Generated from CHANGELOG.alpha.md during release preparation. Do not edit manually.&#xD;
-- Harden Sure runtime, alpha import preflight, template secret masking, and release paths.&#xD;
-- Enforce capped alpha import limits and structured malformed Account preflight errors.&#xD;
-- Derive external assistant session keys when operators leave the shared key blank.&#xD;
-- Tighten first-boot database readiness so Rails waits for authenticated PostgreSQL access.</Changes>
+- Preserve Rails origin checks behind reverse proxies.&#xD;
+- Add null-origin compatibility for Sure 0.7.1 alpha proxy login paths.&#xD;
+- Allow the browser service worker behind reverse proxies without triggering Rails cross-origin JavaScript protection.</Changes>
   <Category>Productivity Tools:Utilities</Category>
   <Beta>True</Beta>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>

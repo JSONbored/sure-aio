@@ -398,9 +398,9 @@ def test_alpha_changelog_documents_runtime_differences() -> None:
     assert "SURE_IMPORT_MAX_ROWS" in overview  # nosec B101
     assert "strict SureImport preflight" in overview  # nosec B101
     assert "admin reset UI/task" in overview  # nosec B101
-    assert "Harden Sure runtime" in changes  # nosec B101
-    assert "malformed Account preflight errors" in changes  # nosec B101
-    assert "authenticated PostgreSQL access" in changes  # nosec B101
+    assert "Preserve Rails origin checks" in changes  # nosec B101
+    assert "null-origin compatibility" in changes  # nosec B101
+    assert "browser service worker" in changes  # nosec B101
 
 
 def test_alpha_docs_use_dedicated_package_and_trimmed_tags() -> None:
