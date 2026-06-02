@@ -34,10 +34,14 @@ This template is meant for testing and local validation, not primary household f
 - [code]/mnt/user/appdata/sure-aio-alpha/redis[/code]</Overview>
   <Changes>### 2026-06-02&#xD;
 - Generated from CHANGELOG.alpha.md during release preparation. Do not edit manually.&#xD;
-- Track upstream Sure Alpha 0.7.2-alpha.1.&#xD;
+- Track upstream Sure Alpha 0.7.2-alpha.2.&#xD;
 - Publish Docker Hub and GHCR tags with the configured component revision tag.&#xD;
-- Preserve the Sure AIO alpha import-limit, strict import preflight, and route-parity importer overlays.&#xD;
-- Keep alpha import and WebAuthn controls separate from stable.</Changes>
+- Preserve the Sure AIO alpha import-limit overlay documented in `docs/alpha-lane.md`.&#xD;
+- Preserve the strict SureImport preflight/failure overlay until the pinned upstream alpha includes equivalent behavior.&#xD;
+- Preserve the route-parity importer overlay for Enhanced NDJSON split/transfer proof packages until upstream carries it.&#xD;
+- Keep `SURE_IMPORT_MAX_NDJSON_SIZE_MB` and `SURE_IMPORT_MAX_ROWS` alpha-only.&#xD;
+- Do not add dirty-target taxonomy merge as a Unraid template or environment control.&#xD;
+- Keep alpha passkey/WebAuthn template controls separate from stable.</Changes>
   <Category>Productivity Tools:Utilities</Category>
   <Beta>True</Beta>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
