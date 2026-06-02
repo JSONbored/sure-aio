@@ -364,7 +364,7 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
 def test_alpha_dockerfile_declares_revision_and_repo_metadata() -> None:
     alpha = (ROOT / "Dockerfile.alpha").read_text()
 
-    assert "ARG AIO_REVISION=2" in alpha  # nosec B101
+    assert "ARG AIO_REVISION=1" in alpha  # nosec B101
     assert (  # nosec B101
         'org.opencontainers.image.source="https://github.com/JSONbored/sure-aio"'
         in alpha
@@ -398,9 +398,10 @@ def test_alpha_changelog_documents_runtime_differences() -> None:
     assert "SURE_IMPORT_MAX_ROWS" in overview  # nosec B101
     assert "strict SureImport preflight" in overview  # nosec B101
     assert "admin reset UI/task" in overview  # nosec B101
-    assert "Preserve Rails origin checks" in changes  # nosec B101
-    assert "null-origin compatibility" in changes  # nosec B101
-    assert "browser service worker" in changes  # nosec B101
+    assert "Track upstream Sure Alpha 0.7.2-alpha.1" in changes  # nosec B101
+    assert "configured component revision tag" in changes  # nosec B101
+    assert "import-limit" in changes  # nosec B101
+    assert "route-parity importer" in changes  # nosec B101
 
 
 def test_alpha_docs_use_dedicated_package_and_trimmed_tags() -> None:
