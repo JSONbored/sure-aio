@@ -398,7 +398,7 @@ def test_alpha_changelog_documents_runtime_differences() -> None:
     assert "SURE_IMPORT_MAX_ROWS" in overview  # nosec B101
     assert "strict SureImport preflight" in overview  # nosec B101
     assert "admin reset UI/task" in overview  # nosec B101
-    assert "Track upstream Sure Alpha 0.7.2-alpha.1" in changes  # nosec B101
+    assert "Track upstream Sure Alpha 0.7.2-alpha.2" in changes  # nosec B101
     assert "configured component revision tag" in changes  # nosec B101
     assert "import-limit" in changes  # nosec B101
     assert "route-parity importer" in changes  # nosec B101
