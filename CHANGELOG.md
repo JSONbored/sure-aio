@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.1-hotfix.1-aio.1 - 2026-06-12
+
+### Maintenance
+
+- Bump sure alpha to 0.7.2-alpha.1
+
+- Update upstream pins for sure-aio (#135)
+
 ## 0.7.1-aio.2 - 2026-06-01
 
 ### Fixes
