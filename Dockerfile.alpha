@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1@sha256:2780b5c3bab67f1f76c781860de469442999ed1a0d7992a5efdf2cffc0e3d769
 # checkov:skip=CKV_DOCKER_8: s6-overlay entrypoint must start as root so init scripts can prepare filesystem state before dropping privileges
 
-ARG UPSTREAM_VERSION=0.7.2-alpha.5
-ARG UPSTREAM_IMAGE_DIGEST=sha256:144228c3376e97e28e9dacd83a1a37559b220b2428f4ce2d4151825c34129682
+ARG UPSTREAM_VERSION=0.7.2-alpha.6
+ARG UPSTREAM_IMAGE_DIGEST=sha256:7b511dcb6ee96fb8ac0163e72b8e4b4d68851b2665a994828be4c51dbc46b149
 ARG AIO_REVISION=1
 ARG PGVECTOR_VERSION=0.8.2
 FROM ghcr.io/we-promise/sure:${UPSTREAM_VERSION}@${UPSTREAM_IMAGE_DIGEST}
