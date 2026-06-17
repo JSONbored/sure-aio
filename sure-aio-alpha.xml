@@ -32,9 +32,9 @@ This template is meant for testing and local validation, not primary household f
 - [code]/mnt/user/appdata/sure-aio-alpha/system[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio-alpha/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio-alpha/redis[/code]</Overview>
-  <Changes>### 2026-06-02&#xD;
+  <Changes>### 2026-06-17&#xD;
 - Generated from CHANGELOG.alpha.md during release preparation. Do not edit manually.&#xD;
-- Track upstream Sure Alpha 0.7.2-alpha.2.&#xD;
+- Track upstream Sure Alpha 0.7.2-alpha.7.&#xD;
 - Publish Docker Hub and GHCR tags with the configured component revision tag.&#xD;
 - Preserve the Sure AIO alpha import-limit overlay documented in `docs/alpha-lane.md`.&#xD;
 - Preserve the strict SureImport preflight/failure overlay until the pinned upstream alpha includes equivalent behavior.&#xD;
