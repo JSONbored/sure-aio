@@ -1,3 +1,17 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## 0.7.2-alpha.7-aio.2 - 2026-06-18
+
+### Maintenance
+
+- Enable alpha published smoke target
+
+### Refactors
+
+- Migrate to the shared aio-base s6 overlay (#140)
+
 # Alpha Changelog
 
 Alpha releases are testing builds for `sure-aio-alpha`. They track upstream Sure
