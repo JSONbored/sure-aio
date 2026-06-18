@@ -57,7 +57,7 @@ RUN aio-harden pre && \
       build-essential git postgresql-server-dev-17 \
       clang-19 llvm-19 llvm-19-dev llvm-19-linker-tools llvm-19-runtime llvm-19-tools && \
     rm -f /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/certs/ssl-cert-snakeoil.pem && \
-    aio-harden post
+    rm -rf /tmp/* /var/lib/apt/lists/*
 
 # 2. Setup persistent internal storage paths
 RUN mkdir -p /var/lib/postgresql/data /var/lib/redis /rails/storage /run/postgresql && \
