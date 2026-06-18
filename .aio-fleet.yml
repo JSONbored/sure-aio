@@ -293,6 +293,8 @@ components:
       - Keep alpha passkey/WebAuthn template controls separate from stable.
     floating_tags:
       - latest-alpha
+    smoke_test:
+      enabled: true
     include_upstream_version_tag: false
     include_sha_tag: false
     preserve_tags:
