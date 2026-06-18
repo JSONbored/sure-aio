@@ -5,16 +5,13 @@ ARG UPSTREAM_VERSION=0.7.2-alpha.7
 ARG UPSTREAM_IMAGE_DIGEST=sha256:8eada80908cbb26dcb7a21fc7993df9ba8db953904742258345e2ebd1e793e81
 ARG AIO_REVISION=1
 ARG PGVECTOR_VERSION=0.8.2
+FROM jsonbored/aio-base:s6-3.2.1.0 AS aio-base
+
 FROM ghcr.io/we-promise/sure:${UPSTREAM_VERSION}@${UPSTREAM_IMAGE_DIGEST}
 
 ARG UPSTREAM_VERSION
 ARG AIO_REVISION
 ARG PGVECTOR_VERSION
-ARG S6_OVERLAY_VERSION=3.1.6.2
-ARG S6_OVERLAY_NOARCH_SHA256=05af2536ec4fb23f087a43ce305f8962512890d7c71572ed88852ab91d1434e3
-ARG S6_OVERLAY_AARCH64_SHA256=3fc0bae418a0e3811b3deeadfca9cc2f0869fb2f4787ab8a53f6944067d140ee
-ARG S6_OVERLAY_X86_64_SHA256=95081f11c56e5a351e9ccab4e70c2b1c3d7d056d82b72502b942762112c03d1c
-ARG TARGETARCH
 
 LABEL org.opencontainers.image.source="https://github.com/JSONbored/sure-aio" \
       org.opencontainers.image.title="Sure AIO Alpha" \
@@ -24,6 +21,9 @@ LABEL org.opencontainers.image.source="https://github.com/JSONbored/sure-aio" \
 USER root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR /rails
+
+# Shared, pinned s6-overlay + hardening from the fleet aio-base overlay.
+COPY --from=aio-base /aio-overlay/ /
 
 COPY docker/assert-sure-bundle-versions.rb /tmp/assert-sure-bundle-versions.rb
 
@@ -35,8 +35,7 @@ RUN printf '%s\n' "${UPSTREAM_VERSION}" > /rails/.sure-version
 # We use standard PATH binaries for Postgres (it's installed as postgresql)
 # Refresh inherited Debian packages before adding our own runtime dependencies so
 # published security fixes from the upstream base layer land in the wrapper image.
-RUN find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i 's|http://|https://|g' {} + && \
-    printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' > /etc/apt/apt.conf.d/80-retries && \
+RUN aio-harden pre && \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade && \
     apt-get install -y --no-install-recommends \
@@ -57,19 +56,8 @@ RUN find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i
     apt-get purge -y --auto-remove \
       build-essential git postgresql-server-dev-17 \
       clang-19 llvm-19 llvm-19-dev llvm-19-linker-tools llvm-19-runtime llvm-19-tools && \
-    curl -L -o /tmp/s6-overlay-noarch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz" && \
-    echo "${S6_OVERLAY_NOARCH_SHA256}  /tmp/s6-overlay-noarch.tar.xz" | sha256sum -c - && \
-    tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
-    case "${TARGETARCH}" in \
-      amd64) s6_arch="x86_64"; s6_sha="${S6_OVERLAY_X86_64_SHA256}" ;; \
-      arm64) s6_arch="aarch64"; s6_sha="${S6_OVERLAY_AARCH64_SHA256}" ;; \
-      *) echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
-    esac && \
-    curl -L -o /tmp/s6-overlay-arch.tar.xz "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${s6_arch}.tar.xz" && \
-    echo "${s6_sha}  /tmp/s6-overlay-arch.tar.xz" | sha256sum -c - && \
-    tar -C / -Jxpf /tmp/s6-overlay-arch.tar.xz && \
     rm -f /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/certs/ssl-cert-snakeoil.pem && \
-    rm -rf /tmp/* /var/lib/apt/lists/*
+    aio-harden post
 
 # 2. Setup persistent internal storage paths
 RUN mkdir -p /var/lib/postgresql/data /var/lib/redis /rails/storage /run/postgresql && \
