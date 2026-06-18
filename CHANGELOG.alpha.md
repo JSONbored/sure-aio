@@ -1,6 +1,10 @@
-# Changelog
+# Alpha Changelog
 
-All notable changes to this project will be documented in this file.
+Alpha releases are testing builds for `sure-aio-alpha`. They track upstream Sure
+alpha prereleases and may include wrapper-only experiments before those changes
+are upstreamed or promoted to stable. Alpha uses the dedicated
+`jsonbored/sure-aio-alpha` image repo so testing tags stay out of the stable
+`jsonbored/sure-aio` package.
 
 ## 0.7.2-alpha.7-aio.2 - 2026-06-18
 
@@ -11,14 +15,6 @@ All notable changes to this project will be documented in this file.
 ### Refactors
 
 - Migrate to the shared aio-base s6 overlay (#140)
-
-# Alpha Changelog
-
-Alpha releases are testing builds for `sure-aio-alpha`. They track upstream Sure
-alpha prereleases and may include wrapper-only experiments before those changes
-are upstreamed or promoted to stable. Alpha uses the dedicated
-`jsonbored/sure-aio-alpha` image repo so testing tags stay out of the stable
-`jsonbored/sure-aio` package.
 
 ## 0.7.2-alpha.7-aio.1 - 2026-06-17
 
