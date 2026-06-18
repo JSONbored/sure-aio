@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.1-hotfix.1-aio.2 - 2026-06-18
+
+### Maintenance
+
+- Bump sure alpha to 0.7.2-alpha.7
+
+- Enable alpha published smoke target
+
+### Refactors
+
+- Migrate to the shared aio-base s6 overlay (#140)
+
 ## 0.7.1-hotfix.1-aio.1 - 2026-06-12
 
 ### Maintenance
