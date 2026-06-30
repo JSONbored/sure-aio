@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1@sha256:2780b5c3bab67f1f76c781860de469442999ed1a0d7992a5efdf2cffc0e3d769
 # checkov:skip=CKV_DOCKER_8: s6-overlay entrypoint must start as root so init scripts can prepare filesystem state before dropping privileges
 
-ARG UPSTREAM_VERSION=0.7.2-alpha.7
-ARG UPSTREAM_IMAGE_DIGEST=sha256:8eada80908cbb26dcb7a21fc7993df9ba8db953904742258345e2ebd1e793e81
-ARG AIO_REVISION=2
+ARG UPSTREAM_VERSION=0.7.2-alpha.12
+ARG UPSTREAM_IMAGE_DIGEST=sha256:cec55808e857da29e6ef69bf96e58d765979aa839a443c9d2e0e35c0716e69ed
+ARG AIO_REVISION=1
 ARG PGVECTOR_VERSION=0.8.2
 FROM jsonbored/aio-base:s6-3.2.1.0@sha256:07db479a01a95ba28480b4605f5d1cc8bedb574b77cf167ee46e29b9558fee90 AS aio-base
 
