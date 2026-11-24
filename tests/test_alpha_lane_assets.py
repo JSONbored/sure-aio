@@ -205,7 +205,9 @@ def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
     assert (
         'ENV.fetch("SURE_CSRF_ORIGIN_CHECK", "true")' in csrf_origin_check
     )  # nosec B101
-    assert "forgery_protection_origin_check = false" in csrf_origin_check  # nosec B101
+    assert "self.forgery_protection_origin_check = origin_check" in (
+        csrf_origin_check
+    )  # nosec B101
     assert "Rails CSRF token" in csrf_origin_check  # nosec B101
     assert "PwaController" in service_worker_forgery  # nosec B101
     assert "verify_same_origin_request" in service_worker_forgery  # nosec B101

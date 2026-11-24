@@ -415,7 +415,10 @@ def test_upgrade_from_published_june_image_preserves_family(build_image) -> None
             uuid.UUID(family_id)
             run_command(["docker", "stop", "--time", "60", name])
 
-        with container(storage, postgres, redis, extra_env=database_env) as (name, port):
+        with container(storage, postgres, redis, extra_env=database_env) as (
+            name,
+            port,
+        ):
             wait_for_http(name, port)
             restored = rails_runner_output(
                 name,

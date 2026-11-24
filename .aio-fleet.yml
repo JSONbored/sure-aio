@@ -68,6 +68,7 @@ catalog:
     - source: screenshots/sure-aio-alpha/03-budgets.png
       target: screenshots/sure-aio-alpha/03-budgets.png
 tests:
+  unit: tests/test_alpha_lane_assets.py
   integration: tests/integration -m integration
   checkout_submodules: false
 validation:
