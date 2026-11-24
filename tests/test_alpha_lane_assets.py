@@ -161,9 +161,9 @@ def test_dockerfiles_do_not_mutate_upstream_bundle_resolution() -> None:
         assert "bundle check" in text  # nosec B101
         assert "COPY docker/assert-sure-bundle-versions.rb" in text  # nosec B101
         assert "ruby /tmp/assert-sure-bundle-versions.rb" in text  # nosec B101
-    assert '"rack" => ["3.2.6", "3.2.8"]' in bundle_assertion  # nosec B101
+    assert '"rack" => ["3.2.8"]' in bundle_assertion  # nosec B101
     assert '"rack-session" => ["2.1.2"]' in bundle_assertion  # nosec B101
-    assert '"addressable" => ["2.8.7", "2.9.0"]' in bundle_assertion  # nosec B101
+    assert '"addressable" => ["2.9.0", "2.9.1"]' in bundle_assertion  # nosec B101
     assert '"rexml" => ["3.4.2"]' in bundle_assertion  # nosec B101
     assert "unexpected upstream gem versions" in bundle_assertion  # nosec B101
 
@@ -332,13 +332,7 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
     assert "capped_positive_integer_env" in import_limits_text  # nosec B101
     assert "SureImport.const_set(:MAX_NDJSON_SIZE" in import_limits_text  # nosec B101
     assert "SureImport::Preflight" in import_preflight_text  # nosec B101
-    assert "PreflightError" in import_preflight_text  # nosec B101
-    assert "preflight_failed" in import_preflight_text  # nosec B101
-    assert "invalid_accountable" in import_preflight_text  # nosec B101
-    assert "!accountable.is_a?(Hash)" in import_preflight_text  # nosec B101
-    assert (  # nosec B101
-        "invalid_rows_count: @rows_count - @valid_rows_count" in import_preflight_text
-    )
+    assert ":existing_taxonomy_collision" in import_preflight_text  # nosec B101
     assert "Family::FinancialDataReset" in admin_reset_model_text  # nosec B101
     assert "CONFIRM_RESET_FINANCIAL_DATA=yes" in admin_reset_model_text  # nosec B101
     assert "Family::FinancialDataReset.new(" in admin_reset_job_text  # nosec B101

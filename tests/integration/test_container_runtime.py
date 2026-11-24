@@ -549,6 +549,8 @@ def test_alpha_image_boots_with_version_import_limits_and_webauthn_env(
             image_tag=ALPHA_IMAGE_TAG,
             name_prefix="sure-aio-alpha-pytest",
             extra_env={
+                "POSTGRES_USER": "sure_user",
+                "POSTGRES_PASSWORD": uuid.uuid4().hex,
                 "SURE_IMPORT_MAX_NDJSON_SIZE_MB": "250",
                 "SURE_IMPORT_MAX_ROWS": "1000000",
                 "WEBAUTHN_RP_ID": "finance.example.com",
@@ -572,6 +574,10 @@ def test_alpha_image_boots_with_version_import_limits_and_webauthn_env(
                 ),
             )
             assert_alpha_import_preflight_blocks_dirty_target(name)
+            proof = (REPO_ROOT / "tests/integration/split_transfer.rb").read_text()
+            assert (  # nosec B101
+                rails_runner_output(name, proof) == "Split import and transfer verified"
+            )
             assert_alpha_admin_reset_task_available(name)
 
 

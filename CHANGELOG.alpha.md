@@ -6,6 +6,15 @@ are upstreamed or promoted to stable. Alpha uses the dedicated
 `jsonbored/sure-aio-alpha` image repo so testing tags stay out of the stable
 `jsonbored/sure-aio` package.
 
+## 2026.11.23-alpha-aio.1 - 2026-11-24
+
+### Build
+
+- Track upstream Sure Alpha 2026.11.23-alpha (compatibility alias 0.7.7-alpha.9).
+- Pin the upstream amd64 and arm64 image index and verify its Rack 3.2.8 and Addressable 2.9.1 bundle versions.
+- Block imports into existing categories, tags or merchants during preflight.
+- Preserve split source IDs, notes and transfer links with the upstream importer, including its import history and session handling.
+
 ## 0.7.3-alpha.6-aio.1 - 2026-07-27
 
 ### Build
