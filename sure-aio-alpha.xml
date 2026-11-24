@@ -32,16 +32,12 @@ This template is meant for testing and local validation, not primary household f
 - [code]/mnt/user/appdata/sure-aio-alpha/system[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio-alpha/postgres[/code]&#xD;
 - [code]/mnt/user/appdata/sure-aio-alpha/redis[/code]</Overview>
-  <Changes>### 2026-06-18&#xD;
+  <Changes>### 2026-11-24&#xD;
 - Generated from CHANGELOG.alpha.md during release preparation. Do not edit manually.&#xD;
-- Enable alpha published smoke target&#xD;
-- Migrate to the shared aio-base s6 overlay (#140)&#xD;
-- # Alpha Changelog&#xD;
-- Alpha releases are testing builds for `sure-aio-alpha`. They track upstream Sure&#xD;
-- alpha prereleases and may include wrapper-only experiments before those changes&#xD;
-- are upstreamed or promoted to stable. Alpha uses the dedicated&#xD;
-- `jsonbored/sure-aio-alpha` image repo so testing tags stay out of the stable&#xD;
-- `jsonbored/sure-aio` package.</Changes>
+- Track upstream Sure Alpha 2026.11.23-alpha (compatibility alias 0.7.7-alpha.9).&#xD;
+- Pin the upstream amd64 and arm64 image index and verify its Rack 3.2.8 and Addressable 2.9.1 bundle versions.&#xD;
+- Block imports into existing categories, tags or merchants during preflight.&#xD;
+- Preserve split source IDs, notes and transfer links with the upstream importer, including its import history and session handling.</Changes>
   <Category>Productivity Tools:Utilities</Category>
   <Beta>True</Beta>
   <WebUI>http://[IP]:[PORT:3000]</WebUI>
