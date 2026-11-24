@@ -104,7 +104,11 @@ def login_form_token(host_port: int, cookie_path: str) -> str:
     )
     with open(cookie_path, encoding="utf-8") as cookies:
         assert any("\t_sure_session\t" in line for line in cookies)  # nosec B101
-    match = re.search(r'name="authenticity_token" value="([^"]+)"', result.stdout)
+    # Rails issues per-form tokens. The login page can also contain forms
+    # for other actions, so select the token belonging to POST /sessions.
+    form = re.search(r'<form\b[^>]*\baction="/sessions"[^>]*>(.*?)</form>', result.stdout, re.S)
+    assert form is not None  # nosec B101
+    match = re.search(r'name="authenticity_token" value="([^"]+)"', form.group(1))
     assert match is not None  # nosec B101
     return match.group(1)
 
@@ -447,9 +451,18 @@ def test_proxy_null_origin_escape_hatch_keeps_token_csrf_validation(
             result = post_login_with_null_origin(host_port, cookie_path, token)
 
             assert "HTTP/1.1 422" in result.stdout  # nosec B101
-            assert (
-                "The change you wanted was rejected" not in result.stdout
-            )  # nosec B101
+            if "The change you wanted was rejected" in result.stdout:
+                effective = rails_runner_output(
+                    name,
+                    "puts [Rails.application.config.action_controller.forgery_protection_origin_check, "
+                    "SessionsController.forgery_protection_origin_check].inspect",
+                )
+                reason = [
+                    line for line in logs(name).splitlines()
+                    if "InvalidAuthenticityToken" in line or "Can't verify CSRF token" in line
+                ]
+                raise AssertionError(f"Login rejected: origin settings {effective}; {reason[-2:]}")
+
             assert "InvalidAuthenticityToken" not in logs(name)  # nosec B101
 
 
