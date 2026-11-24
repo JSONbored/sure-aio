@@ -37,14 +37,14 @@ The alpha XML changelog must call out exposed upstream alpha controls separately
 - Defaults: strict clean-target validation before `SureImport#publish_later` and `SureImport#publish`.
 - Why: alpha certification needs specific operator-visible failures for dirty taxonomy, missing required fields, unsupported record types, bad accountables, duplicate valuation rows, and missing references instead of the generic failure screen.
 - Template/env surface: none. Dirty-target merge is not an Unraid variable and should remain explicit upstream/API behavior when separately proven.
-- Upstream issue/PR: PR 1785 may need reconciliation because it also touches `SureImport` and import sessions.
+- Upstream 2026.11.23-alpha supplies the preflight model, API errors and enqueue rollback. The wrapper promotes existing taxonomy collisions to blocking errors for this lane.
 - Promotion/removal path: remove this overlay once the pinned upstream alpha image includes equivalent model/API/UI preflight behavior.
 
 ### route-parity-importer
 
 - Status: active alpha-only overlay.
 - Overlay: `rootfs-alpha/rails/config/initializers/sure_aio_alpha_route_parity_importer.rb`.
-- Why: Enhanced route proof packages can include split lines and linked transfers before the pinned upstream alpha importer has that exact proof behavior.
+- Upstream 2026.11.23-alpha creates split entries, import associations and transfer links. The wrapper preserves Enhanced NDJSON split source notes, generated IDs and the `simpsplit_` aliases used by older transfer records.
 - Template/env surface: none.
 - Promotion/removal path: remove once the pinned upstream alpha image includes equivalent split-line and transfer ID mapping behavior.
 

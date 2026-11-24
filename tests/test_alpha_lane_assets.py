@@ -205,7 +205,9 @@ def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
     assert (
         'ENV.fetch("SURE_CSRF_ORIGIN_CHECK", "true")' in csrf_origin_check
     )  # nosec B101
-    assert "forgery_protection_origin_check = false" in csrf_origin_check  # nosec B101
+    assert "self.forgery_protection_origin_check = origin_check" in (
+        csrf_origin_check
+    )  # nosec B101
     assert "Rails CSRF token" in csrf_origin_check  # nosec B101
     assert "PwaController" in service_worker_forgery  # nosec B101
     assert "verify_same_origin_request" in service_worker_forgery  # nosec B101
@@ -330,13 +332,7 @@ def test_alpha_overlay_is_documented_and_copied() -> None:
     assert "capped_positive_integer_env" in import_limits_text  # nosec B101
     assert "SureImport.const_set(:MAX_NDJSON_SIZE" in import_limits_text  # nosec B101
     assert "SureImport::Preflight" in import_preflight_text  # nosec B101
-    assert "PreflightError" in import_preflight_text  # nosec B101
-    assert "preflight_failed" in import_preflight_text  # nosec B101
-    assert "invalid_accountable" in import_preflight_text  # nosec B101
-    assert "!accountable.is_a?(Hash)" in import_preflight_text  # nosec B101
-    assert (  # nosec B101
-        "invalid_rows_count: @rows_count - @valid_rows_count" in import_preflight_text
-    )
+    assert ":existing_taxonomy_collision" in import_preflight_text  # nosec B101
     assert "Family::FinancialDataReset" in admin_reset_model_text  # nosec B101
     assert "CONFIRM_RESET_FINANCIAL_DATA=yes" in admin_reset_model_text  # nosec B101
     assert "Family::FinancialDataReset.new(" in admin_reset_job_text  # nosec B101
@@ -398,10 +394,14 @@ def test_alpha_changelog_documents_runtime_differences() -> None:
     assert "SURE_IMPORT_MAX_ROWS" in overview  # nosec B101
     assert "strict SureImport preflight" in overview  # nosec B101
     assert "admin reset UI/task" in overview  # nosec B101
-    assert "Track upstream Sure Alpha 0.7.2-alpha.2" in changes  # nosec B101
-    assert "configured component revision tag" in changes  # nosec B101
-    assert "import-limit" in changes  # nosec B101
-    assert "route-parity importer" in changes  # nosec B101
+    assert "Generated from CHANGELOG.alpha.md" in changes  # nosec B101
+    release_bullets = {
+        line.strip()
+        for line in (ROOT / "CHANGELOG.alpha.md").read_text().splitlines()
+        if line.startswith("- ")
+    }
+    assert release_bullets.intersection(changes.splitlines())  # nosec B101
+    assert "split-line and transfer route-parity" in overview  # nosec B101
 
 
 def test_alpha_docs_use_dedicated_package_and_trimmed_tags() -> None:
