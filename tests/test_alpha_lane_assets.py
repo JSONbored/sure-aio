@@ -161,10 +161,10 @@ def test_dockerfiles_do_not_mutate_upstream_bundle_resolution() -> None:
         assert "bundle check" in text  # nosec B101
         assert "COPY docker/assert-sure-bundle-versions.rb" in text  # nosec B101
         assert "ruby /tmp/assert-sure-bundle-versions.rb" in text  # nosec B101
-    assert '"rack" => "3.2.6"' in bundle_assertion  # nosec B101
-    assert '"rack-session" => "2.1.2"' in bundle_assertion  # nosec B101
-    assert '"addressable" => "2.8.7"' in bundle_assertion  # nosec B101
-    assert '"rexml" => "3.4.2"' in bundle_assertion  # nosec B101
+    assert '"rack" => ["3.2.6", "3.2.8"]' in bundle_assertion  # nosec B101
+    assert '"rack-session" => ["2.1.2"]' in bundle_assertion  # nosec B101
+    assert '"addressable" => ["2.8.7", "2.9.0"]' in bundle_assertion  # nosec B101
+    assert '"rexml" => ["3.4.2"]' in bundle_assertion  # nosec B101
     assert "unexpected upstream gem versions" in bundle_assertion  # nosec B101
 
 
@@ -205,7 +205,9 @@ def test_shared_runtime_waits_for_final_postgres_and_omits_init_db() -> None:
     assert (
         'ENV.fetch("SURE_CSRF_ORIGIN_CHECK", "true")' in csrf_origin_check
     )  # nosec B101
-    assert "forgery_protection_origin_check = false" in csrf_origin_check  # nosec B101
+    assert "self.forgery_protection_origin_check = origin_check" in (
+        csrf_origin_check
+    )  # nosec B101
     assert "Rails CSRF token" in csrf_origin_check  # nosec B101
     assert "PwaController" in service_worker_forgery  # nosec B101
     assert "verify_same_origin_request" in service_worker_forgery  # nosec B101
@@ -398,10 +400,14 @@ def test_alpha_changelog_documents_runtime_differences() -> None:
     assert "SURE_IMPORT_MAX_ROWS" in overview  # nosec B101
     assert "strict SureImport preflight" in overview  # nosec B101
     assert "admin reset UI/task" in overview  # nosec B101
-    assert "Track upstream Sure Alpha 0.7.2-alpha.2" in changes  # nosec B101
-    assert "configured component revision tag" in changes  # nosec B101
-    assert "import-limit" in changes  # nosec B101
-    assert "route-parity importer" in changes  # nosec B101
+    assert "Generated from CHANGELOG.alpha.md" in changes  # nosec B101
+    release_bullets = {
+        line.strip()
+        for line in (ROOT / "CHANGELOG.alpha.md").read_text().splitlines()
+        if line.startswith("- ")
+    }
+    assert release_bullets.intersection(changes.splitlines())  # nosec B101
+    assert "split-line and transfer route-parity" in overview  # nosec B101
 
 
 def test_alpha_docs_use_dedicated_package_and_trimmed_tags() -> None:

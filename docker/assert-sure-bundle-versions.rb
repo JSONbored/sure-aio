@@ -9,7 +9,7 @@ require "bundler"
 # explicit set keeps the guard as a tripwire for an *unexpected* version while
 # tolerating the reviewed divergence between lanes.
 EXPECTED_GEMS = {
-  "rack" => ["3.2.6"],
+  "rack" => ["3.2.6", "3.2.8"],
   "rack-session" => ["2.1.2"],
   "addressable" => ["2.8.7", "2.9.0"],
   "rexml" => ["3.4.2"]

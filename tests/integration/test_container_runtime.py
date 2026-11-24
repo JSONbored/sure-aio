@@ -73,12 +73,17 @@ def assert_no_https_redirect(host_port: int) -> None:
 
 
 def rails_runner_output(container_name: str, code: str) -> str:
-    result = docker_exec(container_name, f"bin/rails runner {code!r}")
+    result = run_command(
+        ["docker", "exec", container_name, "bin/rails", "runner", code], check=False
+    )
+    assert result.returncode == 0, result.stderr  # nosec B101
     lines = result.stdout.strip().splitlines()
     return lines[-1] if lines else ""
 
 
 def login_form_token(host_port: int, cookie_path: str) -> str:
+    # Rails sets a Secure session cookie behind the simulated HTTPS proxy.
+    # curl treats localhost as a secure cookie context on a loopback HTTP hop.
     result = run_command(
         [
             "curl",
@@ -88,19 +93,27 @@ def login_form_token(host_port: int, cookie_path: str) -> str:
             "-b",
             cookie_path,
             "-H",
-            "Host: sure.domain.com",
+            "Host: localhost",
             "-H",
-            "X-Forwarded-Host: sure.domain.com",
+            "X-Forwarded-Host: localhost",
             "-H",
             "X-Forwarded-Port: 443",
             "-H",
             "X-Forwarded-Proto: https",
             "-H",
             "X-Forwarded-Ssl: on",
-            f"http://127.0.0.1:{host_port}/sessions/new",
+            f"http://localhost:{host_port}/sessions/new",
         ]
     )
-    match = re.search(r'name="authenticity_token" value="([^"]+)"', result.stdout)
+    with open(cookie_path, encoding="utf-8") as cookies:
+        assert any("\t_sure_session\t" in line for line in cookies)  # nosec B101
+    # Rails issues per-form tokens. The login page can also contain forms
+    # for other actions, so select the token belonging to POST /sessions.
+    form = re.search(
+        r'<form\b[^>]*\baction="/sessions"[^>]*>(.*?)</form>', result.stdout, re.S
+    )
+    assert form is not None  # nosec B101
+    match = re.search(r'name="authenticity_token" value="([^"]+)"', form.group(1))
     assert match is not None  # nosec B101
     return match.group(1)
 
@@ -119,9 +132,9 @@ def post_login_with_null_origin(host_port: int, cookie_path: str, token: str):
             "-b",
             cookie_path,
             "-H",
-            "Host: sure.domain.com",
+            "Host: localhost",
             "-H",
-            "X-Forwarded-Host: sure.domain.com",
+            "X-Forwarded-Host: localhost",
             "-H",
             "X-Forwarded-Port: 443",
             "-H",
@@ -138,7 +151,7 @@ def post_login_with_null_origin(host_port: int, cookie_path: str, token: str):
             "email=missing@example.com",
             "--data-urlencode",
             "password=bad-password",
-            f"http://127.0.0.1:{host_port}/sessions",
+            f"http://localhost:{host_port}/sessions",
         ],
         check=False,
     )
@@ -378,6 +391,42 @@ def test_happy_path_boot_and_recreate_persists_data(build_image) -> None:
             )  # nosec B101
 
 
+def test_upgrade_from_published_june_image_preserves_family(build_image) -> None:
+    old_image = (
+        "jsonbored/sure-aio@sha256:"
+        "0d98498df3c9beafb114376f9245b25df83bd9ac715496fbe7ca937757c97d0f"
+    )
+    # The web service exports its database credentials inside its s6 process.
+    # Give the separate Rails runner the same account on both image versions.
+    database_env = {"POSTGRES_USER": "sure_user", "POSTGRES_PASSWORD": uuid.uuid4().hex}
+    with (
+        docker_volume("sure-aio-upgrade-storage") as storage,
+        docker_volume("sure-aio-upgrade-postgres") as postgres,
+        docker_volume("sure-aio-upgrade-redis") as redis,
+    ):
+        with container(
+            storage, postgres, redis, image_tag=old_image, extra_env=database_env
+        ) as (name, port):
+            wait_for_http(name, port)
+            family_id = rails_runner_output(
+                name,
+                'puts Family.create!(name: "Upgrade fixture", currency: "EUR").id',
+            )
+            uuid.UUID(family_id)
+            run_command(["docker", "stop", "--time", "60", name])
+
+        with container(storage, postgres, redis, extra_env=database_env) as (
+            name,
+            port,
+        ):
+            wait_for_http(name, port)
+            restored = rails_runner_output(
+                name,
+                f'f = Family.find("{family_id}"); puts [f.name, f.currency].join("|")',
+            )
+            assert restored == "Upgrade fixture|EUR"  # nosec B101
+
+
 def test_image_reports_pinned_upstream_version(build_image) -> None:
     result = run_command(
         [
@@ -399,8 +448,8 @@ def test_proxy_null_origin_escape_hatch_keeps_token_csrf_validation(
     tmp_path,
 ) -> None:
     proxy_env = {
-        "APP_DOMAIN": "sure.domain.com",
-        "APP_URL": "https://sure.domain.com",
+        "APP_DOMAIN": "localhost",
+        "APP_URL": "https://localhost",
         "RAILS_ASSUME_SSL": "true",
         "RAILS_FORCE_SSL": "false",
         "SURE_REFERRER_POLICY": "strict-origin-when-cross-origin",
