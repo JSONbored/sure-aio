@@ -161,10 +161,10 @@ def test_dockerfiles_do_not_mutate_upstream_bundle_resolution() -> None:
         assert "bundle check" in text  # nosec B101
         assert "COPY docker/assert-sure-bundle-versions.rb" in text  # nosec B101
         assert "ruby /tmp/assert-sure-bundle-versions.rb" in text  # nosec B101
-    assert '"rack" => "3.2.6"' in bundle_assertion  # nosec B101
-    assert '"rack-session" => "2.1.2"' in bundle_assertion  # nosec B101
-    assert '"addressable" => "2.8.7"' in bundle_assertion  # nosec B101
-    assert '"rexml" => "3.4.2"' in bundle_assertion  # nosec B101
+    assert '"rack" => ["3.2.6", "3.2.8"]' in bundle_assertion  # nosec B101
+    assert '"rack-session" => ["2.1.2"]' in bundle_assertion  # nosec B101
+    assert '"addressable" => ["2.8.7", "2.9.0"]' in bundle_assertion  # nosec B101
+    assert '"rexml" => ["3.4.2"]' in bundle_assertion  # nosec B101
     assert "unexpected upstream gem versions" in bundle_assertion  # nosec B101
 
 

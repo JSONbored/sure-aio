@@ -73,7 +73,10 @@ def assert_no_https_redirect(host_port: int) -> None:
 
 
 def rails_runner_output(container_name: str, code: str) -> str:
-    result = docker_exec(container_name, f"bin/rails runner {code!r}")
+    result = run_command(
+        ["docker", "exec", container_name, "bin/rails", "runner", code], check=False
+    )
+    assert result.returncode == 0, result.stderr  # nosec B101
     lines = result.stdout.strip().splitlines()
     return lines[-1] if lines else ""
 
@@ -393,12 +396,17 @@ def test_upgrade_from_published_june_image_preserves_family(build_image) -> None
         "jsonbored/sure-aio@sha256:"
         "0d98498df3c9beafb114376f9245b25df83bd9ac715496fbe7ca937757c97d0f"
     )
+    # The web service exports its database credentials inside its s6 process.
+    # Give the separate Rails runner the same account on both image versions.
+    database_env = {"POSTGRES_USER": "sure_user", "POSTGRES_PASSWORD": uuid.uuid4().hex}
     with (
         docker_volume("sure-aio-upgrade-storage") as storage,
         docker_volume("sure-aio-upgrade-postgres") as postgres,
         docker_volume("sure-aio-upgrade-redis") as redis,
     ):
-        with container(storage, postgres, redis, image_tag=old_image) as (name, port):
+        with container(
+            storage, postgres, redis, image_tag=old_image, extra_env=database_env
+        ) as (name, port):
             wait_for_http(name, port)
             family_id = rails_runner_output(
                 name,
@@ -407,7 +415,7 @@ def test_upgrade_from_published_june_image_preserves_family(build_image) -> None
             uuid.UUID(family_id)
             run_command(["docker", "stop", "--time", "60", name])
 
-        with container(storage, postgres, redis) as (name, port):
+        with container(storage, postgres, redis, extra_env=database_env) as (name, port):
             wait_for_http(name, port)
             restored = rails_runner_output(
                 name,
