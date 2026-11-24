@@ -106,7 +106,9 @@ def login_form_token(host_port: int, cookie_path: str) -> str:
         assert any("\t_sure_session\t" in line for line in cookies)  # nosec B101
     # Rails issues per-form tokens. The login page can also contain forms
     # for other actions, so select the token belonging to POST /sessions.
-    form = re.search(r'<form\b[^>]*\baction="/sessions"[^>]*>(.*?)</form>', result.stdout, re.S)
+    form = re.search(
+        r'<form\b[^>]*\baction="/sessions"[^>]*>(.*?)</form>', result.stdout, re.S
+    )
     assert form is not None  # nosec B101
     match = re.search(r'name="authenticity_token" value="([^"]+)"', form.group(1))
     assert match is not None  # nosec B101
@@ -386,6 +388,34 @@ def test_happy_path_boot_and_recreate_persists_data(build_image) -> None:
             )  # nosec B101
 
 
+def test_upgrade_from_published_june_image_preserves_family(build_image) -> None:
+    old_image = (
+        "jsonbored/sure-aio@sha256:"
+        "0d98498df3c9beafb114376f9245b25df83bd9ac715496fbe7ca937757c97d0f"
+    )
+    with (
+        docker_volume("sure-aio-upgrade-storage") as storage,
+        docker_volume("sure-aio-upgrade-postgres") as postgres,
+        docker_volume("sure-aio-upgrade-redis") as redis,
+    ):
+        with container(storage, postgres, redis, image_tag=old_image) as (name, port):
+            wait_for_http(name, port)
+            family_id = rails_runner_output(
+                name,
+                'puts Family.create!(name: "Upgrade fixture", currency: "EUR").id',
+            )
+            uuid.UUID(family_id)
+            run_command(["docker", "stop", "--time", "60", name])
+
+        with container(storage, postgres, redis) as (name, port):
+            wait_for_http(name, port)
+            restored = rails_runner_output(
+                name,
+                f'f = Family.find("{family_id}"); puts [f.name, f.currency].join("|")',
+            )
+            assert restored == "Upgrade fixture|EUR"  # nosec B101
+
+
 def test_image_reports_pinned_upstream_version(build_image) -> None:
     result = run_command(
         [
@@ -451,18 +481,9 @@ def test_proxy_null_origin_escape_hatch_keeps_token_csrf_validation(
             result = post_login_with_null_origin(host_port, cookie_path, token)
 
             assert "HTTP/1.1 422" in result.stdout  # nosec B101
-            if "The change you wanted was rejected" in result.stdout:
-                effective = rails_runner_output(
-                    name,
-                    "puts [Rails.application.config.action_controller.forgery_protection_origin_check, "
-                    "SessionsController.forgery_protection_origin_check].inspect",
-                )
-                reason = [
-                    line for line in logs(name).splitlines()
-                    if "InvalidAuthenticityToken" in line or "Can't verify CSRF token" in line
-                ]
-                raise AssertionError(f"Login rejected: origin settings {effective}; {reason[-2:]}")
-
+            assert (
+                "The change you wanted was rejected" not in result.stdout
+            )  # nosec B101
             assert "InvalidAuthenticityToken" not in logs(name)  # nosec B101
 
 
