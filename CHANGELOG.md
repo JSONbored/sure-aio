@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.6-hotfix.2-aio.1 - 2026-11-24
+
+### Fixes
+
+- Update Sure stable to 0.7.6-hotfix.2 (#152)
+
+### Maintenance
+
+- Update upstream pins for sure-aio (#149)
+
 ## 0.7.1-hotfix.1-aio.2 - 2026-06-18
 
 ### Maintenance
