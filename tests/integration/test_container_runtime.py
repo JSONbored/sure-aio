@@ -79,6 +79,8 @@ def rails_runner_output(container_name: str, code: str) -> str:
 
 
 def login_form_token(host_port: int, cookie_path: str) -> str:
+    # Rails sets a Secure session cookie behind the simulated HTTPS proxy.
+    # curl treats localhost as a secure cookie context on a loopback HTTP hop.
     result = run_command(
         [
             "curl",
@@ -88,18 +90,20 @@ def login_form_token(host_port: int, cookie_path: str) -> str:
             "-b",
             cookie_path,
             "-H",
-            "Host: sure.domain.com",
+            "Host: localhost",
             "-H",
-            "X-Forwarded-Host: sure.domain.com",
+            "X-Forwarded-Host: localhost",
             "-H",
             "X-Forwarded-Port: 443",
             "-H",
             "X-Forwarded-Proto: https",
             "-H",
             "X-Forwarded-Ssl: on",
-            f"http://127.0.0.1:{host_port}/sessions/new",
+            f"http://localhost:{host_port}/sessions/new",
         ]
     )
+    with open(cookie_path, encoding="utf-8") as cookies:
+        assert any("\t_sure_session\t" in line for line in cookies)  # nosec B101
     match = re.search(r'name="authenticity_token" value="([^"]+)"', result.stdout)
     assert match is not None  # nosec B101
     return match.group(1)
@@ -119,9 +123,9 @@ def post_login_with_null_origin(host_port: int, cookie_path: str, token: str):
             "-b",
             cookie_path,
             "-H",
-            "Host: sure.domain.com",
+            "Host: localhost",
             "-H",
-            "X-Forwarded-Host: sure.domain.com",
+            "X-Forwarded-Host: localhost",
             "-H",
             "X-Forwarded-Port: 443",
             "-H",
@@ -138,7 +142,7 @@ def post_login_with_null_origin(host_port: int, cookie_path: str, token: str):
             "email=missing@example.com",
             "--data-urlencode",
             "password=bad-password",
-            f"http://127.0.0.1:{host_port}/sessions",
+            f"http://localhost:{host_port}/sessions",
         ],
         check=False,
     )
@@ -399,8 +403,8 @@ def test_proxy_null_origin_escape_hatch_keeps_token_csrf_validation(
     tmp_path,
 ) -> None:
     proxy_env = {
-        "APP_DOMAIN": "sure.domain.com",
-        "APP_URL": "https://sure.domain.com",
+        "APP_DOMAIN": "localhost",
+        "APP_URL": "https://localhost",
         "RAILS_ASSUME_SSL": "true",
         "RAILS_FORCE_SSL": "false",
         "SURE_REFERRER_POLICY": "strict-origin-when-cross-origin",
